@@ -93,7 +93,7 @@ sorted ascending. Each cycle is reported once, rotated to start at its smallest 
 
 ```
 capacityBetween(people, timeZone, from, to): Result<number>
-effectiveCapacity(capacity, marginPct): number      // floor(capacity*(100-m)/100), m in {0,5,...,30}
+effectiveCapacity(capacity, marginPct): Result<number>   // floor(capacity*(100-m)/100), m in {0,5,...,30}; else margin-invalid
 ```
 
 Slot midpoints are local 11:00 (morning) and 16:00 (afternoon). Algorithm:

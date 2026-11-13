@@ -27,11 +27,11 @@ Run `npm run typecheck` and `npm test` before ticking any task; tick it only whe
   - [x] 4.2 Self-test (`generators.test.ts`): every generated board passes `validateBoard`; permutation helper keeps the same board content
   - _Requirements: 13.4_
 
-- [ ] 5. Half-day capacity
-  - [ ] 5.1 `src/engine/capacity.ts`: `capacityBetween`, `effectiveCapacity`, formatter cache, `range-too-long`
-  - [ ] 5.2 Example tests: known week, 12:00 edge on both ends, weekend, European DST change, `full` and half absences
-  - [ ] 5.3 `P14 slots` property test
-  - [ ] 5.4 `P11 capacity never grows` property test (four variants)
+- [x] 5. Half-day capacity
+  - [x] 5.1 `src/engine/capacity.ts`: `capacityBetween`, `effectiveCapacity` (returns a `Result`), formatter and midpoint caches, `range-too-long`
+  - [x] 5.2 Example tests: known week, 12:00 edge on both ends, weekend, European DST changes (spring and autumn), Kolkata, New York, `full` and half absences
+  - [x] 5.3 `P14 slots` property test
+  - [x] 5.4 `P11 capacity never grows` property test (four variants)
   - _Requirements: 3.1–3.9, 6.2_
 
 - [ ] 6. Cost of delay and hunger
