@@ -306,3 +306,37 @@ prometer lo contrario.
 - **El hambre cambia el resultado**: HB-105 (urgencia 1 → 5) y HB-113 (3 → 8) pasan de `cod` 7 y 9 a 11 y 14.
 - **P20 en la práctica**: de 5 % a 10 % de reserva la probabilidad no cambia (3 %), porque la regla elige el mismo
   conjunto. La pantalla no promete que más reserva siempre suba la probabilidad.
+
+## 2026-11-13 — Motor de reglas (spec `rule-engine`): decisiones tomadas al implementar
+
+Lo que la spec `rule-engine` (`.kiro/specs/rule-engine/`) tuvo que decidir y este documento no decía. Donde esta
+sección dice otra cosa que las anteriores, **manda esta**. El alcance de la spec es solo `src/engine`: P1–P11, P14–P18,
+P22, P23 y P27. **P12** (guardia del epitafio) y **P13** (CSV de ida y vuelta) quedan para las specs de la guardia y del
+CSV; P19–P21 (niebla), P24 (certificado), P25 (deshacer) y P26 (importación) también.
+
+- **Rematar y los dependientes.** Quitar un enterrado del tablero no puede dejar libres a los tickets que dependían
+  de él: si la dependencia simplemente desapareciera, esos tickets podrían salvarse y P18 se rompería. Por eso la clave
+  rematada pasa a `wontDo` y **todo ticket cuya cadena llega a una clave de `wontDo` no puede salvarse nunca**
+  (motivo `blocked-by-put-down`). Así P18 se cumple: el óptimo anterior sigue siendo válido y el desempate no cambia,
+  porque la clave quitada estaba en todas las listas de enterrados que se comparan.
+- **Solo se remata a un zombi.** El zombi es un enterrado con `past + 1 ≥ umbral`. Rematar un ticket que no es zombi, o
+  uno salvado, es un error. Con una congelación imposible no hay lista de enterrados y tampoco se puede rematar.
+- **P9 con rematados.** «Imposible» también ocurre si un imprescindible depende de una clave rematada, sin importar la
+  capacidad. Sin claves rematadas, es exactamente el enunciado original: los imprescindibles con sus dependencias
+  superan la capacidad (con margen).
+- **Exhumar.** Si hace la congelación imposible, no se aplica y el motor devuelve los números (necesita, capacidad,
+  capacidad con margen). Exhumar uno ya salvado no cambia nada.
+- **Tiempo.** `now` y `freezeAt` son milisegundos de época enteros, para que el motor no analice fechas. Las
+  ausencias son fechas locales `AAAA-MM-DD` con tramo `mañana`, `tarde` o `día entero`. La zona horaria se resuelve con
+  `Intl` y el nombre IANA; el cambio de hora no desplaza los puntos medios (11:00 y 16:00 locales).
+- **Desempate alfabético.** Entre dos conjuntos con el mismo `cod`, el mismo número de enterrados y el mismo esfuerzo
+  enterrado, gana el que tiene la **lista de claves enterradas ordenada más pequeña** (se comparan elemento a elemento, con
+  el orden de unidades de código, `CRYPT-12` antes que `CRYPT-2`). Con tres tickets iguales A, B y C y sitio para uno, se
+  entierran A y B y se salva C.
+- **Los tres primeros niveles del desempate en un solo entero.** Más `cod` salvado, luego más tickets salvados (menos
+  enterrados), luego más esfuerzo salvado (menos esfuerzo enterrado) se plegan en un peso entero por ticket
+  (`cod × K1 + K0 + esfuerzo`). Un tablero cuya aritmética no sería exacta se rechaza con `board-too-large`.
+- **Explicación del cambio.** Los tickets que se levantan toman su `cod` de la solución anterior (donde estaban
+  enterrados) y los que se hunden, de la nueva. P15 supone que los costes no cambian entre las dos soluciones.
+- **Medido.** Con tableros de 80 tickets, la mediana de la resolución es de menos de 3 ms y el peor caso medido (muchos
+  empates) unos 55 ms, en un portátil de desarrollo. El peor caso teórico sigue siendo exponencial, como en cualquier mochila.

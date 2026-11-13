@@ -56,28 +56,28 @@ Run `npm run typecheck` and `npm test` before ticking any task; tick it only whe
   - [x] 8.8 Reason examples (one per kind) and the invariant that a `no-room` ticket has `needed > left`
   - _Requirements: 4.6, 5.1–5.15, 6.1, 6.3, 6.4_
 
-- [ ] 9. Impossible freeze
-  - [ ] 9.1 Impossible branch in the solver with `needed`, capacities and blocked must-haves
-  - [ ] 9.2 `P9 impossible iff` property test with an independent computation of the needed effort
-  - [ ] 9.3 Example: must-haves need 54, capacity 41
+- [x] 9. Impossible freeze
+  - [x] 9.1 Impossible branch in the solver with `needed`, capacities and blocked must-haves (built in task 8; verified by the tests below)
+  - [x] 9.2 `P9 impossible iff` property test with an independent computation of the needed effort (`tests/engine/reference.ts`)
+  - [x] 9.3 Example: must-haves need 54, capacity 41
   - _Requirements: 7.1–7.3_
 
-- [ ] 10. Diff, exhume, zombies and put down
-  - [ ] 10.1 `src/engine/diff.ts`: `diffSolutions`
-  - [ ] 10.2 `P15 diff` property test
-  - [ ] 10.3 `exhume` and `resurrect`; `P10 exhume` property test; examples: already kept, unknown key, impossible rejected and board unchanged
-  - [ ] 10.4 Zombie listing; `P17 zombie` property test
-  - [ ] 10.5 `putDown` with `wontDo` blocking; `P18 put down` property test (threshold 1); examples: not a zombie, dependents blocked
+- [x] 10. Diff, exhume, zombies and put down
+  - [x] 10.1 `src/engine/diff.ts`: `diffSolutions`
+  - [x] 10.2 `P15 diff` property test
+  - [x] 10.3 `exhume` and `resurrect`; `P10 exhume` property test; examples: already kept, unknown key, impossible rejected and board unchanged
+  - [x] 10.4 Zombie listing; `P17 zombie` property test
+  - [x] 10.5 `putDown` with `wontDo` blocking; `P18 put down` property test (threshold 1); examples: not a zombie, dependents blocked
   - _Requirements: 8.1–8.5, 9.1–9.6, 10.1–10.4_
 
-- [ ] 11. Public API, purity and performance
-  - [ ] 11.1 `src/engine/index.ts` exporting the public API (not the oracle)
-  - [ ] 11.2 `tests/engine/purity.test.ts`: forbidden-token scan and no imports outside `src/engine`
-  - [ ] 11.3 No-mutation test: deep-freeze inputs, call every public function twice, outputs deeply equal
-  - [ ] 11.4 `tests/engine/performance.test.ts`: 20 boards of 80 tickets, each under 2 s; print the median for the record
+- [x] 11. Public API, purity and performance
+  - [x] 11.1 `src/engine/index.ts` exporting the public API (not the oracle); a test pins the exact list of exports
+  - [x] 11.2 `tests/engine/purity.test.ts`: forbidden-token scan and no imports outside `src/engine`
+  - [x] 11.3 No-mutation test: deep-freeze inputs, call every public function twice, outputs deeply equal
+  - [x] 11.4 `tests/engine/performance.test.ts`: 20 boards of 80 tickets (normal, tie-heavy, no dependencies), each under 2 s; prints the median; plus 1,000 capacity calls
   - _Requirements: 12.1–12.5, 14.1, 14.2_
 
-- [ ] 12. Checkpoint
-  - [ ] 12.1 `npm run typecheck`, `npm test`, `npm run build` all green
-  - [ ] 12.2 Check the traceability table: every in-scope property has a test named with its number, none is skipped
-  - [ ] 12.3 Update `docs/rule.md` with a dated section for the decisions taken in this spec (put down and `wontDo`, P9 with put downs, epoch milliseconds)
+- [x] 12. Checkpoint
+  - [x] 12.1 `npm run typecheck`, `npm test`, `npm run build` all green
+  - [x] 12.2 Check the traceability table: every in-scope property has a test named with its number, none is skipped (`tests/engine/traceability.test.ts` keeps it checked)
+  - [x] 12.3 Update `docs/rule.md` with a dated section for the decisions taken in this spec (put down and `wontDo`, P9 with put downs, epoch milliseconds)

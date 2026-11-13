@@ -223,8 +223,9 @@ in Vitest and in the MCP server.
 
 #### Acceptance Criteria
 
-1. `src/engine` SHALL NOT contain `Date.now`, `new Date()` with no arguments, `Math.random`, `window`, `document`,
-   `localStorage`, `fetch`, `process` or `require`. A test SHALL scan the sources and fail if any appears.
+1. `src/engine` SHALL NOT contain `Date.now`, `new Date()` with no arguments, `Math.random`, `performance`, `window`, `document`,
+   `navigator`, `localStorage`, `sessionStorage`, `fetch`, `XMLHttpRequest`, `process`, `require`, `crypto`, `setTimeout` or `setInterval`
+   (comments are ignored). A test SHALL scan the sources and fail if any appears.
 2. `src/engine` SHALL NOT import from `src/ui`, `mcp` or `tests`.
 3. `tsconfig.engine.json` (lib `ES2022` only, no DOM) SHALL compile `src/engine` and `tests/engine`.
 4. THE public API SHALL be exported only from `src/engine/index.ts`.

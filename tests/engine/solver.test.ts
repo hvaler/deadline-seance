@@ -7,6 +7,7 @@ import type { Board, Key, Solution, SolvedSolution, ValidBoard } from '../../src
 import { ticket, validOf, valid } from './fixtures';
 import { arbBoardForImpossible, arbPermutedBoard, arbSolveCase } from './generators';
 import type { SolveCase } from './generators';
+import { chainOf, reachedPutDown } from './reference';
 
 // ---- helpers (independent of the engine's own graph code) -------------------------------------------------------------
 
@@ -21,33 +22,6 @@ function solveOk(board: ValidBoard, capacity: number, margin = 0): SolvedSolutio
   if (!r.ok) throw new Error(`solver error: ${r.error.code}`);
   if (r.value.status !== 'ok') throw new Error('expected a solution, got impossible');
   return r.value;
-}
-
-/** Keys in the chain of `key` (itself included), skipping put-down keys. */
-function chainOf(board: Board, key: Key): Set<Key> {
-  const byKey = new Map(board.tickets.map((t) => [t.key, t] as const));
-  const seen = new Set<Key>();
-  const todo = [key];
-  while (todo.length > 0) {
-    const k = todo.pop() as Key;
-    if (seen.has(k) || !byKey.has(k)) continue;
-    seen.add(k);
-    for (const d of byKey.get(k)?.dependsOn ?? []) todo.push(d);
-  }
-  return seen;
-}
-
-/** Smallest put-down key reached from the chain of `key`, if any. */
-function reachedPutDown(board: Board, key: Key): Key | undefined {
-  const wont = new Set(board.wontDo);
-  const byKey = new Map(board.tickets.map((t) => [t.key, t] as const));
-  let smallest: Key | undefined;
-  for (const k of chainOf(board, key)) {
-    for (const d of byKey.get(k)?.dependsOn ?? []) {
-      if (wont.has(d) && (smallest === undefined || d < smallest)) smallest = d;
-    }
-  }
-  return smallest;
 }
 
 const RUNS = 300;

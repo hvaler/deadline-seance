@@ -196,8 +196,9 @@ putDown(board, freeze, key): Result<{ board: ValidBoard; before: SolvedSolution;
   If `before` is already impossible, the result is also `rejected`.
 - `putDown`: solve; the key must be buried and a zombie, else `not-a-zombie` / `unknown-key`. Remove the ticket, append the key to `wontDo`
   (kept sorted), re-solve. Tickets that depended on it are blocked and stay buried.
-- `diffSolutions` takes `cod` of raised from `after` and of sunk from `before`. After a put down, a put-down ticket was buried, so it is
-  never in `raised` or `sunk`.
+- A solution lists the `cod` of its buried tickets only, so `diffSolutions` takes the `cod` of a raised ticket from `before.buried` and of a sunk
+  ticket from `after.buried`. Both solutions must come from boards with the same costs (true for a new candle, team, exhume or put down).
+  A put-down ticket was buried, so it is never in `raised` or `sunk`.
 
 ### Why P18 holds with this design
 
