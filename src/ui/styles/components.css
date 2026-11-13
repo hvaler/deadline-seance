@@ -1,0 +1,683 @@
+/*
+ * The look of each part. Text colours follow the pairs checked in tests/ui/contrast.test.ts:
+ *   on night:       bone, stone, tape, amber, green, red
+ *   on plywood:     bone, tape, amber, green (stone on plywood-1 only)
+ *   on a coloured fill: night
+ * Dim, violet and rust never colour text; they are for borders, lines and decoration only.
+ */
+
+/* ---- the title card ---- */
+
+.product-line {
+  font-size: 0.8125rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--stone);
+}
+
+.title-card h1 {
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 9.5vw + 0.25rem, 5.75rem);
+  line-height: 1;
+  color: var(--red);
+  text-shadow: var(--glow-red);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+/* ---- buttons ---- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--target);
+  min-width: var(--target);
+  padding: 10px 18px;
+  border: 2px solid var(--tape);
+  border-radius: var(--radius);
+  background: var(--ply-1);
+  color: var(--bone);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: var(--amber);
+  background: var(--ply-2);
+}
+
+.button[aria-pressed='true'] {
+  border-color: var(--amber);
+  background: var(--amber);
+  color: var(--night);
+}
+
+.button-primary {
+  border-color: var(--green);
+  background: var(--green);
+  color: var(--night);
+}
+
+.button-primary:hover {
+  border-color: var(--bone);
+  background: var(--green);
+}
+
+/* Empty slots: dashed, quiet, and plainly not working. */
+.button.slot,
+.button.slot:hover {
+  border: 2px dashed var(--stone);
+  background: transparent;
+  color: var(--stone);
+  cursor: not-allowed;
+}
+
+.slot-note,
+.slot-text,
+.slot-label {
+  font-size: 0.875rem;
+  color: var(--stone);
+}
+
+.slot-text {
+  padding-top: 12px;
+  border-top: 2px dashed var(--stone);
+}
+
+/* ---- headings painted on the planks ---- */
+
+.region-title {
+  font-family: var(--font-sign);
+  font-weight: 400;
+  font-size: 1.75rem;
+  line-height: 1.15;
+  color: var(--tape);
+}
+
+#safehouse .region-title {
+  color: var(--green);
+}
+
+/* ---- the sign ---- */
+
+.sign-board {
+  position: relative;
+  margin-top: 26px; /* room for the tape above the plank */
+  padding: 28px 22px 24px;
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.16) 0 2px, transparent 2px 140px),
+    linear-gradient(180deg, var(--ply-2), var(--ply-1));
+  box-shadow: var(--shadow);
+}
+
+/* Two pieces of masking tape holding the sign up. */
+.sign-board::before,
+.sign-board::after {
+  content: '';
+  position: absolute;
+  top: -12px;
+  width: 96px;
+  height: 28px;
+  background: var(--tape);
+  opacity: 0.88;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.4);
+  pointer-events: none;
+}
+
+.sign-board::before {
+  left: -18px;
+  transform: rotate(-32deg);
+}
+
+.sign-board::after {
+  right: -18px;
+  transform: rotate(32deg);
+}
+
+@media (max-width: 479.98px) {
+  /* On a phone the tape stays inside the screen: nothing may make the page wider than it. */
+  .sign-board::before {
+    left: -6px;
+  }
+
+  .sign-board::after {
+    right: -6px;
+  }
+}
+
+.verdict {
+  display: grid;
+  gap: 8px;
+  color: var(--bone);
+}
+
+.verdict p:first-child {
+  font-family: var(--font-sign);
+  font-size: clamp(1.25rem, 2.6vw + 0.6rem, 1.75rem);
+  line-height: 1.3;
+}
+
+.sign-board.is-impossible .verdict {
+  padding: 14px 16px;
+  border-left: 6px solid var(--red);
+  background: var(--night);
+}
+
+.sign-board.is-impossible .verdict p:first-child {
+  color: var(--red);
+}
+
+/* What the last action did. */
+.change-note {
+  display: grid;
+  gap: 6px;
+  padding: 12px 16px;
+  border-left: 6px solid var(--amber);
+  border-radius: 2px;
+  background: var(--night);
+}
+
+.change-headline {
+  font-weight: 600;
+  color: var(--amber);
+}
+
+.change-lines {
+  display: grid;
+  gap: 2px;
+}
+
+.change-lines li[data-kind='rises'],
+.change-lines li[data-kind='gain'] {
+  color: var(--green);
+}
+
+.change-lines li[data-kind='sinks'],
+.change-lines li[data-kind='loss'] {
+  color: var(--red);
+}
+
+.change-lines li[data-kind='rises']::before {
+  content: '▲ ' / '';
+}
+
+.change-lines li[data-kind='sinks']::before {
+  content: '▼ ' / '';
+}
+
+.change-note[data-alert='true'] {
+  border-left-color: var(--red);
+  outline: 2px solid var(--red);
+  outline-offset: -2px;
+}
+
+.change-note[data-alert='true'] .change-headline {
+  color: var(--red);
+}
+
+/* ---- range inputs: the reserve and the candle ---- */
+
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: var(--thumb);
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.range::-webkit-slider-runnable-track {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--rust), var(--amber));
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.5);
+}
+
+.range::-moz-range-track {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--rust), var(--amber));
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.5);
+}
+
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc((10px - var(--thumb)) / 2);
+  border: 4px solid var(--night);
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber);
+}
+
+.range::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--thumb);
+  height: var(--thumb);
+  border: 4px solid var(--night);
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber);
+}
+
+.reserve-label,
+.candle-label {
+  font-family: var(--font-sign);
+  font-size: 1.25rem;
+  color: var(--tape);
+}
+
+.reserve-output {
+  justify-self: end;
+  font-size: 1.25rem;
+  color: var(--amber);
+}
+
+.reserve-hint {
+  font-size: 0.875rem;
+  color: var(--tape);
+}
+
+/* ---- the candle ---- */
+
+.candle-art {
+  --wax: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  width: 84px;
+  height: 250px;
+}
+
+.candle-flame {
+  width: 20px;
+  height: 36px;
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  background: radial-gradient(ellipse at 50% 75%, var(--bone) 0 12%, var(--amber) 45%, var(--rust) 100%);
+  box-shadow: var(--glow-amber);
+  transform-origin: 50% 100%;
+}
+
+.candle-wick {
+  width: 3px;
+  height: 10px;
+  background: var(--night);
+}
+
+.candle-wax {
+  position: relative;
+  width: 44px;
+  height: calc(34px + 160px * var(--wax));
+  border-radius: 8px 8px 3px 3px;
+  background: linear-gradient(90deg, var(--tape), var(--bone) 40%, var(--tape) 75%, var(--stone));
+  box-shadow: inset -6px 0 10px rgb(0 0 0 / 0.25);
+}
+
+.candle-drip {
+  position: absolute;
+  top: -2px;
+  width: 9px;
+  border-radius: 0 0 9px 9px;
+  background: var(--bone);
+}
+
+.candle-drip-1 {
+  left: 5px;
+  height: 30px;
+}
+
+.candle-drip-2 {
+  right: 6px;
+  height: 52px;
+}
+
+.candle-pool {
+  width: 84px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--tape);
+  opacity: 0.7;
+}
+
+.candle-readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: baseline;
+  color: var(--bone);
+}
+
+.candle-time {
+  font-size: 1.5rem;
+  color: var(--amber);
+}
+
+.candle-effective {
+  color: var(--stone);
+}
+
+.notch {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.notch-tick {
+  width: 2px;
+  height: 10px;
+  background: var(--stone);
+}
+
+.notch-capacity {
+  font-size: 0.75rem;
+  color: var(--stone);
+}
+
+.notch.is-past .notch-tick {
+  background: var(--rust);
+}
+
+.notch.is-current .notch-tick {
+  height: 16px;
+  background: var(--amber);
+}
+
+.notch.is-current .notch-capacity {
+  font-weight: 600;
+  color: var(--amber);
+}
+
+@media (max-width: 479.98px) {
+  /* Eleven numbers do not fit side by side on a phone: every other one is enough, and the current one always shows. */
+  .notch:nth-child(even):not(.is-current) .notch-capacity {
+    visibility: hidden;
+  }
+}
+
+/* ---- survivors ---- */
+
+.chip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  min-height: var(--target);
+  padding: 8px 16px;
+  border: 2px solid var(--green);
+  border-radius: 999px;
+  background: var(--ply-1);
+  color: var(--bone);
+  text-align: left;
+  cursor: pointer;
+}
+
+.chip:hover {
+  background: var(--ply-2);
+}
+
+.chip-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.chip-points {
+  font-size: 0.875rem;
+  color: var(--stone);
+}
+
+.chip-state {
+  font-weight: 600;
+  color: var(--green);
+}
+
+.team-member.is-away .chip {
+  border-style: dashed;
+  border-color: var(--stone);
+}
+
+.team-member.is-away .chip-name {
+  text-decoration: line-through;
+}
+
+.team-member.is-away .chip-state {
+  color: var(--stone);
+}
+
+.chip-note {
+  padding-left: 18px;
+  font-size: 0.875rem;
+  color: var(--stone);
+}
+
+/* ---- the grounds ---- */
+
+.ground-summary {
+  margin-bottom: 14px;
+  font-size: 0.9375rem;
+  color: var(--bone);
+}
+
+.ground-empty {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 2px dashed var(--stone);
+  border-radius: var(--radius);
+  color: var(--stone);
+}
+
+.closed-line {
+  margin-top: 16px;
+  font-size: 0.9375rem;
+  color: var(--tape);
+}
+
+.musthave {
+  padding: 10px 14px;
+  border-left: 6px solid var(--amber);
+  border-radius: 2px;
+  background: var(--ply-1);
+  color: var(--bone);
+  overflow-wrap: anywhere;
+}
+
+.musthave .card-key {
+  margin-right: 4px;
+}
+
+/* ---- cards: kept tickets ---- */
+
+.card {
+  min-width: 0;
+  padding: 14px 16px 16px;
+  color: var(--bone);
+  overflow-wrap: anywhere;
+}
+
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-bottom: 4px;
+}
+
+.card-key {
+  font-weight: 600;
+  color: var(--amber);
+}
+
+.card-title {
+  margin-bottom: 8px;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.card-facts {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-size: 0.9375rem;
+}
+
+.card-facts > div {
+  display: grid;
+  grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.card-facts dt {
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--stone);
+}
+
+.card-cost {
+  font-size: 0.875rem;
+}
+
+.card-releases,
+.card-needs {
+  font-size: 0.875rem;
+}
+
+.plank .card {
+  border-left: 8px solid var(--green);
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 26px, rgb(0 0 0 / 0.2) 26px 27px),
+    var(--ply-1);
+  box-shadow: var(--shadow);
+}
+
+.plank .card-releases,
+.plank .card-needs {
+  color: var(--stone);
+}
+
+/* ---- cards: tombstones ---- */
+
+.grave .card {
+  position: relative;
+  padding-top: 30px;
+  border: 2px solid var(--stone);
+  border-radius: 64px 64px 6px 6px;
+  background: var(--ply-2);
+  box-shadow: var(--shadow);
+}
+
+.grave .card-facts dt {
+  color: var(--tape);
+}
+
+/* A tombstone is narrow: the label sits above its value instead of beside it. */
+.grave .card-facts > div {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.grave.is-zombie .card {
+  border-top: 5px solid var(--violet);
+}
+
+.grave.is-fallen .card {
+  border-style: dashed;
+  border-color: var(--rust);
+  transform: rotate(-2.5deg) translateY(4px);
+}
+
+.card-epitaph {
+  margin: 4px 0 8px;
+  font-style: italic;
+  color: var(--tape);
+}
+
+.card-chained {
+  margin-bottom: 4px;
+  font-size: 0.875rem;
+  color: var(--tape);
+}
+
+.card-fell {
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--amber);
+}
+
+.grave .card-why dd {
+  color: var(--amber);
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.grave .card .action {
+  background: var(--ply-2);
+}
+
+.action-exhume,
+.action-resurrect {
+  border-color: var(--green);
+}
+
+.action-put-down {
+  border-color: var(--red);
+}
+
+/* ---- badges ---- */
+
+.card-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badge {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+
+.badge-must-have {
+  background: var(--amber);
+  color: var(--night);
+}
+
+/* A zombie's mark: night inside, a violet rim, and the word. Violet is never the colour of the text. */
+.badge-zombie {
+  border: 2px solid var(--violet);
+  background: var(--night);
+  color: var(--bone);
+}
+
+/* ---- chains ---- */
+
+.chain-link {
+  fill: none;
+  stroke: var(--stone);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 2 7;
+  opacity: 0.9;
+}

@@ -109,13 +109,13 @@ export function syncChildren(container: Element, desired: readonly Element[]): v
   while (container.children.length > desired.length) container.lastElementChild?.remove();
 }
 
-/** Elements created once per key and kept: a ticket's card is the same element for as long as it exists. */
-export class Keyed<E extends Element> {
+/** Things created once per key and kept (a ticket's card is the same element for as long as it exists). */
+export class Keyed<E> {
   private readonly items = new Map<string, E>();
 
   constructor(private readonly create: (key: string) => E) {}
 
-  /** The element for `key`, created on first use. */
+  /** The item for `key`, created on first use. */
   get(key: string): E {
     let item = this.items.get(key);
     if (item === undefined) {
@@ -125,7 +125,7 @@ export class Keyed<E extends Element> {
     return item;
   }
 
-  /** Forgets every key that is not in `keep`, so elements of tickets that left the board are released. */
+  /** Forgets every key that is not in `keep`, so items of tickets that left the board are released. */
   retain(keep: ReadonlySet<string>): void {
     for (const key of [...this.items.keys()]) if (!keep.has(key)) this.items.delete(key);
   }

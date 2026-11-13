@@ -1,5 +1,9 @@
-/* Palette and type. The look of every component is built from these, never from other colours. */
+/*
+ * Palette, type and sizes. The look of every component is built from these, never from other colours: a test checks that no other hex
+ * colour appears anywhere in the styles. Colours that carry text are chosen from the pairs in tests/ui/contrast.test.ts.
+ */
 :root {
+  /* The night */
   --night: #110e16;
   --ply-1: #3a2c22;
   --ply-2: #4a3829;
@@ -13,10 +17,29 @@
   --rust: #b8592f;
   --amber: #f1b24a;
 
+  /* Type: title, painted signs, body, numbers */
   --font-title: 'Rubik Wet Paint', Impact, 'Arial Black', sans-serif;
   --font-sign: 'Permanent Marker', 'Marker Felt', 'Comic Sans MS', cursive;
   --font-body: 'IBM Plex Sans', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
 
+  /* Sizes */
+  --gutter: 16px;
+  --max-width: 1120px;
+  --target: 44px; /* the smallest tap target */
+  --radius: 6px;
+  --thumb: 44px; /* the handle of a range input */
+
+  /* Light, as shadows (not colours of their own) */
+  --glow-red: 0 0 6px rgb(255 61 61 / 0.8), 0 0 26px rgb(255 61 61 / 0.5), 0 0 70px rgb(255 61 61 / 0.3);
+  --glow-amber: 0 0 18px 6px rgb(241 178 74 / 0.5);
+  --shadow: 0 10px 28px rgb(0 0 0 / 0.55);
+
   color-scheme: dark;
+}
+
+@media (min-width: 820px) {
+  :root {
+    --gutter: 24px;
+  }
 }

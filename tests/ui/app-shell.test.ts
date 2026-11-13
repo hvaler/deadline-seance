@@ -71,14 +71,18 @@ describe('the page shell', () => {
     expect([...root.querySelectorAll('[tabindex]')].every((n) => Number(n.getAttribute('tabindex')) <= 0)).toBe(true);
   });
 
-  test('has a hidden polite live region and an aria-hidden decoration layer', () => {
+  test('has a hidden polite live region, a hidden alert region, and two aria-hidden decoration layers', () => {
     mount();
     const announcer = root.querySelector('[data-region="announcer"]');
     expect(announcer?.getAttribute('aria-live')).toBe('polite');
     expect(announcer?.getAttribute('aria-atomic')).toBe('true');
     expect(announcer?.classList.contains('visually-hidden')).toBe(true);
-    const atmosphere = root.querySelector('.atmosphere');
-    expect(atmosphere?.getAttribute('aria-hidden')).toBe('true');
+    const alerter = root.querySelector('[data-region="alerter"]');
+    expect(alerter?.getAttribute('role')).toBe('alert');
+    expect(alerter?.classList.contains('visually-hidden')).toBe(true);
+    const layers = [...root.querySelectorAll('.atmosphere')];
+    expect(layers.map((l) => (l as HTMLElement).dataset.layer)).toEqual(['back', 'front']);
+    for (const layer of layers) expect(layer.getAttribute('aria-hidden')).toBe('true');
   });
 
   test('the guided tour is an inert, disabled slot with a note that explains it', () => {

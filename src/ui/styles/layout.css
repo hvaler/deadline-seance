@@ -1,0 +1,169 @@
+/* Where things go: one centred column, the two grounds side by side from 820 px and stacked below it. */
+
+.page {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  min-height: 100vh;
+}
+
+main {
+  display: grid;
+  gap: 40px;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 8px var(--gutter) 80px;
+}
+
+.region {
+  min-width: 0;
+}
+
+.region-title {
+  margin-bottom: 14px;
+}
+
+/* ---- title card ---- */
+
+.title-card {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 88px var(--gutter) 32px;
+  text-align: center;
+}
+
+.title-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ---- the sign ---- */
+
+.sign-board {
+  display: grid;
+  gap: 20px;
+}
+
+.reserve {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 6px;
+}
+
+.reserve-range {
+  grid-column: 1 / -1;
+}
+
+.reserve-hint {
+  grid-column: 1 / -1;
+}
+
+/* ---- the candle ---- */
+
+.candle-layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 28px;
+}
+
+.candle-controls {
+  flex: 1 1 220px;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.notches {
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  padding: 0 calc(var(--thumb) / 2);
+}
+
+/* ---- survivors ---- */
+
+.team {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+}
+
+.team-member {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* ---- the two grounds ---- */
+
+.grounds {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px 24px;
+  align-items: start;
+}
+
+@media (max-width: 819.98px) {
+  .grounds {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.planks {
+  display: grid;
+  gap: 12px;
+}
+
+.yard-field {
+  position: relative;
+}
+
+.graves {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: 20px 16px;
+}
+
+.chains {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.musthave-list {
+  display: grid;
+  gap: 8px;
+}
+
+/* ---- tools ---- */
+
+.tools-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 12px 16px;
+}
+
+.slot-item {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+}

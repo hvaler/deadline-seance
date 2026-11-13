@@ -1,0 +1,131 @@
+/*
+ * Everything that moves. All of it is `transform` or `opacity`, so the browser can run it without redoing layout. Under
+ * `prefers-reduced-motion: reduce` none of it runs, and the state it showed is still carried by text and by static styling (a fallen
+ * tombstone stays tilted, a rejected exhume keeps its red outline).
+ */
+
+@keyframes rec-blink {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes flame {
+  0%,
+  100% {
+    transform: scale(1, 1) rotate(-1deg);
+    opacity: 0.96;
+  }
+  22% {
+    transform: scale(0.93, 1.07) rotate(1.8deg);
+  }
+  48% {
+    transform: scale(1.06, 0.94) rotate(-1.6deg);
+    opacity: 1;
+  }
+  74% {
+    transform: scale(0.96, 1.04) rotate(1deg);
+  }
+}
+
+@keyframes title-flicker {
+  0%,
+  90%,
+  100% {
+    opacity: 1;
+  }
+  91% {
+    opacity: 0.8;
+  }
+  92% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 0.88;
+  }
+  96% {
+    opacity: 1;
+  }
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fall {
+  from {
+    opacity: 0;
+    transform: translateY(-22px) rotate(-7deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-2.5deg) translateY(4px);
+  }
+}
+
+@keyframes refuse {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-7px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+.rec-dot {
+  animation: rec-blink 1.3s steps(1, end) infinite;
+}
+
+.candle-flame {
+  animation: flame 1.7s ease-in-out infinite;
+}
+
+.title-card h1 {
+  animation: title-flicker 8s linear infinite;
+}
+
+.card {
+  animation: arrive 0.32s ease-out both;
+}
+
+/* A tombstone that fell behind its dependency drops in, one after another in the order they fell. */
+.grave.is-fallen .card {
+  animation: fall 0.55s cubic-bezier(0.3, 1.35, 0.5, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+
+.change-note[data-alert='true'] {
+  animation: refuse 0.42s ease-in-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

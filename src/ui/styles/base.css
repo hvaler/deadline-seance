@@ -1,4 +1,4 @@
-/* Page basics: reset, text, focus ring, skip link and the visually hidden live region. Layout and components come in later files. */
+/* Page basics: reset, text, focus ring, skip link and the visually hidden live regions. Layout and components come in later files. */
 *,
 *::before,
 *::after {
@@ -12,26 +12,46 @@ html {
   font-size: 100%;
   line-height: 1.5;
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   background: var(--night);
+  overflow-x: hidden; /* a safety net for decoration; nothing that carries content is wider than the screen */
 }
 
 h1,
 h2,
 h3,
-p {
+p,
+dl,
+dd,
+ul,
+ol {
   margin: 0;
 }
 
-button {
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+button,
+input {
   font: inherit;
   color: inherit;
 }
 
+noscript {
+  display: block;
+  padding: 24px;
+  text-align: center;
+}
+
+/* Numbers are always in the mono face, with figures of equal width, so columns of numbers do not wobble. */
 .num,
 output {
   font-family: var(--font-mono);
@@ -44,25 +64,22 @@ output {
   outline-offset: 2px;
 }
 
-[tabindex='-1']:focus {
+/* Things that take focus from script only (a card, a ground) show the ring when they get it, and never when clicked. */
+[tabindex='-1']:focus:not(:focus-visible) {
   outline: none;
-}
-
-[tabindex='-1']:focus-visible {
-  outline: 3px solid var(--amber);
-  outline-offset: 2px;
 }
 
 .skip-link {
   position: absolute;
   left: 8px;
-  top: -64px;
+  top: -80px;
   z-index: 100;
   padding: 12px 16px;
   background: var(--amber);
   color: var(--night);
   font-weight: 600;
   text-decoration: none;
+  border-radius: var(--radius);
 }
 
 .skip-link:focus {
@@ -81,14 +98,6 @@ output {
   border: 0;
 }
 
-.atmosphere {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-#app {
-  position: relative;
-  z-index: 1;
+[hidden] {
+  display: none !important;
 }

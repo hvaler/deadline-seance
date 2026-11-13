@@ -48,50 +48,50 @@ check, not after it. Run mutation checks one at a time (never in parallel on the
   - [x] 6.6 `build/csp.ts` (the policy constant), `public/licenses/` (the four font licence texts) and `tests/ui/csp.test.ts`: exact policy, no host, no external URL in `index.html`, CSS or sources, licences present
   - _Requirements: 10.3, 12.3, 13.2, 14.1, 14.4, 15.1, 15.2, 15.3, 15.4_
 
-- [ ] 7. The sign: verdict, change note and reserve
-  - [ ] 7.1 `src/ui/render/sign.ts`: verdict, change note, alert for a rejected exhume, reserve range and output, fog slot
-  - [ ] 7.2 `src/ui/announcer.ts` and `src/ui/gestures.ts` (frame coalescing, settle timer, injected timers)
-  - [ ] 7.3 `tests/ui/render-sign.test.ts`
+- [x] 7. The sign: verdict, change note and reserve
+  - [x] 7.1 `src/ui/render/sign.ts`: verdict, change note, alert for a rejected exhume, reserve range and output, fog slot
+  - [x] 7.2 `src/ui/announcer.ts` and `src/ui/gestures.ts` (frame coalescing, settle timer, injected timers)
+  - [x] 7.3 `tests/ui/render-sign.test.ts`
   - _Requirements: 4.1–4.3, 7.1–7.7, 8.3, 10.1, 12.4_
 
-- [ ] 8. The candle
-  - [ ] 8.1 `src/ui/render/candle.ts`: drawing (wax height from the step), range input, `aria-valuetext`, notches with capacities
-  - [ ] 8.2 `tests/ui/candle.test.ts`: one dispatch per frame, one announcement per settle with the start-to-end diff, notches, `aria-valuetext`
+- [x] 8. The candle
+  - [x] 8.1 `src/ui/render/candle.ts`: drawing (wax height from the step), range input, `aria-valuetext`, notches with capacities
+  - [x] 8.2 `tests/ui/candle.test.ts`: one dispatch per frame, one announcement per settle with the start-to-end diff, notches, `aria-valuetext`
   - _Requirements: 2.1–2.7, 12.4, 18.1_
 
-- [ ] 9. Survivors
-  - [ ] 9.1 `src/ui/render/survivors.ts`: switches with `role="switch"`, `aria-checked`, "Here"/"Away"
-  - [ ] 9.2 `tests/ui/survivors.test.ts`, and a survivor named with markup in `xss.test.ts`
+- [x] 9. Survivors
+  - [x] 9.1 `src/ui/render/survivors.ts`: switches with `role="switch"`, `aria-checked`, "Here"/"Away"
+  - [x] 9.2 `tests/ui/survivors.test.ts`, and a survivor named with markup in `xss.test.ts`
   - _Requirements: 3.1–3.5_
 
-- [ ] 10. The safehouse and the yard
-  - [ ] 10.1 `src/ui/render/grounds.ts`: keyed cards and tombstones, formula, reasons, epitaph, totals, must-have and zombie badges, actions with `data-focus`, put-down line, impossible explanation with the must-have list
-  - [ ] 10.2 Focus handling when a card changes ground
-  - [ ] 10.3 `tests/ui/render-grounds.test.ts`, and a ticket titled `<img src=x onerror=alert(1)>` (and a key with markup) in `xss.test.ts`
+- [x] 10. The safehouse and the yard
+  - [x] 10.1 `src/ui/render/grounds.ts`: keyed cards and tombstones, formula, reasons, epitaph, totals, must-have and zombie badges, actions with `data-focus`, put-down line, impossible explanation with the must-have list
+  - [x] 10.2 Focus handling when a card changes ground
+  - [x] 10.3 `tests/ui/render-grounds.test.ts`, and a ticket titled `<img src=x onerror=alert(1)>` (and a key with markup) in `xss.test.ts`
   - _Requirements: 5.1–5.8, 8.1, 8.4, 8.5, 9.1–9.5, 10.2, 12.5, 18.2_
 
-- [ ] 11. Chains and the cascade
-  - [ ] 11.1 `src/ui/render/chains.ts`: `chainEdges` (pure), SVG drawing in one frame after layout, `ResizeObserver`
-  - [ ] 11.2 Fallen marks and chained-to text in the tombstones
-  - [ ] 11.3 `tests/ui/chains.test.ts`
+- [x] 11. Chains and the cascade
+  - [x] 11.1 `src/ui/render/chains.ts`: `chainEdges` (pure), SVG drawing in one frame after layout, `ResizeObserver`
+  - [x] 11.2 Fallen marks and chained-to text in the tombstones
+  - [x] 11.3 `tests/ui/chains.test.ts`
   - _Requirements: 6.1–6.5, 12.8_
 
-- [ ] 12. Sound
-  - [ ] 12.1 `src/ui/audio/reverb.ts`, `recipes.ts`, `sound.ts` (injected factory)
-  - [ ] 12.2 Wire the sound button (`aria-pressed`), enable on the click, play on settled changes
-  - [ ] 12.3 `tests/ui/audio.test.ts` with a fake context: lazy creation, four distinct signatures, one convolver, limits, failure tolerance
+- [x] 12. Sound
+  - [x] 12.1 `src/ui/audio/reverb.ts`, `recipes.ts`, `sound.ts` (injected factory)
+  - [x] 12.2 Wire the sound button (`aria-pressed`), enable on the click, play on settled changes
+  - [x] 12.3 `tests/ui/audio.test.ts` with a fake context: lazy creation, four distinct signatures, one convolver, limits, failure tolerance
   - _Requirements: 11.1–11.6, 18.5_
 
-- [ ] 13. Atmosphere
-  - [ ] 13.1 `src/ui/atmosphere/decor.ts` (moon, vignette, scanlines, REC), `timecode.ts`, `fog.ts`
-  - [ ] 13.2 Reduced-motion handling (and live changes of the setting); pause on hidden tab; 20 fps cap
-  - [ ] 13.3 Tests with a stubbed `matchMedia`, canvas and timers: nothing animates under reduced motion
+- [x] 13. Atmosphere
+  - [x] 13.1 `src/ui/atmosphere/decor.ts` (moon, vignette, scanlines, REC), `timecode.ts`, `fog.ts`
+  - [x] 13.2 Reduced-motion handling (and live changes of the setting); pause on hidden tab; 20 fps cap
+  - [x] 13.3 Tests with a stubbed `matchMedia`, canvas and timers: nothing animates under reduced motion
   - _Requirements: 12.8, 12.9, 13.4, 18.3_
 
-- [ ] 14. Look: tokens, layout, components, motion
-  - [ ] 14.1 `styles/tokens.css`, `base.css`, `layout.css`, `components.css`, `atmosphere.css`, `motion.css`; font families with their system fallbacks (the font files come from `fonts.css`, task 6.3)
-  - [ ] 14.2 Title card with the disabled tour slot and the sound button; the sign, the candle, the grounds, the tools with inert slots
-  - [ ] 14.3 `tests/ui/contrast.test.ts` and `tests/ui/tokens.test.ts`; `tests/ui/slots.test.ts`
+- [x] 14. Look: tokens, layout, components, motion
+  - [x] 14.1 `styles/tokens.css`, `base.css`, `layout.css`, `components.css`, `atmosphere.css`, `motion.css`; font families with their system fallbacks (the font files come from `fonts.css`, task 6.3)
+  - [x] 14.2 Title card with the disabled tour slot and the sound button; the sign, the candle, the grounds, the tools with inert slots
+  - [x] 14.3 `tests/ui/contrast.test.ts` and `tests/ui/tokens.test.ts`; `tests/ui/slots.test.ts`
   - _Requirements: 12.2, 12.6–12.11, 13.1–13.6, 16.1–16.3_
 
 - [ ] 15. Whole-app properties and accessibility structure

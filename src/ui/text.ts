@@ -1,7 +1,7 @@
 import { SCALE } from '../engine/index';
 import type { CodParts, ImpossibleSolution, Reason, ValidationError } from '../engine/index';
 import { CANDLE_STEPS } from './candle-steps';
-import type { TombstoneView, View } from './derive';
+import type { Totals, TombstoneView, View } from './derive';
 import type { Change, Comparison, Subject } from './model';
 
 /**
@@ -72,6 +72,45 @@ export function epitaphFor(tombstone: TombstoneView, weeks: number): string {
       break;
   }
   return tombstone.isZombie ? `${body} It has been left out ${count(tombstone.cost.past, 'release')} in a row.` : body;
+}
+
+// ---- the two grounds ---------------------------------------------------------------------------------------------------
+
+/** The heading line of the safehouse: "12 tickets · 59 of 59 points · saved cod 167". */
+export function safehouseSummary(totals: Totals, effectiveCapacity: number): string {
+  return `${count(totals.keptCount, 'ticket')} · ${totals.keptEffort} of ${effectiveCapacity} points · saved cod ${totals.savedCod}`;
+}
+
+/** The heading line of the yard: "7 tickets · effort 129 · cod 101". */
+export function yardSummary(totals: Totals): string {
+  return `${count(totals.buriedCount, 'ticket')} · effort ${totals.buriedEffort} · cod ${totals.buriedCod}`;
+}
+
+export const IMPOSSIBLE_GROUND = 'Nothing can be decided until the must-haves fit.';
+export const NOTHING_INSIDE = 'Nothing fits inside.';
+export const NOTHING_OUTSIDE = 'Nothing is left outside.';
+
+/** "Needs HB-104", with closed tickets marked: "Needs HB-112 (closed as Won't Do)". */
+export function needsText(needs: readonly string[], closed: readonly string[]): string {
+  if (needs.length === 0) return '';
+  return `Needs ${listOf(needs.map((key) => (closed.includes(key) ? `${key} (closed as Won't Do)` : key)))}`;
+}
+
+export function chainedText(keys: readonly string[]): string {
+  return keys.length === 0 ? '' : `Chained to ${listOf(keys)}`;
+}
+
+export function fellText(keys: readonly string[]): string {
+  return keys.length === 0 ? '' : `Fell behind ${listOf(keys)}`;
+}
+
+/** "20 over 2 weeks": what waiting for the next release costs. */
+export function waitingText(burialCost: number, weeks: number): string {
+  return `${burialCost} over ${count(weeks, 'week')}`;
+}
+
+export function closedLine(keys: readonly string[]): string {
+  return keys.length === 0 ? '' : `Closed as Won't Do: ${keys.join(', ')}`;
 }
 
 // ---- the verdict -------------------------------------------------------------------------------------------------------
