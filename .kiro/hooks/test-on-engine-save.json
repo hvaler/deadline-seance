@@ -1,0 +1,17 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Run tests on engine save",
+      "enabled": true,
+      "trigger": "PostFileSave",
+      "description": "Runs npm test whenever a file under src/engine or tests/engine is saved",
+      "matcher": "(src|tests)[\\\\/]engine[\\\\/]",
+      "action": {
+        "type": "command",
+        "command": "npm test",
+        "timeout": 180
+      }
+    }
+  ]
+}
