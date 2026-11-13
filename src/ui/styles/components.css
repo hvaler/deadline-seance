@@ -166,6 +166,27 @@
   }
 }
 
+.sign-readout {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  /* The verdict and the note take the room of the tallest thing they can say together, so the candle below never moves while it is dragged. */
+  /* The numbers are the tallest the sample board writes, measured at each width (the text wraps more on a narrow screen). */
+  min-height: 15.5rem;
+}
+
+@media (max-width: 819.98px) {
+  .sign-readout {
+    min-height: 21rem;
+  }
+}
+
+@media (max-width: 479.98px) {
+  .sign-readout {
+    min-height: 29rem;
+  }
+}
+
 .verdict {
   display: grid;
   gap: 10px;

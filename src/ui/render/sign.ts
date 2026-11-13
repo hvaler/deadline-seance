@@ -83,7 +83,8 @@ export function mountSign(section: HTMLElement, ctx: Ctx): Part {
 
   const fogSlot = el('p', { class: 'slot-text', data: { slot: 'fog' }, text: 'Chance the shelter holds: not built yet.' });
 
-  const board = el('div', { class: 'sign-board' }, [verdict, note, reserve, fogSlot]);
+  const readout = el('div', { class: 'sign-readout' }, [verdict, note]);
+  const board = el('div', { class: 'sign-board' }, [readout, reserve, fogSlot]);
   section.append(board);
 
   const gesture = createGesture({

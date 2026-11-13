@@ -188,7 +188,7 @@ function fillGrave(grave: Grave, tomb: TombstoneView, index: number, weeks: numb
   setText(grave.waiting, waitingText(tomb.burialCost, weeks));
   const have = grave.badges.children.length;
   if (tomb.isZombie !== (have > 0)) grave.badges.replaceChildren(...(tomb.isZombie ? [badge('Zombie')] : []));
-  const epitaph = epitaphFor(tomb, weeks);
+  const epitaph = epitaphFor(tomb);
   setText(grave.epitaph, epitaph);
   const hunger = hungerText(tomb) ?? '';
   setText(grave.hunger, hunger);
@@ -207,8 +207,8 @@ function fillGrave(grave: Grave, tomb: TombstoneView, index: number, weeks: numb
   const fell = tomb.fell && tomb.reason.kind === 'depends-on-buried' ? fellText(tomb.reason.buriedDependencies) : '';
   setText(grave.fell, fell);
   setAttr(grave.fell, 'hidden', fell === '');
-  // A zombie's releases are in its epitaph and its hunger line; any other tombstone that was left out before says so here.
-  const releases = tomb.isZombie ? '' : (releasesText(tomb.cost) ?? '');
+  // How long it has been left out: from the engine's count, never from the epitaph.
+  const releases = releasesText(tomb.cost) ?? '';
   setText(grave.releases, releases);
   setAttr(grave.releases, 'hidden', releases === '');
   setAttr(grave.exhume, 'hidden', tomb.isZombie);

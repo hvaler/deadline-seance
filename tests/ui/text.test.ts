@@ -17,7 +17,9 @@ import {
   listOf,
   noteSentence,
   reasonText,
+  hungerText,
   releasesText,
+  waitingText,
   verdictSentences,
 } from '../../src/ui/text';
 import { arbMeaningfulAction, statesAfter } from './arbitraries';
@@ -91,36 +93,39 @@ describe('reasons and epitaphs', () => {
     expect(reasonText({ kind: 'blocked-by-put-down', putDownKey: 'HB-112' })).toBe('Depends on HB-112, which was put down.');
   });
 
-  test('epitaph, no room', () => {
-    expect(epitaphFor(tomb(initial, 'HB-108'), 2)).toBe('Here lies HB-108. It needed 8 points and the night had 0 left. Waiting 2 weeks costs 20.');
+  test('epitaph, no room: one line of mood and the cause', () => {
+    expect(epitaphFor(tomb(initial, 'HB-108'))).toBe('Here lies HB-108. It needed 8 points; the night had 0 left.');
   });
-
   test('epitaph, cascade', () => {
-    expect(epitaphFor(tomb(initial, 'HB-114'), 2)).toBe('Here lies HB-114. It followed HB-112 into the ground. Waiting 2 weeks costs 22.');
+    expect(epitaphFor(tomb(initial, 'HB-114'))).toBe('Here lies HB-114. It followed HB-112 into the ground.');
   });
-
-  test('epitaph, a zombie adds how long it has been out', () => {
-    expect(epitaphFor(tomb(initial, 'HB-112'), 2)).toBe(
-      'Here lies HB-112. It needed 21 points and the night had 0 left. Waiting 2 weeks costs 32. It has been left out 3 releases in a row.',
-    );
-    expect(epitaphFor(tomb(initial, 'HB-110'), 2)).toContain('It has been left out 2 releases in a row.');
+  test('epitaph, a zombie says the same kind of thing: how long it has been out is not in it', () => {
+    expect(epitaphFor(tomb(initial, 'HB-112'))).toBe('Here lies HB-112. It needed 21 points; the night had 0 left.');
+    expect(epitaphFor(tomb(initial, 'HB-110'))).toBe('Here lies HB-110. It needed 13 points; the night had 0 left.');
   });
-
   test('epitaph, blocked by a put down', () => {
     const closed = reducer(initial, { type: 'tombstone/put-down', key: 'HB-112' });
-    expect(epitaphFor(tomb(closed, 'HB-114'), 2)).toBe("Here lies HB-114. HB-112 was closed as Won't Do, so it can never ship. Waiting 2 weeks costs 22.");
+    expect(epitaphFor(tomb(closed, 'HB-114'))).toBe("Here lies HB-114. HB-112 was closed as Won't Do, so it can never ship.");
   });
-
-  test('one week is singular', () => {
-    expect(epitaphFor(tomb(initial, 'HB-108'), 1)).toContain('Waiting 1 week costs 20.');
+  test('the epitaph carries no waiting cost and no release count, and does not depend on them', () => {
+    for (const t of derive(initial).yard) {
+      const text = epitaphFor(t);
+      expect(text).not.toMatch(/Waiting|costs|left out|in a row/);
+      const changed = { ...t, burialCost: t.burialCost + 7, cost: { ...t.cost, past: t.cost.past + 3, cod: t.cost.cod + 1 }, isZombie: !t.isZombie };
+      expect(epitaphFor(changed)).toBe(text);
+    }
   });
-
+  test('the facts the epitaph used to carry are in the detail block and the hunger line', () => {
+    const zombie = tomb(initial, 'HB-112');
+    expect(waitingText(zombie.burialCost, 2)).toBe('32 over 2 weeks');
+    expect(releasesText(zombie.cost)).toBe('left out 3 releases');
+    expect(hungerText(zombie)).toBe('Hungrier next release: urgency 8 → 13');
+    expect(waitingText(tomb(initial, 'HB-108').burialCost, 1)).toBe('20 over 1 week');
+  });
   test('epitaphs are deterministic', () => {
-    expect(epitaphFor(tomb(initial, 'HB-117'), 2)).toBe(epitaphFor(tomb(initial, 'HB-117'), 2));
+    expect(epitaphFor(tomb(initial, 'HB-117'))).toBe(epitaphFor(tomb(initial, 'HB-117')));
   });
-});
-
-describe('the verdict', () => {
+});describe('the verdict', () => {
   test('a solved cut: what is inside, what is left outside', () => {
     expect(verdictSentences(derive(initial))).toEqual([
       'Inside the safehouse: 12 tickets, 59 of 59 points, saved cod 167. Left outside: 7 tickets, cod 101.',
@@ -406,7 +411,7 @@ describe('number provenance', () => {
     expect(unexplained(verdictSentences(view).join(' '), view.solution, view.totals)).toEqual([]);
     for (const t of view.yard) {
       expect(unexplained(reasonText(t.reason), t.reason)).toEqual([]);
-      expect(unexplained(epitaphFor(t, 2), t, 2)).toEqual([]);
+      expect(unexplained(epitaphFor(t), t)).toEqual([]);
     }
     for (const c of [...view.safehouse, ...view.yard]) {
       expect(unexplained(formulaText(c.cost), c.cost)).toEqual([]);
@@ -426,7 +431,9 @@ describe('number provenance', () => {
           expect(unexplained(announcementText(state.change, view), state.change, view.solution, view.totals)).toEqual([]);
           for (const t of view.yard) {
             expect(unexplained(reasonText(t.reason), t.reason)).toEqual([]);
-            expect(unexplained(epitaphFor(t, weeks), t, weeks)).toEqual([]);
+            expect(unexplained(epitaphFor(t), t)).toEqual([]);
+            expect(unexplained(waitingText(t.burialCost, weeks), t, weeks)).toEqual([]);
+            expect(unexplained(hungerText(t) ?? '', t)).toEqual([]);
           }
           for (const c of [...view.safehouse, ...view.yard]) {
             expect(unexplained(formulaText(c.cost), c.cost)).toEqual([]);

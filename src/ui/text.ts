@@ -53,28 +53,22 @@ export function reasonText(reason: Reason): string {
 }
 
 /**
- * The epitaph: one fixed template per reason, built only from facts. This is the single function a later spec replaces to add a
+ * The epitaph: one line of mood and the cause, one fixed template per reason, built only from facts. It says nothing else: the waiting cost,
+ * the releases left out and the hunger live in the detail block and the hunger line, which stay the source of truth for those numbers.
+ * It is This is the single function a later spec replaces to add a
  * language model behind the number guard; the template stays as the fallback.
  */
-export function epitaphFor(tombstone: TombstoneView, weeks: number): string {
-  const wait = `Waiting ${count(weeks, 'week')} costs ${tombstone.burialCost}.`;
+export function epitaphFor(tombstone: TombstoneView): string {
   const reason = tombstone.reason;
-  let body: string;
   switch (reason.kind) {
     case 'no-room':
-      body = `Here lies ${tombstone.key}. It needed ${count(reason.needed, 'point')} and the night had ${reason.left} left. ${wait}`;
-      break;
+      return `Here lies ${tombstone.key}. It needed ${count(reason.needed, 'point')}; the night had ${reason.left} left.`;
     case 'depends-on-buried':
-      body = `Here lies ${tombstone.key}. It followed ${listOf(reason.buriedDependencies)} into the ground. ${wait}`;
-      break;
+      return `Here lies ${tombstone.key}. It followed ${listOf(reason.buriedDependencies)} into the ground.`;
     case 'blocked-by-put-down':
-      body = `Here lies ${tombstone.key}. ${reason.putDownKey} was closed as Won't Do, so it can never ship. ${wait}`;
-      break;
+      return `Here lies ${tombstone.key}. ${reason.putDownKey} was closed as Won't Do, so it can never ship.`;
   }
-  return tombstone.isZombie ? `${body} It has been left out ${count(tombstone.cost.past, 'release')} in a row.` : body;
 }
-
-
 /** The line under a zombie's epitaph: what one more release left out does to its urgency. Null unless it is a zombie with a formula. */
 export function hungerText(tombstone: TombstoneView): string | null {
   const next = tombstone.nextUrgency;
@@ -88,7 +82,7 @@ export function hungerText(tombstone: TombstoneView): string | null {
 export function reasonCovered(reason: Reason, epitaph: string): boolean {
   switch (reason.kind) {
     case 'no-room':
-      return epitaph.includes(`${count(reason.needed, 'point')} and the night had ${reason.left} left`);
+      return epitaph.includes(`${count(reason.needed, 'point')}; the night had ${reason.left} left`);
     case 'depends-on-buried':
       return reason.buriedDependencies.every((key) => epitaph.includes(key));
     case 'blocked-by-put-down':

@@ -98,7 +98,7 @@ describe('what the language-model slot must not have', () => {
     document.body.replaceChildren();
     const b = mountWith();
     expect(b.root.querySelector('li[data-key="HB-108"] .card-epitaph')?.textContent).toBe(first);
-    expect(first).toBe('Here lies HB-108. It needed 8 points and the night had 0 left. Waiting 2 weeks costs 20.');
+    expect(first).toBe('Here lies HB-108. It needed 8 points; the night had 0 left.');
   });
 });
 

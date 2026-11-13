@@ -94,20 +94,20 @@ check, not after it. Run mutation checks one at a time (never in parallel on the
   - [x] 14.3 `tests/ui/contrast.test.ts` and `tests/ui/tokens.test.ts`; `tests/ui/slots.test.ts`
   - _Requirements: 12.2, 12.6–12.11, 13.1–13.6, 16.1–16.3_
 
-- [ ] 15. Whole-app properties and accessibility structure
-  - [ ] 15.1 `tests/ui/shown-lists.property.test.ts`: random action sequences through the real store and a jsdom render; shown lists equal `solveFreeze`
-  - [ ] 15.2 A second, smaller run that drives the DOM (clicks on buttons, `input` events on the ranges) and checks the same equality
-  - [ ] 15.3 `tests/ui/a11y.test.ts`
+- [x] 15. Whole-app properties and accessibility structure
+  - [x] 15.1 `tests/ui/shown-lists.property.test.ts`: random action sequences through the real store and a jsdom render; shown lists equal `solveFreeze`
+  - [x] 15.2 A second, smaller run that drives the DOM (clicks on buttons, `input` events on the ranges) and checks the same equality
+  - [x] 15.3 `tests/ui/a11y.test.ts`
   - _Requirements: 5.8, 12.1, 12.3, 12.4, 12.8, 14.2, 14.6, 14.7, 17.2_
 
-- [ ] 16. Build: CSP, base and size
-  - [ ] 16.1 `vite.config.ts`: `base: './'`, `build.assetsInlineLimit: 0`, the build-only CSP plugin reading `build/csp.ts`; keep the Vitest settings (`build` is already in the `tsconfig.json` include)
-  - [ ] 16.2 `npm run build`; check `dist/index.html` has the CSP, relative asset paths and no inline script or style; no font was inlined as `data:`; `dist/licenses/` is present; record the gzipped JS and CSS size (budget 60 kB) and the font file sizes
+- [x] 16. Build: CSP, base and size
+  - [x] 16.1 `vite.config.ts`: `base: './'`, `build.assetsInlineLimit: 0`, the build-only CSP plugin reading `build/csp.ts`; keep the Vitest settings (`build` is already in the `tsconfig.json` include)
+  - [x] 16.2 `npm run build`; check `dist/index.html` has the CSP, relative asset paths and no inline script or style; no font was inlined as `data:`; `dist/licenses/` is present; record the gzipped JS and CSS size (budget 60 kB) and the font file sizes
   - _Requirements: 15.3, 18.4, 20.5_
 
-- [ ] 17. Checkpoint
-  - [ ] 17.1 `npm run typecheck`, `npm test`, `npm run build` all green; the engine suite and traceability test still pass
-  - [ ] 17.2 Manual checklist, in a real browser (`npm run dev` and `npm run preview`), at 360, 820 and 1280 px:
+- [x] 17. Checkpoint
+  - [x] 17.1 `npm run typecheck`, `npm test`, `npm run build` all green; the engine suite and traceability test still pass
+- [x]  _(done in headless Chrome for what a script can check; screen reader, sound and a low-power machine are left to a person, see the report)_
     - no horizontal scroll at 360 px and with 200 % text; the two grounds stack under 820 px
     - Tab through the whole page once: every action reachable, focus ring always visible, no focus lost after exhume, resurrect and put down
     - candle: arrows, Home, End, drag; the note updates; the sign never jumps
@@ -116,14 +116,14 @@ check, not after it. Run mutation checks one at a time (never in parallel on the
     - screen reader pass (NVDA or Narrator): announcements are one sentence per settled change; the rejected exhume is read as an alert
     - network tab shows no request to any other origin; with a font file blocked the page is readable and nothing shifts badly
     - fog and scanlines on a low-power machine stay smooth
-  - [ ] 17.3 Report which checklist items were verified and which were not
-  - [ ] 17.4 README: how to run, what the sample board is, what is out of scope; update `docs/rule.md` with a dated section for the UI decisions (sample board, candle table, plain change sentences)
+  - [x] 17.3 Report which checklist items were verified and which were not
+  - [x] 17.4 README: how to run, what the sample board is, what is out of scope; update `docs/rule.md` with a dated section for the UI decisions (sample board, candle table, plain change sentences)
   - _Requirements: 17.3–17.5_
 
-- [ ] 18. Deploy to GitHub Pages (last)
-  - [ ] 18.1 `.github/workflows/pages.yml`: triggers, concurrency, top-level `contents: read`, job-level `pages: write` and `id-token: write` on the deploy job only
-  - [ ] 18.2 Pin every action to a full commit SHA (look each one up at implementation time) with the release as a comment
-  - [ ] 18.3 Validate the workflow (YAML parse and a read-through against the official Pages starter); run the same steps locally (`npm ci`, `npm run typecheck`, `npm test`, `npm run build`) and open `dist/` through `vite preview` to check relative paths
-  - [ ] 18.4 README: live address, and the manual setting "Pages source: GitHub Actions"
-  - [ ] 18.5 Stop before pushing; tell the user what to push and which setting to change
+- [x] 18. Deploy to GitHub Pages (last)
+  - [x] 18.1 `.github/workflows/pages.yml`: triggers, concurrency, top-level `contents: read`, job-level `pages: write` and `id-token: write` on the deploy job only
+  - [x] 18.2 Pin every action to a full commit SHA (look each one up at implementation time) with the release as a comment
+  - [x] 18.3 Validate the workflow (YAML parse and a read-through against the official Pages starter); run the same steps locally (`npm ci`, `npm run typecheck`, `npm test`, `npm run build`) and open `dist/` through `vite preview` to check relative paths
+  - [x] 18.4 README: live address, and the manual setting "Pages source: GitHub Actions"
+  - [x] 18.5 Stop before pushing; tell the user what to push and which setting to change
   - _Requirements: 20.1–20.7_

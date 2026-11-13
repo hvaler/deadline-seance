@@ -353,3 +353,28 @@ Se añaden cuatro enteros, sin cambiar ninguna decisión de la regla:
 
 No son propiedades de la regla: se comprueban en `tests/engine/totals.test.ts`, sin número P, y P15 comprueba además la última
 igualdad.
+
+## 2026-11-14 — Decisiones de la interfaz (spec `board-ui`)
+
+La interfaz no cambia la regla. Estas son las decisiones que la rodean, para que no se pierdan en el código:
+
+- **Tablero de muestra.** «Hollow Bank app 3.2 · víspera del lanzamiento»: 19 tickets, 4 personas y un `now` fijo (lunes
+  2026-11-16, 09:00, Europe/Madrid). La interfaz es el único sitio que conoce ese instante; el motor lo recibe como dato.
+  Con la congelación del viernes a las 18:00 la capacidad es 59 y se salvan 12 tickets (59 de 59 puntos); hay 7 enterrados,
+  entre ellos dos zombis (HB-110 y HB-112), un coste importado (HB-111), una cascada (HB-114 cae detrás de HB-112) y un
+  ticket que no cabe aunque se exhume (HB-119: con él los imprescindibles necesitan 63 puntos y hay 59).
+- **Tabla de la vela.** Once posiciones, fijas: lunes 09:00 (el propio `now`) y, de lunes a viernes, el final de cada mañana
+  (13:00) y de cada tarde (18:00). Los instantes son datos y no se calculan en la interfaz; un test comprueba que cada etiqueta
+  es la hora local de Madrid de su instante. Las tres primeras posiciones hacen imposible la congelación.
+- **Frases del cambio.** Cada acción deja una nota en lenguaje llano hecha solo con hechos del motor: «Rises», «Sinks»,
+  «Gain» o «Loss» (según el signo de `codDelta`) y «Saved cod antes → después». Una exhumación rechazada es una alerta
+  que dice cuántos puntos hacen falta y cuántos hay. Un test comprueba que todo entero que se muestra es un hecho recibido.
+- **Totales.** La interfaz no suma: los enterrados y los que suben o se hunden traen sus totales del motor (sección anterior).
+- **Epitafio.** Una línea de ambiente y la causa («Here lies HB-108. It needed 8 points; the night had 0 left.»), una
+  plantilla fija por motivo. No lleva el coste de esperar, ni cuántas versiones lleva fuera, ni el hambre: esos números viven
+  en el bloque de detalles de la lápida y en la línea del zombi («Hungrier next release: urgency 5 → 8», con la urgencia
+  siguiente calculada por el motor). Así, cuando un modelo de lenguaje escriba el epitafio, ningún número dependerá de él.
+- **Una sola altura.** El veredicto y la nota del cambio comparten un bloque de altura fija (la del caso más alto medido a cada
+  ancho), para que la vela no se mueva bajo el dedo mientras se arrastra.
+- **Sin red.** Las fuentes se empaquetan (latín, solo los pesos usados) y la compilación lleva una política CSP sin ningún
+  otro origen. Las rutas son relativas para que funcione en cualquier carpeta de un alojamiento estático.

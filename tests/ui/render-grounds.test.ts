@@ -87,16 +87,19 @@ describe('the yard', () => {
     expect(fact(stone, 'Cost of delay')).toBe('value 5 + urgency 2 + risk 3 = 10');
     expect(fact(stone, 'Waiting costs')).toBe('20 over 2 weeks');
     // The engine's reason is the epitaph's own sentence, so it is not written twice.
-    expect(stone.querySelector('.card-epitaph')?.textContent).toContain('It needed 8 points and the night had 0 left.');
+    expect(stone.querySelector('.card-epitaph')?.textContent).toContain('It needed 8 points; the night had 0 left.');
     expect(visible(stone.querySelector('.card-why')!)).toBe(false);
   });
 
   test('the epitaph is the fixed template, built from the facts', () => {
     const { root } = mountWith();
     expect(grave(root, 'HB-108').querySelector('.card-epitaph')?.textContent).toBe(
-      'Here lies HB-108. It needed 8 points and the night had 0 left. Waiting 2 weeks costs 20.',
+      'Here lies HB-108. It needed 8 points; the night had 0 left.',
     );
-    expect(grave(root, 'HB-112').querySelector('.card-epitaph')?.textContent).toContain('It has been left out 3 releases in a row.');
+    // The waiting cost and the releases are not in the epitaph: they are in the details and the hunger line.
+    expect(grave(root, 'HB-112').querySelector('.card-epitaph')?.textContent).toBe('Here lies HB-112. It needed 21 points; the night had 0 left.');
+    expect(fact(grave(root, 'HB-112'), 'Waiting costs')).toBe('32 over 2 weeks');
+    expect(grave(root, 'HB-112').querySelector('.card-releases')?.textContent).toBe('left out 3 releases');
   });
 
   test('an imported cost says so', () => {
@@ -113,8 +116,8 @@ describe('the yard', () => {
     expect(actionsOf(grave(root, 'HB-108'))).toEqual(['Exhume']);
     expect(grave(root, 'HB-110').dataset.zombie).toBe('true');
     expect(grave(root, 'HB-108').dataset.zombie).toBe('false');
-    // A zombie's releases are in its epitaph; a second line would say them again.
-    expect(visible(grave(root, 'HB-110').querySelector('.card-releases')!)).toBe(false);
+    expect(grave(root, 'HB-110').querySelector('.card-releases')?.textContent).toBe('left out 2 releases');
+    expect(visible(grave(root, 'HB-108').querySelector('.card-releases')!)).toBe(false);
   });
 
   test('actions have accessible names that include the key', () => {
@@ -136,7 +139,7 @@ describe('the yard', () => {
     expect(stone.querySelector('.card-fell')?.textContent).toBe('Fell behind HB-112');
     expect(stone.querySelector('.card-chained')?.textContent).toBe('Chained to HB-112');
     expect(visible(stone.querySelector('.card-why')!)).toBe(false);
-    expect(stone.querySelector('.card-epitaph')?.textContent).toBe('Here lies HB-114. It followed HB-112 into the ground. Waiting 2 weeks costs 22.');
+    expect(stone.querySelector('.card-epitaph')?.textContent).toBe('Here lies HB-114. It followed HB-112 into the ground.');
     expect(grave(root, 'HB-108').dataset.fell).toBe('false');
     expect(visible(grave(root, 'HB-108').querySelector('.card-fell')!)).toBe(false);
   });

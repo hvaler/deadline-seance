@@ -6,6 +6,7 @@ import { initialState } from '../../src/ui/state';
 import { TAGLINE, hungerText, reasonCovered, verdictFigures } from '../../src/ui/text';
 import { mountWith, region } from './harness';
 
+const styles = import.meta.glob('../../src/ui/styles/components.css', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const files = import.meta.glob(['../../public/favicon.svg', '../../index.html'], { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const read = (name: string): string => Object.entries(files).find(([path]) => path.endsWith(name))?.[1] ?? '';
 
@@ -90,8 +91,8 @@ describe('the hunger line', () => {
 
 describe('the reason is not repeated when the epitaph says it', () => {
   test('a reason is covered by an epitaph that names its numbers or keys', () => {
-    expect(reasonCovered({ kind: 'no-room', needed: 8, left: 0 }, 'It needed 8 points and the night had 0 left.')).toBe(true);
-    expect(reasonCovered({ kind: 'no-room', needed: 8, left: 0 }, 'It needed 8 points and the night had 3 left.')).toBe(false);
+    expect(reasonCovered({ kind: 'no-room', needed: 8, left: 0 }, 'It needed 8 points; the night had 0 left.')).toBe(true);
+    expect(reasonCovered({ kind: 'no-room', needed: 8, left: 0 }, 'It needed 8 points; the night had 3 left.')).toBe(false);
     expect(reasonCovered({ kind: 'depends-on-buried', buriedDependencies: ['HB-1', 'HB-2'] }, 'It followed HB-1 and HB-2 into the ground.')).toBe(true);
     expect(reasonCovered({ kind: 'depends-on-buried', buriedDependencies: ['HB-1', 'HB-2'] }, 'It followed HB-1 into the ground.')).toBe(false);
     expect(reasonCovered({ kind: 'blocked-by-put-down', putDownKey: 'HB-9' }, 'HB-9 was closed as Won\'t Do.')).toBe(true);
@@ -114,5 +115,19 @@ describe('the favicon', () => {
     const used = [...svg.matchAll(/#[0-9a-f]{6}\b/gi)].map((m) => m[0].toLowerCase());
     expect(used.length).toBeGreaterThan(0);
     for (const colour of used) expect(palette, colour).toContain(colour);
+  });
+});
+
+describe('the sign keeps one height, so the candle below it does not move while it is dragged', () => {
+  test('the verdict and the change note share one block that reserves room for the tallest thing they can say', () => {
+    const { root } = mountWith();
+    const readout = root.querySelector('.sign-readout')!;
+    expect([...readout.children].map((n) => n.className.split(' ')[0])).toEqual(['verdict', 'change-note']);
+    expect(readout.parentElement?.className).toBe('sign-board');
+    // jsdom has no layout: what is checked is that the styles reserve the room, at three widths (measured in a real browser).
+    const css = Object.values(styles)[0] ?? '';
+    expect(css).toMatch(/\.sign-readout\s*\{[^}]*min-height:\s*15\.5rem/);
+    expect(css).toMatch(/@media \(max-width: 819\.98px\)\s*\{\s*\.sign-readout\s*\{\s*min-height:\s*21rem/);
+    expect(css).toMatch(/@media \(max-width: 479\.98px\)\s*\{\s*\.sign-readout\s*\{\s*min-height:\s*29rem/);
   });
 });

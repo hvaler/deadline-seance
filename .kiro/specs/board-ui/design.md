@@ -489,3 +489,11 @@ cannot run in jsdom; they are the manual checklist in the last task, and the fin
   request other than its own files.
 - **The solver is exponential in the worst case** but takes a few milliseconds on this board; a drag solves once per frame, with a cache.
 - **Pages deployment** needs the repository setting and a push; the agent does neither.
+
+## Addendum: visual pass and checkpoint decisions
+
+- **Epitaph.** One line of mood and the cause, a fixed template per reason (`epitaphFor(tombstone)`, no `weeks`). The waiting cost, the releases left out and the hunger are in the stone's details block and its hunger line, from engine facts, so a later language-model epitaph cannot change any number on screen.
+- **Grounds.** The kept tickets are rows of one framed shelf; the buried ones are stone slabs (R · I · P, epitaph as the main line, two-column details). From 1100 px the two grounds stack so a shelf row fits on one line and the yard gets four stones across; from 820 to 1099 px they sit side by side.
+- **A sign that does not move.** The verdict and the change note share `.sign-readout`, whose `min-height` is the tallest thing they say together (15.5 rem, 21 rem under 820 px, 29 rem under 480 px; measured in a real browser). The candle below stays put while it is dragged.
+- **Build.** `base: './'`, `assetsInlineLimit: 0`, and a build-only plugin writes the policy of `build/csp.ts` into `index.html`. `tests/ui/build.test.ts` builds into a temporary folder and checks the result (policy, relative paths, no inline code, no `data:`, fonts and licences, size budget). It needs `@types/node` (dev only; the engine's tsconfig does not load it).
+- **Pages.** `.github/workflows/pages.yml`: build job read-only, deploy job alone has `pages: write` and `id-token: write`; every action pinned to a commit. `tests/ui/workflow.test.ts` checks that.
