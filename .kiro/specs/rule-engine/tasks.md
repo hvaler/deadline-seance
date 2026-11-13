@@ -21,9 +21,10 @@ Run `npm run typecheck` and `npm test` before ticking any task; tick it only whe
   - [x] 3.3 `tests/engine/validate.test.ts`: one example per error code, cycle rotation, order independence
   - _Requirements: 2.1–2.5_
 
-- [ ] 4. Generators
-  - [ ] 4.1 `tests/engine/generators.ts`: `arbBoard`, `arbCapacity`, `arbPeople`, `arbAbsences`, `arbInstant`, `arbMargin`, `arbBoardForImpossible`
-  - [ ] 4.2 Self-test: every generated board passes `validateBoard`; permutation helper keeps the same board content
+- [x] 4. Generators
+  - [x] 4.1 `tests/engine/generators.ts`: `arbBoard`, `arbCapacity`, `arbPeople`, `arbAbsences`, `arbCapacityCase` (zone, window, people and four sorted
+    instants, replacing `arbInstant`), `arbMargin`, `arbBoardForImpossible`, `arbPermutedBoard`
+  - [x] 4.2 Self-test (`generators.test.ts`): every generated board passes `validateBoard`; permutation helper keeps the same board content
   - _Requirements: 13.4_
 
 - [ ] 5. Half-day capacity
