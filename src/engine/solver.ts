@@ -204,8 +204,12 @@ function solveCore(board: ValidBoard, capacity: number, marginPct: number, effec
   });
   const left = effective - keptEffort;
   const zombies: Key[] = [];
+  let buriedEffort = 0;
+  let buriedCod = 0;
   tickets.forEach((t, i) => {
     if (bestKept[i]) return;
+    buriedEffort += t.effort;
+    buriedCod += cod[i] as number;
     const isZombie = t.past + 1 >= board.zombieThreshold;
     if (isZombie) zombies.push(t.key);
     buriedList.push({
@@ -226,6 +230,8 @@ function solveCore(board: ValidBoard, capacity: number, marginPct: number, effec
     buried: buriedList,
     keptEffort,
     savedCod,
+    buriedEffort,
+    buriedCod,
     zombies,
   };
 }

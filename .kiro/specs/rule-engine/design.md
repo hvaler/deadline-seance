@@ -208,6 +208,12 @@ because `R` was in every compared buried list: deleting a common element does no
 equal-size sorted lists are ordered by their smallest differing element. Dependents of `R` could not be in any candidate before (their
 closure contains `R`), so blocking them changes nothing.
 
+## Later addition: totals (spec `board-ui`, 2026-11-13)
+
+`SolvedSolution` also carries `buriedEffort` and `buriedCod`, and `Diff` carries `raisedCod` and `sunkCod`, so a UI can show sums without adding engine
+numbers itself. They are plain sums of values already in the solution; no decision of the rule changes. `tests/engine/totals.test.ts` checks them (named
+without a P number), and P15 also asserts `raisedCod − sunkCod = codDelta`.
+
 ## Testing design
 
 ### Generators (`tests/engine/generators.ts`)

@@ -1,0 +1,22 @@
+/* Palette and type. The look of every component is built from these, never from other colours. */
+:root {
+  --night: #110e16;
+  --ply-1: #3a2c22;
+  --ply-2: #4a3829;
+  --bone: #ebe4d3;
+  --stone: #a49cad;
+  --dim: #6f6779;
+  --red: #ff3d3d;
+  --green: #8fd47e;
+  --violet: #7d5cff;
+  --tape: #d9cfa6;
+  --rust: #b8592f;
+  --amber: #f1b24a;
+
+  --font-title: 'Rubik Wet Paint', Impact, 'Arial Black', sans-serif;
+  --font-sign: 'Permanent Marker', 'Marker Felt', 'Comic Sans MS', cursive;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+
+  color-scheme: dark;
+}

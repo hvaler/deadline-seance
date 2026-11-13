@@ -36,6 +36,8 @@ describe('exhume (examples)', () => {
         { key: 'B', cod: 10 },
       ],
       sunk: [{ key: 'C', cod: 30 }],
+      raisedCod: 22,
+      sunkCod: 30,
       codDelta: -8,
     });
     expect(out.board.tickets.find((t) => t.key === 'A')?.mustHave).toBe(true);
@@ -91,7 +93,7 @@ describe('exhume (examples)', () => {
   test('exhuming a ticket that is already kept succeeds and changes nothing', () => {
     const { board, freeze } = atCapacity(validOf([ticket('A', 2, 5), ticket('B', 9, 1)]), 2);
     const out = applied(exhumeOk(board, freeze, 'A'));
-    expect(out.diff).toEqual({ raised: [], sunk: [], codDelta: 0 });
+    expect(out.diff).toEqual({ raised: [], sunk: [], raisedCod: 0, sunkCod: 0, codDelta: 0 });
     expect(out.after).toEqual(out.before);
   });
 

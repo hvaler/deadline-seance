@@ -31,6 +31,8 @@ describe('diffSolutions (examples)', () => {
         { key: 'A', cod: 12 },
         { key: 'B', cod: 10 },
       ],
+      raisedCod: 30,
+      sunkCod: 22,
       codDelta: 8,
     });
   });
@@ -43,12 +45,14 @@ describe('diffSolutions (examples)', () => {
         { key: 'B', cod: 10 },
       ],
       sunk: [{ key: 'C', cod: 30 }],
+      raisedCod: 22,
+      sunkCod: 30,
       codDelta: -8,
     });
   });
 
   test('the same solution twice: nothing rises, nothing sinks, no change', () => {
-    expect(diffOf(solved(board, 10), solved(board, 10))).toEqual({ raised: [], sunk: [], codDelta: 0 });
+    expect(diffOf(solved(board, 10), solved(board, 10))).toEqual({ raised: [], sunk: [], raisedCod: 0, sunkCod: 0, codDelta: 0 });
   });
 
   test('a change that only adds tickets: they all rise, nothing sinks', () => {
@@ -115,6 +119,9 @@ describe('diffSolutions (properties)', () => {
 
           const diff = diffOf(a.value, b.value);
           expect(sum(diff.raised) - sum(diff.sunk)).toBe(diff.codDelta);
+          expect(diff.raisedCod).toBe(sum(diff.raised));
+          expect(diff.sunkCod).toBe(sum(diff.sunk));
+          expect(diff.raisedCod - diff.sunkCod).toBe(diff.codDelta);
           expect(diff.codDelta).toBe(b.value.savedCod - a.value.savedCod);
 
           const raised = new Set(diff.raised.map((e) => e.key));
@@ -137,6 +144,8 @@ describe('diffSolutions (properties)', () => {
           const back = diffOf(b.value, a.value);
           expect(back.raised).toEqual(diff.sunk);
           expect(back.sunk).toEqual(diff.raised);
+          expect(back.raisedCod).toBe(diff.sunkCod);
+          expect(back.sunkCod).toBe(diff.raisedCod);
           expect(back.codDelta).toBe(0 - diff.codDelta); // 0 - x, not -x, so a zero delta is +0 on both sides
         },
       ),

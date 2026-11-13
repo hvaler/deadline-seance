@@ -72,7 +72,7 @@ describe('putDown (examples)', () => {
     expect(validateBoard(out.board).ok).toBe(true);
     expect(snapshot(board)).toBe(copy); // the input is never changed
 
-    expect(out.diff).toEqual({ raised: [], sunk: [], codDelta: 0 });
+    expect(out.diff).toEqual({ raised: [], sunk: [], raisedCod: 0, sunkCod: 0, codDelta: 0 });
     expect(out.after.kept).toEqual(out.before.kept);
     const b = out.after.buried.find((x) => x.key === 'B');
     expect(b?.reason).toEqual({ kind: 'blocked-by-put-down', putDownKey: 'A' });
@@ -172,7 +172,7 @@ describe('zombie properties', () => {
 
         expect(out.after.savedCod).toBe(out.before.savedCod);
         expect(out.after.kept).toEqual(out.before.kept);
-        expect(out.diff).toEqual({ raised: [], sunk: [], codDelta: 0 });
+        expect(out.diff).toEqual({ raised: [], sunk: [], raisedCod: 0, sunkCod: 0, codDelta: 0 });
         expect(out.after.buried.map((b) => b.key)).toEqual(out.before.buried.map((b) => b.key).filter((k) => k !== key));
         expect(out.board.tickets.some((t) => t.key === key)).toBe(false);
         expect(out.board.wontDo).toContain(key);

@@ -79,6 +79,10 @@ export interface SolvedSolution {
   readonly buried: readonly Buried[];
   readonly keptEffort: number;
   readonly savedCod: number;
+  /** Sum of `effort` over the buried tickets: `keptEffort + buriedEffort` is the total effort of the board. */
+  readonly buriedEffort: number;
+  /** Sum of `cod` over the buried tickets: `savedCod + buriedCod` is the total cod of the board. */
+  readonly buriedCod: number;
   readonly zombies: readonly Key[];
 }
 
@@ -102,6 +106,10 @@ export interface DiffEntry {
 export interface Diff {
   readonly raised: readonly DiffEntry[];
   readonly sunk: readonly DiffEntry[];
+  /** Sum of `cod` over `raised`. */
+  readonly raisedCod: number;
+  /** Sum of `cod` over `sunk`. `raisedCod - sunkCod` equals `codDelta` when the costs did not change. */
+  readonly sunkCod: number;
   readonly codDelta: number;
 }
 

@@ -46,7 +46,9 @@ export function diffSolutions(before: Solution, after: Solution): Result<Diff> {
   }
   raised.sort((a, b) => compareKeys(a.key, b.key));
   sunk.sort((a, b) => compareKeys(a.key, b.key));
-  return ok({ raised, sunk, codDelta: after.savedCod - before.savedCod });
+  const raisedCod = raised.reduce((sum, e) => sum + e.cod, 0);
+  const sunkCod = sunk.reduce((sum, e) => sum + e.cod, 0);
+  return ok({ raised, sunk, raisedCod, sunkCod, codDelta: after.savedCod - before.savedCod });
 }
 
 export interface ExhumeApplied {

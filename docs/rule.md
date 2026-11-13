@@ -340,3 +340,16 @@ CSV; P19–P21 (niebla), P24 (certificado), P25 (deshacer) y P26 (importación) 
   enterrados) y los que se hunden, de la nueva. P15 supone que los costes no cambian entre las dos soluciones.
 - **Medido.** Con tableros de 80 tickets, la mediana de la resolución es de menos de 3 ms y el peor caso medido (muchos
   empates) unos 55 ms, en un portátil de desarrollo. El peor caso teórico sigue siendo exponencial, como en cualquier mochila.
+
+## 2026-11-13 — Totales para la interfaz (spec `board-ui`)
+
+La interfaz muestra sumas que el motor no devolvía, y la regla del producto es que la interfaz no suma números del motor.
+Se añaden cuatro enteros, sin cambiar ninguna decisión de la regla:
+
+- `SolvedSolution.buriedEffort` y `buriedCod`: suma del esfuerzo y del `cod` de los enterrados. Así `keptEffort + buriedEffort`
+  es el esfuerzo total del tablero y `savedCod + buriedCod` su `cod` total.
+- `Diff.raisedCod` y `sunkCod`: suma del `cod` de los que se levantan y de los que se hunden, de modo que
+  `raisedCod − sunkCod = codDelta` (P15, con los costes sin cambios entre las dos soluciones).
+
+No son propiedades de la regla: se comprueban en `tests/engine/totals.test.ts`, sin número P, y P15 comprueba además la última
+igualdad.
