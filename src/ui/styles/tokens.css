@@ -17,6 +17,14 @@
   --rust: #b8592f;
   --amber: #f1b24a;
 
+  /* Stone and soil, mixed from the palette (no colours of their own) */
+  --slab-top: var(--bone);
+  --slab-bottom: color-mix(in srgb, var(--bone) 40%, var(--stone));
+  --slab-zombie-top: color-mix(in srgb, var(--green) 42%, var(--bone));
+  --slab-zombie-bottom: color-mix(in srgb, var(--green) 34%, var(--stone));
+  --soil-top: color-mix(in srgb, var(--ply-1) 70%, var(--night));
+  --soil-bottom: color-mix(in srgb, var(--ply-1) 25%, var(--night));
+
   /* Type: title, painted signs, body, numbers */
   --font-title: 'Rubik Wet Paint', Impact, 'Arial Black', sans-serif;
   --font-sign: 'Permanent Marker', 'Marker Felt', 'Comic Sans MS', cursive;

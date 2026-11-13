@@ -1,6 +1,7 @@
 import type { Ctx, Part } from '../context';
 import { el, setAttr, setText } from '../dom';
 import { PRODUCT_LINE } from '../sample-board';
+import { TAGLINE } from '../text';
 
 /**
  * The title card: the product line, the big title, "Play the night" (an empty slot until the tour exists) and the sound switch. Sound is
@@ -33,6 +34,7 @@ export function mountTitleCard(header: HTMLElement, ctx: Ctx): Part {
   header.append(
     el('p', { class: 'product-line', text: PRODUCT_LINE }),
     el('h1', { class: 'title', text: TITLE }),
+    el('p', { class: 'tagline', text: TAGLINE }),
     el('div', { class: 'title-actions' }, [tourSlot, soundButton]),
     el('p', { id: 'slot-note-tour', class: 'slot-note', text: 'The guided tour is not built yet.' }),
   );

@@ -1,4 +1,4 @@
-import { capacityBetween, codParts, compareKeys, effectiveCapacity } from '../engine/index';
+import { capacityBetween, codParts, compareKeys, effectiveCapacity, effectiveUrgency } from '../engine/index';
 import type { CodParts, FreezeInput, Key, Reason, Solution, Ticket } from '../engine/index';
 import { CANDLE_STEPS } from './candle-steps';
 import { freezeFor, presentPeople } from './model';
@@ -20,6 +20,8 @@ export interface CardView {
   readonly needs: readonly Key[];
   /** The cost of delay in parts (value, urgency and its hunger, risk, releases out), from the engine. */
   readonly cost: CodParts;
+  /** True when the ticket has a formula and has been left out long enough for its urgency to have grown. */
+  readonly hungry: boolean;
 }
 
 export interface TombstoneView extends CardView {
@@ -31,6 +33,8 @@ export interface TombstoneView extends CardView {
   readonly chainedTo: readonly Key[];
   /** True when it fell because a dependency is buried (reason `depends-on-buried`). */
   readonly fell: boolean;
+  /** The urgency it would have after one more release left out (ffectiveUrgency with one more past release); null for an imported cost. */
+  readonly nextUrgency: number | null;
 }
 
 export interface TeamView {
@@ -92,13 +96,15 @@ function uniqueSorted(keys: readonly Key[]): Key[] {
 }
 
 function cardOf(ticket: Ticket): CardView {
+  const cost = codParts(ticket);
   return {
     key: ticket.key,
     title: ticket.title,
     effort: ticket.effort,
     mustHave: ticket.mustHave,
     needs: uniqueSorted(ticket.dependsOn),
-    cost: codParts(ticket),
+    cost,
+    hungry: !cost.imported && cost.effectiveUrgency !== cost.urgency,
   };
 }
 
@@ -140,6 +146,7 @@ export function derive(state: AppState): View {
         isZombie: entry.isZombie,
         chainedTo,
         fell: entry.reason.kind === 'depends-on-buried',
+        nextUrgency: ticket.cost.kind === 'imported' ? null : effectiveUrgency(ticket.cost.urgency, ticket.past + 1),
       });
     }
     totals = {

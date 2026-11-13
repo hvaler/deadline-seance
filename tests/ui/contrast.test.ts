@@ -89,6 +89,8 @@ describe('text pairs: at least 4.5 to 1', () => {
     ['green', 'ply2'],
     ['red', 'night'],
     ['night', 'tape'],
+    ['night', 'bone'], // the engraved text of a tombstone, at the top of the slab
+    ['night', 'stone'], // and at the foot of it
     ['night', 'green'],
     ['night', 'amber'],
     ['night', 'red'],
@@ -156,5 +158,37 @@ describe('large text: at least 3 to 1', () => {
 
   test('the impossible-freeze headline is red on the night too (it sits on a night panel, not on plywood)', () => {
     expect(contrast('red', 'night')).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('the tombstone slab: night text on every colour the slab takes', () => {
+  const tokens = import.meta.glob('../../src/ui/styles/tokens.css', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+  const text = Object.values(tokens)[0] ?? '';
+  const hexOf = (name: string): string => PALETTE[name.replace(/^--/, '').replace('-', '') as Name];
+  const toRgb = (hex: string): [number, number, number] => [1, 3, 5].map((at) => parseInt(hex.slice(at, at + 2), 16)) as [number, number, number];
+  const toHex = (rgb: number[]): string => `#${rgb.map((c) => Math.round(c).toString(16).padStart(2, '0')).join('')}`;
+  /** `color-mix(in srgb, A p%, B)`: the channels of A and B in the proportion p to 100 - p. */
+  function mix(a: string, p: number, b: string): string {
+    const [x, y] = [toRgb(a), toRgb(b)];
+    return toHex(x.map((c, i) => (c * p) / 100 + ((y[i] as number) * (100 - p)) / 100));
+  }
+  function slab(token: string): string {
+    const value = new RegExp(`${token}:\\s*([^;]+);`).exec(text)?.[1] ?? '';
+    const plain = /^var\((--[a-z0-9-]+)\)$/.exec(value);
+    if (plain) return hexOf(plain[1] as string);
+    const m = /^color-mix\(in srgb,\s*var\((--[a-z0-9-]+)\)\s*(\d+)%,\s*var\((--[a-z0-9-]+)\)\)$/.exec(value);
+    if (!m) throw new Error(`cannot read ${token}: ${value}`);
+    return mix(hexOf(m[1] as string), Number(m[2]), hexOf(m[3] as string));
+  }
+  for (const token of ['--slab-top', '--slab-bottom', '--slab-zombie-top', '--slab-zombie-bottom']) {
+    test(`night on ${token} is at least 4.5`, () => {
+      const colour = slab(token);
+      const [hi, lo] = [luminance(colour), luminance(PALETTE.night)];
+      expect((hi + 0.05) / (lo + 0.05)).toBeGreaterThanOrEqual(4.5);
+    });
+  }
+  test('the focus ring needs a dark halo on the slab: amber alone is below 3 against the pale top', () => {
+    expect(contrast('amber', 'bone')).toBeLessThan(3);
+    expect(contrast('night', 'bone')).toBeGreaterThanOrEqual(3);
   });
 });

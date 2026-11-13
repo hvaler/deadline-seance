@@ -18,7 +18,7 @@
 .title-card h1 {
   font-family: var(--font-title);
   font-weight: 400;
-  font-size: clamp(2.25rem, 9.5vw + 0.25rem, 5.75rem);
+  font-size: clamp(2rem, 8.4vw, 3.4rem);
   line-height: 1;
   color: var(--red);
   text-shadow: var(--glow-red);
@@ -26,6 +26,22 @@
   overflow-wrap: anywhere;
 }
 
+@media (min-width: 820px) {
+  /* One line on a desktop: the size follows the width of the screen so that it always fits. */
+  .title-card h1 {
+    font-size: clamp(2.6rem, 4.9vw, 4.4rem);
+    white-space: nowrap;
+  }
+}
+
+/* A line painted under the title. */
+.tagline {
+  font-family: var(--font-sign);
+  font-size: clamp(1.0625rem, 2.2vw + 0.5rem, 1.5rem);
+  line-height: 1.25;
+  color: var(--tape);
+  transform: rotate(-1deg);
+}
 /* ---- buttons ---- */
 
 .button {
@@ -84,7 +100,7 @@
 }
 
 .slot-text {
-  padding-top: 12px;
+  padding-top: 6px;
   border-top: 2px dashed var(--stone);
 }
 
@@ -106,8 +122,8 @@
 
 .sign-board {
   position: relative;
-  margin-top: 26px; /* room for the tape above the plank */
-  padding: 28px 22px 24px;
+  margin-top: 18px; /* room for the tape above the plank */
+  padding: 16px 18px 12px;
   border-radius: 4px;
   background:
     repeating-linear-gradient(90deg, rgb(0 0 0 / 0.16) 0 2px, transparent 2px 140px),
@@ -152,31 +168,79 @@
 
 .verdict {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   color: var(--bone);
 }
 
-.verdict p:first-child {
-  font-family: var(--font-sign);
-  font-size: clamp(1.25rem, 2.6vw + 0.6rem, 1.75rem);
-  line-height: 1.3;
+/* The headline of the sign: the figures, painted big, each in the colour of what it means. */
+.verdict-figures {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px 24px;
+  padding: 10px 18px 8px;
+  border-radius: 4px;
+  background: var(--night);
 }
 
-.sign-board.is-impossible .verdict {
-  padding: 14px 16px;
+.figure {
+  display: grid;
+  min-width: 0;
+}
+
+.figure-value {
+  font-family: var(--font-sign);
+  font-size: clamp(1.75rem, 3.4vw + 0.7rem, 2.75rem);
+  line-height: 1.1;
+  color: var(--bone);
+}
+
+.figure-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stone);
+}
+
+.figure[data-tone='time'] .figure-value {
+  color: var(--amber);
+}
+
+.figure[data-tone='available'] .figure-value {
+  color: var(--tape);
+}
+
+.figure[data-tone='inside'] .figure-value {
+  color: var(--green);
+}
+
+.figure[data-tone='outside'] .figure-value,
+.figure[data-tone='needed'] .figure-value {
+  color: var(--red);
+}
+
+.verdict-sentences {
+  display: grid;
+  gap: 4px;
+}
+
+.sign-board.is-impossible .verdict-sentences {
+  padding: 10px 14px;
   border-left: 6px solid var(--red);
   background: var(--night);
 }
 
-.sign-board.is-impossible .verdict p:first-child {
+.sign-board.is-impossible .verdict-sentences p:first-child {
+  font-weight: 600;
   color: var(--red);
 }
 
 /* What the last action did. */
 .change-note {
   display: grid;
-  gap: 6px;
-  padding: 12px 16px;
+  gap: 4px;
+  padding: 8px 14px;
   border-left: 6px solid var(--amber);
   border-radius: 2px;
   background: var(--night);
@@ -219,7 +283,6 @@
 .change-note[data-alert='true'] .change-headline {
   color: var(--red);
 }
-
 /* ---- range inputs: the reserve and the candle ---- */
 
 .range {
@@ -276,6 +339,7 @@
 }
 
 .reserve-output {
+  min-width: 3.5rem;
   justify-self: end;
   font-size: 1.25rem;
   color: var(--amber);
@@ -296,12 +360,12 @@
   justify-content: flex-end;
   flex: 0 0 auto;
   width: 84px;
-  height: 250px;
+  height: 160px;
 }
 
 .candle-flame {
-  width: 20px;
-  height: 36px;
+  width: 15px;
+  height: 28px;
   border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
   background: radial-gradient(ellipse at 50% 75%, var(--bone) 0 12%, var(--amber) 45%, var(--rust) 100%);
   box-shadow: var(--glow-amber);
@@ -317,7 +381,7 @@
 .candle-wax {
   position: relative;
   width: 44px;
-  height: calc(34px + 160px * var(--wax));
+  height: calc(18px + 84px * var(--wax));
   border-radius: 8px 8px 3px 3px;
   background: linear-gradient(90deg, var(--tape), var(--bone) 40%, var(--tape) 75%, var(--stone));
   box-shadow: inset -6px 0 10px rgb(0 0 0 / 0.25);
@@ -411,9 +475,9 @@
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 10px;
+  gap: 0 6px;
   min-height: var(--target);
-  padding: 8px 16px;
+  padding: 2px 8px;
   border: 2px solid var(--green);
   border-radius: 999px;
   background: var(--ply-1);
@@ -427,12 +491,13 @@
 }
 
 .chip-name {
+  font-size: 0.9375rem;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 
 .chip-points {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--stone);
 }
 
@@ -463,27 +528,27 @@
 /* ---- the grounds ---- */
 
 .ground-summary {
-  margin-bottom: 14px;
+  margin-bottom: 8px;
   font-size: 0.9375rem;
   color: var(--bone);
 }
 
 .ground-empty {
-  margin-bottom: 14px;
-  padding: 12px 14px;
+  margin-bottom: 10px;
+  padding: 10px 14px;
   border: 2px dashed var(--stone);
   border-radius: var(--radius);
   color: var(--stone);
 }
 
 .closed-line {
-  margin-top: 16px;
+  margin-top: 12px;
   font-size: 0.9375rem;
   color: var(--tape);
 }
 
 .musthave {
-  padding: 10px 14px;
+  padding: 8px 14px;
   border-left: 6px solid var(--amber);
   border-radius: 2px;
   background: var(--ply-1);
@@ -493,103 +558,238 @@
 
 .musthave .card-key {
   margin-right: 4px;
+  color: var(--amber);
 }
-
-/* ---- cards: kept tickets ---- */
 
 .card {
   min-width: 0;
-  padding: 14px 16px 16px;
-  color: var(--bone);
   overflow-wrap: anywhere;
-}
-
-.card-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 10px;
-  margin-bottom: 4px;
 }
 
 .card-key {
   font-weight: 600;
-  color: var(--amber);
 }
 
 .card-title {
-  margin-bottom: 8px;
-  font-size: 1.0625rem;
+  font-size: 1rem;
   font-weight: 600;
   line-height: 1.3;
 }
 
-.card-facts {
+/* ---- the shelf: kept tickets, one short row each, in one framed plywood shelf ---- */
+
+.shelf {
   display: grid;
-  gap: 4px;
-  margin-bottom: 8px;
+  padding: 4px 12px;
+  border: 5px solid var(--ply-2);
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.14) 0 2px, transparent 2px 120px),
+    var(--ply-1);
+  box-shadow:
+    inset 0 0 0 2px rgb(0 0 0 / 0.35),
+    var(--shadow);
+}
+
+.plank + .plank {
+  border-top: 1px solid rgb(0 0 0 / 0.45);
+}
+
+.card-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 10px;
+  padding: 6px 2px;
+  color: var(--bone);
   font-size: 0.9375rem;
 }
 
-.card-facts > div {
-  display: grid;
-  grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr);
-  gap: 8px;
+.card-row .card-key {
+  flex: 0 0 auto;
+  color: var(--amber);
 }
 
-.card-facts dt {
+.card-row .card-title {
+  flex: 1 1 11rem;
+  min-width: 0;
+  font-size: 0.9375rem;
+}
+
+.row-tags {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.row-effort {
+  flex: 0 0 auto;
+  color: var(--bone);
+}
+
+.row-effort::after {
+  content: ' pts' / '';
+  font-size: 0.75rem;
+  color: var(--stone);
+}
+
+.row-cost {
+  flex: 0 1 auto;
   font-size: 0.8125rem;
-  letter-spacing: 0.04em;
+  color: var(--stone);
+}
+
+.row-needs {
+  flex: 0 0 auto;
+  font-size: 0.8125rem;
+  color: var(--stone);
+}
+
+.tag {
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--stone);
+  line-height: 1.6;
 }
 
-.card-cost {
-  font-size: 0.875rem;
+.tag-must-have {
+  background: var(--amber);
+  color: var(--night);
 }
 
-.card-releases,
-.card-needs {
-  font-size: 0.875rem;
+.tag-hungry {
+  border: 1px solid var(--rust);
+  background: var(--night);
+  color: var(--bone);
 }
 
-.plank .card {
-  border-left: 8px solid var(--green);
-  border-radius: 4px;
-  background:
-    repeating-linear-gradient(180deg, transparent 0 26px, rgb(0 0 0 / 0.2) 26px 27px),
-    var(--ply-1);
-  box-shadow: var(--shadow);
-}
+/* ---- the yard: a stone slab for every buried ticket ---- */
 
-.plank .card-releases,
-.plank .card-needs {
-  color: var(--stone);
+.grave {
+  position: relative;
 }
-
-/* ---- cards: tombstones ---- */
 
 .grave .card {
   position: relative;
-  padding-top: 30px;
-  border: 2px solid var(--stone);
-  border-radius: 64px 64px 6px 6px;
-  background: var(--ply-2);
-  box-shadow: var(--shadow);
+  z-index: 1;
+  display: grid;
+  gap: 2px;
+  padding: 14px 12px 12px;
+  border: 2px solid rgb(17 14 22 / 0.35);
+  border-radius: 72px 72px 4px 4px / 56px 56px 4px 4px;
+  background:
+    radial-gradient(circle at 18% 22%, rgb(0 0 0 / 0.07) 0 1.5px, transparent 2px) 0 0 / 23px 19px,
+    radial-gradient(circle at 70% 60%, rgb(0 0 0 / 0.06) 0 1px, transparent 1.5px) 0 0 / 17px 21px,
+    linear-gradient(180deg, var(--slab-top), var(--slab-bottom));
+  box-shadow:
+    inset 0 -22px 28px rgb(17 14 22 / 0.14),
+    0 10px 14px rgb(0 0 0 / 0.55);
+  color: var(--night);
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.45);
+}
+
+/* The soil heaped against the foot of the stone. */
+.grave::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  right: -4px;
+  bottom: -9px;
+  left: -4px;
+  height: 22px;
+  border-radius: 50% 50% 40% 40% / 100% 100% 30% 30%;
+  background:
+    radial-gradient(circle at 22% 45%, rgb(0 0 0 / 0.35) 0 1.5px, transparent 2px) 0 0 / 13px 9px,
+    linear-gradient(180deg, var(--soil-top), var(--soil-bottom));
+  pointer-events: none;
+}
+
+.grave-rip {
+  font-family: var(--font-sign);
+  font-size: 1rem;
+  letter-spacing: 0.28em;
+  text-align: center;
+  text-indent: 0.28em;
+}
+
+.grave .card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 8px;
+}
+
+.grave .card-title {
+  text-align: center;
+}
+
+.grave .card-epitaph {
+  margin: 2px 0;
+  font-size: 0.9375rem;
+  font-style: italic;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.card-hunger {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.grave .card-needs,
+.card-chained,
+.card-fell,
+.card-releases {
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.card-fell {
+  font-weight: 600;
+}
+
+.grave .card-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px 8px;
+  margin-top: 2px;
+  padding-top: 4px;
+  border-top: 1px solid rgb(17 14 22 / 0.4);
+}
+
+.fact {
+  display: grid;
+  min-width: 0;
+}
+
+.fact-wide {
+  grid-column: 1 / -1;
 }
 
 .grave .card-facts dt {
-  color: var(--tape);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-/* A tombstone is narrow: the label sits above its value instead of beside it. */
-.grave .card-facts > div {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
+.grave .card-facts dd {
+  font-size: 0.8125rem;
 }
 
+/* A zombie: a toxic-green tint and glow. */
 .grave.is-zombie .card {
-  border-top: 5px solid var(--violet);
+  background:
+    radial-gradient(circle at 18% 22%, rgb(0 0 0 / 0.07) 0 1.5px, transparent 2px) 0 0 / 23px 19px,
+    linear-gradient(180deg, var(--slab-zombie-top), var(--slab-zombie-bottom));
+  box-shadow:
+    inset 0 -22px 28px rgb(17 14 22 / 0.14),
+    0 0 14px 3px rgb(143 212 126 / 0.65),
+    0 0 46px 10px rgb(143 212 126 / 0.3);
 }
 
 .grave.is-fallen .card {
@@ -598,47 +798,47 @@
   transform: rotate(-2.5deg) translateY(4px);
 }
 
-.card-epitaph {
-  margin: 4px 0 8px;
-  font-style: italic;
-  color: var(--tape);
-}
-
-.card-chained {
-  margin-bottom: 4px;
-  font-size: 0.875rem;
-  color: var(--tape);
-}
-
-.card-fell {
-  margin-bottom: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--amber);
-}
-
-.grave .card-why dd {
-  color: var(--amber);
-}
-
 .card-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 6px;
 }
 
+/* On the stone the buttons are night with bone letters and an edge in the colour of what they do. */
 .grave .card .action {
-  background: var(--ply-2);
+  --accent: var(--green);
+  min-height: var(--target);
+  padding: 6px 12px;
+  border: 2px solid var(--night);
+  background: var(--night);
+  box-shadow: inset 0 -4px 0 var(--accent);
+  color: var(--bone);
+  font-size: 0.875rem;
+  text-shadow: none;
 }
 
-.action-exhume,
-.action-resurrect {
-  border-color: var(--green);
+.grave .card .action:hover {
+  border-color: var(--night);
+  background: var(--ply-1);
 }
 
-.action-put-down {
-  border-color: var(--red);
+.grave .card .action-put-down {
+  --accent: var(--red);
+}
+
+/* The amber ring alone is faint on pale stone: a dark halo goes inside it. */
+.grave :focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--night);
+}
+
+.grave .card .action:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--night),
+    inset 0 -4px 0 var(--accent);
 }
 
 /* ---- badges ---- */
@@ -650,18 +850,14 @@
 }
 
 .badge {
-  padding: 2px 10px;
+  padding: 0 10px;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  line-height: 1.6;
-}
-
-.badge-must-have {
-  background: var(--amber);
-  color: var(--night);
+  line-height: 1.7;
+  text-shadow: none;
 }
 
 /* A zombie's mark: night inside, a violet rim, and the word. Violet is never the colour of the text. */
@@ -670,7 +866,6 @@
   background: var(--night);
   color: var(--bone);
 }
-
 /* ---- chains ---- */
 
 .chain-link {

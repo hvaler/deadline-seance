@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Tombstone with a candle flame">
+  <rect width="64" height="64" rx="12" fill="#110e16"/>
+  <path d="M18 54V28a14 14 0 0 1 28 0v26z" fill="#a49cad"/>
+  <path d="M10 54h44v4H10z" fill="#3a2c22"/>
+  <path d="M32 14c4 5 5 8 5 11a5 5 0 0 1-10 0c0-3 1-6 5-11z" fill="#f1b24a"/>
+  <path d="M32 21c2 2 2.5 3.5 2.5 5a2.5 2.5 0 0 1-5 0c0-1.5.5-3 2.5-5z" fill="#ebe4d3"/>
+  <path d="M26 38h12M26 43h12" stroke="#110e16" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

@@ -11,7 +11,9 @@ import {
   epitaphFor,
   fellText,
   formulaText,
+  hungerText,
   needsText,
+  reasonCovered,
   reasonText,
   releasesText,
   safehouseSummary,
@@ -35,89 +37,80 @@ export interface GroundHooks {
 
 let nextId = 0;
 
-interface CardParts {
+function tag(kind: 'must-have' | 'hungry', text: string, note?: string): HTMLElement {
+  const children: (HTMLElement | string)[] = [text];
+  if (note !== undefined) children.push(el('span', { class: 'visually-hidden', text: ` (${note})` }));
+  return el('span', { class: `tag tag-${kind}`, data: { tag: kind }, attrs: note === undefined ? {} : { title: note } }, children);
+}
+
+function badge(text: string): HTMLElement {
+  return el('span', { class: 'badge badge-zombie', text, data: { badge: 'zombie' } });
+}
+
+// ---- kept tickets: one short row each on the shelf ------------------------------------------------------------------------
+interface Plank {
   readonly item: HTMLLIElement;
-  readonly article: HTMLElement;
   readonly key: HTMLElement;
-  readonly badges: HTMLElement;
   readonly title: HTMLElement;
+  readonly tags: HTMLElement;
   readonly effort: HTMLElement;
   readonly cost: HTMLElement;
-  readonly releases: HTMLElement;
   readonly needs: HTMLElement;
 }
 
-function createCardParts(kind: 'card' | 'tomb', key: string): CardParts {
-  const id = `${kind}-${nextId++}`;
+function createPlank(key: string): Plank {
+  const id = `card-${nextId++}`;
   const keyNode = el('span', { class: 'card-key num' });
-  const badges = el('span', { class: 'card-badges' });
   const title = el('h3', { class: 'card-title', id: `${id}-title` });
-  const effort = el('dd', { class: 'num' });
-  const cost = el('dd', { class: 'card-cost num' });
-  const releases = el('p', { class: 'card-releases' });
-  const needs = el('p', { class: 'card-needs' });
+  const tags = el('span', { class: 'row-tags' });
+  const effort = el('span', { class: 'num' });
+  const cost = el('span', { class: 'row-cost num' });
+  const needs = el('span', { class: 'card-needs row-needs' });
   const article = el(
     'article',
-    { class: `card card-${kind}`, attrs: { tabindex: -1, 'aria-labelledby': `${id}-title` }, data: { focus: `${kind}:${key}`, key } },
-    [
-      el('header', { class: 'card-head' }, [keyNode, badges]),
-      title,
-      el('dl', { class: 'card-facts' }, [
-        el('div', {}, [el('dt', { text: 'Effort' }), effort]),
-        el('div', {}, [el('dt', { text: 'Cost of delay' }), cost]),
-      ]),
-      releases,
-      needs,
-    ],
+    { class: 'card card-row', attrs: { tabindex: -1, 'aria-labelledby': `${id}-title` }, data: { focus: `card:${key}`, key } },
+    [keyNode, title, tags, el('span', { class: 'row-effort' }, [el('span', { class: 'visually-hidden', text: 'Effort ' }), effort]), cost, needs],
   );
-  const item = el('li', { class: kind === 'card' ? 'plank' : 'grave', data: { key } }, [article]);
-  return { item, article, key: keyNode, badges, title, effort, cost, releases, needs };
+  const item = el('li', { class: 'plank', data: { key, ground: 'safehouse' } }, [article]);
+  return { item, key: keyNode, title, tags, effort, cost, needs };
 }
 
-function fillCard(parts: CardParts, card: CardView, closed: readonly string[]): void {
-  setText(parts.key, card.key);
-  setText(parts.title, card.title);
-  setText(parts.effort, String(card.effort));
-  setText(parts.cost, formulaText(card.cost));
-  setText(parts.releases, releasesText(card.cost) ?? '');
-  setAttr(parts.releases, 'hidden', releasesText(card.cost) === null);
+function fillPlank(plank: Plank, card: CardView, closed: readonly string[]): void {
+  setText(plank.key, card.key);
+  setText(plank.title, card.title);
+  setText(plank.effort, String(card.effort));
+  setText(plank.cost, formulaText(card.cost));
+  const wanted = [card.mustHave ? 'must-have' : '', card.hungry ? 'hungry' : ''].filter((t) => t !== '').join(',');
+  if (plank.tags.dataset.wanted !== `${wanted}|${card.cost.past}`) {
+    plank.tags.dataset.wanted = `${wanted}|${card.cost.past}`;
+    const tags: HTMLElement[] = [];
+    if (card.mustHave) tags.push(tag('must-have', 'must-have'));
+    if (card.hungry) tags.push(tag('hungry', 'hungry', releasesText(card.cost) ?? undefined));
+    plank.tags.replaceChildren(...tags);
+  }
+  setAttr(plank.tags, 'hidden', wanted === '');
   const needs = needsText(card.needs, closed);
-  setText(parts.needs, needs);
-  setAttr(parts.needs, 'hidden', needs === '');
+  setText(plank.needs, needs);
+  setAttr(plank.needs, 'hidden', needs === '');
 }
 
-function badge(kind: 'must-have' | 'zombie', text: string): HTMLElement {
-  return el('span', { class: `badge badge-${kind}`, text, data: { badge: kind } });
-}
-
-function setBadges(container: HTMLElement, wanted: readonly ('must-have' | 'zombie')[]): void {
-  const have = [...container.children].map((c) => (c as HTMLElement).dataset.badge);
-  if (have.length === wanted.length && have.every((b, i) => b === wanted[i])) return;
-  container.replaceChildren(...wanted.map((b) => badge(b, b === 'zombie' ? 'Zombie' : 'must-have')));
-}
-
-// ---- kept tickets ------------------------------------------------------------------------------------------------------
-
-interface Plank {
-  readonly parts: CardParts;
-}
-
-function createPlank(key: string): Plank {
-  const parts = createCardParts('card', key);
-  parts.item.setAttribute('data-ground', 'safehouse');
-  return { parts };
-}
-
-// ---- buried tickets ----------------------------------------------------------------------------------------------------
-
+// ---- buried tickets: gravestones ---------------------------------------------------------------------------------------
 interface Grave {
-  readonly parts: CardParts;
-  readonly why: HTMLElement;
-  readonly whyRow: HTMLElement;
-  readonly waiting: HTMLElement;
+  readonly item: HTMLLIElement;
+  readonly key: HTMLElement;
+  readonly badges: HTMLElement;
+  readonly title: HTMLElement;
   readonly epitaph: HTMLElement;
-  readonly chained: HTMLElement;
+  readonly hunger: HTMLElement;
   readonly fell: HTMLElement;
+  readonly chained: HTMLElement;
+  readonly needs: HTMLElement;
+  readonly releases: HTMLElement;
+  readonly effort: HTMLElement;
+  readonly waiting: HTMLElement;
+  readonly cost: HTMLElement;
+  readonly whyRow: HTMLElement;
+  readonly why: HTMLElement;
   readonly exhume: HTMLButtonElement;
   readonly resurrect: HTMLButtonElement;
   readonly putDown: HTMLButtonElement;
@@ -134,20 +127,27 @@ function actionFor(verb: 'exhume' | 'resurrect' | 'put-down', key: string): Acti
   }
 }
 
+function fact(label: string, value: HTMLElement, wide = false): HTMLElement {
+  return el('div', { class: wide ? 'fact fact-wide' : 'fact' }, [el('dt', { text: label }), value]);
+}
+
 function createGrave(ctx: Ctx, key: string): Grave {
-  const parts = createCardParts('tomb', key);
-  parts.item.setAttribute('data-ground', 'yard');
-
-  const why = el('dd');
-  const waiting = el('dd', { class: 'num' });
-  const facts = parts.article.querySelector('dl') as HTMLElement;
-  const whyRow = el('div', { class: 'card-why' }, [el('dt', { text: 'Why' }), why]);
-  facts.append(whyRow, el('div', {}, [el('dt', { text: 'Waiting costs' }), waiting]));
-
+  const id = `tomb-${nextId++}`;
+  const keyNode = el('span', { class: 'card-key num' });
+  const badges = el('span', { class: 'card-badges' });
+  const title = el('h3', { class: 'card-title', id: `${id}-title` });
   const epitaph = el('p', { class: 'card-epitaph' });
-  const chained = el('p', { class: 'card-chained' });
+  const hunger = el('p', { class: 'card-hunger' });
   const fell = el('p', { class: 'card-fell' });
-
+  const chained = el('p', { class: 'card-chained' });
+  const needs = el('p', { class: 'card-needs' });
+  const releases = el('p', { class: 'card-releases' });
+  const effort = el('dd', { class: 'num' });
+  const waiting = el('dd', { class: 'num' });
+  const cost = el('dd', { class: 'card-cost num' });
+  const why = el('dd');
+  const whyRow = fact('Why', why, true);
+  whyRow.classList.add('card-why');
   const button = (verb: 'exhume' | 'resurrect' | 'put-down', text: string, label: string): HTMLButtonElement =>
     el('button', {
       class: `button action action-${verb}`,
@@ -159,32 +159,62 @@ function createGrave(ctx: Ctx, key: string): Grave {
   const exhume = button('exhume', 'Exhume', 'Exhume');
   const resurrect = button('resurrect', 'Resurrect', 'Resurrect');
   const putDown = button('put-down', "Put down (Won't Do)", 'Put down');
-  const actions = el('div', { class: 'card-actions' }, [exhume, resurrect, putDown]);
-
-  parts.article.append(epitaph, chained, fell, actions);
-  return { parts, why, whyRow, waiting, epitaph, chained, fell, exhume, resurrect, putDown };
+  const article = el(
+    'article',
+    { class: 'card card-tomb', attrs: { tabindex: -1, 'aria-labelledby': `${id}-title` }, data: { focus: `tomb:${key}`, key } },
+    [
+      el('p', { class: 'grave-rip', attrs: { 'aria-hidden': 'true' }, text: 'R · I · P' }),
+      el('header', { class: 'card-head' }, [keyNode, badges]),
+      title,
+      epitaph,
+      hunger,
+      fell,
+      chained,
+      needs,
+      releases,
+      el('dl', { class: 'card-facts' }, [fact('Effort', effort), fact('Waiting costs', waiting), fact('Cost of delay', cost, true), whyRow]),
+      el('div', { class: 'card-actions' }, [exhume, resurrect, putDown]),
+    ],
+  );
+  const item = el('li', { class: 'grave', data: { key, ground: 'yard' } }, [article]);
+  return { item, key: keyNode, badges, title, epitaph, hunger, fell, chained, needs, releases, effort, waiting, cost, whyRow, why, exhume, resurrect, putDown };
 }
 
 function fillGrave(grave: Grave, tomb: TombstoneView, index: number, weeks: number, closed: readonly string[]): void {
-  fillCard(grave.parts, tomb, closed);
-  setBadges(grave.parts.badges, tomb.isZombie ? ['zombie'] : []);
-  setText(grave.why, reasonText(tomb.reason));
+  setText(grave.key, tomb.key);
+  setText(grave.title, tomb.title);
+  setText(grave.effort, String(tomb.effort));
+  setText(grave.cost, formulaText(tomb.cost));
   setText(grave.waiting, waitingText(tomb.burialCost, weeks));
-  setText(grave.epitaph, epitaphFor(tomb, weeks));
-
+  const have = grave.badges.children.length;
+  if (tomb.isZombie !== (have > 0)) grave.badges.replaceChildren(...(tomb.isZombie ? [badge('Zombie')] : []));
+  const epitaph = epitaphFor(tomb, weeks);
+  setText(grave.epitaph, epitaph);
+  const hunger = hungerText(tomb) ?? '';
+  setText(grave.hunger, hunger);
+  setAttr(grave.hunger, 'hidden', hunger === '');
+  // The reason is a separate row only when the epitaph does not already say it (the node is emptied, not just hidden).
+  const covered = reasonCovered(tomb.reason, epitaph);
+  setText(grave.why, covered ? '' : reasonText(tomb.reason));
+  setAttr(grave.whyRow, 'hidden', covered);
   const chained = chainedText(tomb.chainedTo);
   setText(grave.chained, chained);
   setAttr(grave.chained, 'hidden', chained === '');
-
+  // The chain already says what it hangs on; "Needs" is added only when something it needs was closed as Won't Do.
+  const needs = tomb.needs.some((key) => closed.includes(key)) ? needsText(tomb.needs, closed) : '';
+  setText(grave.needs, needs);
+  setAttr(grave.needs, 'hidden', needs === '');
   const fell = tomb.fell && tomb.reason.kind === 'depends-on-buried' ? fellText(tomb.reason.buriedDependencies) : '';
   setText(grave.fell, fell);
   setAttr(grave.fell, 'hidden', fell === '');
-
+  // A zombie's releases are in its epitaph and its hunger line; any other tombstone that was left out before says so here.
+  const releases = tomb.isZombie ? '' : (releasesText(tomb.cost) ?? '');
+  setText(grave.releases, releases);
+  setAttr(grave.releases, 'hidden', releases === '');
   setAttr(grave.exhume, 'hidden', tomb.isZombie);
   setAttr(grave.resurrect, 'hidden', !tomb.isZombie);
   setAttr(grave.putDown, 'hidden', !tomb.isZombie);
-
-  const item = grave.parts.item;
+  const item = grave.item;
   setAttr(item, 'data-zombie', tomb.isZombie ? 'true' : 'false');
   setAttr(item, 'data-fell', tomb.fell ? 'true' : 'false');
   setAttr(item, 'data-reason', tomb.reason.kind);
@@ -192,14 +222,13 @@ function fillGrave(grave: Grave, tomb: TombstoneView, index: number, weeks: numb
   setClass(item, 'is-fallen', tomb.fell);
   item.style.setProperty('--i', String(index)); // the order of the fall, for the staggered animation
 }
-
 // ---- the grounds -------------------------------------------------------------------------------------------------------
 
 export function mountGrounds(safehouse: HTMLElement, yard: HTMLElement, ctx: Ctx, hooks: GroundHooks = {}): Part {
   // Safehouse
   const keptSummary = el('p', { class: 'ground-summary num', data: { region: 'safehouse-summary' } });
   const keptEmpty = el('p', { class: 'ground-empty', data: { region: 'safehouse-empty' } });
-  const planks = el('ul', { class: 'planks', attrs: { role: 'list' }, data: { list: 'safehouse' } });
+  const planks = el('ul', { class: 'shelf', attrs: { role: 'list' }, data: { list: 'safehouse' } });
   const mustHaves = el('ul', { class: 'musthave-list', attrs: { role: 'list' }, data: { list: 'must-haves' } });
   safehouse.append(keptSummary, keptEmpty, mustHaves, planks);
 
@@ -253,9 +282,8 @@ export function mountGrounds(safehouse: HTMLElement, yard: HTMLElement, ctx: Ctx
         planks,
         view.safehouse.map((card) => {
           const plank = cards.get(card.key);
-          fillCard(plank.parts, card, closedKeys);
-          setBadges(plank.parts.badges, card.mustHave ? ['must-have'] : []);
-          return plank.parts.item;
+          fillPlank(plank, card, closedKeys);
+          return plank.item;
         }),
       );
       cards.retain(new Set(view.safehouse.map((c) => c.key)));
@@ -273,7 +301,7 @@ export function mountGrounds(safehouse: HTMLElement, yard: HTMLElement, ctx: Ctx
         view.yard.map((tomb, index) => {
           const grave = tombs.get(tomb.key);
           fillGrave(grave, tomb, index, weeks, closedKeys);
-          return grave.parts.item;
+          return grave.item;
         }),
       );
       tombs.retain(new Set(view.yard.map((t) => t.key)));

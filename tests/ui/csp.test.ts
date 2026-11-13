@@ -54,8 +54,10 @@ describe('index.html', () => {
     expect(html).toContain('<div id="app">');
   });
 
-  test('has no link, no preconnect, no host and no other origin', () => {
-    expect(html).not.toMatch(/<link\b/i);
+  test('has no link but the icon, no preconnect, no host and no other origin', () => {
+    expect([...html.matchAll(/<link\b[^>]*>/gi)].map((m) => m[0])).toEqual([
+      '<link rel="icon" type="image/svg+xml" href="/favicon.svg">',
+    ]);
     expect(html).not.toMatch(/preconnect|dns-prefetch|prefetch|preload/i);
     expect(hostsIn(html)).toEqual([]);
     expect(html).not.toMatch(/google|gstatic|googleapis/i);

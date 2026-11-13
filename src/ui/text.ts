@@ -74,6 +74,31 @@ export function epitaphFor(tombstone: TombstoneView, weeks: number): string {
   return tombstone.isZombie ? `${body} It has been left out ${count(tombstone.cost.past, 'release')} in a row.` : body;
 }
 
+
+/** The line under a zombie's epitaph: what one more release left out does to its urgency. Null unless it is a zombie with a formula. */
+export function hungerText(tombstone: TombstoneView): string | null {
+  const next = tombstone.nextUrgency;
+  if (!tombstone.isZombie || tombstone.cost.imported || next === null) return null;
+  const now = tombstone.cost.effectiveUrgency;
+  if (next === now) return `Urgency is already at the top: ${now}.`;
+  return `Hungrier next release: urgency ${now} → ${next}`;
+}
+
+/** True when the epitaph already says the reason, so the "Why" row of a tombstone would only repeat it. */
+export function reasonCovered(reason: Reason, epitaph: string): boolean {
+  switch (reason.kind) {
+    case 'no-room':
+      return epitaph.includes(`${count(reason.needed, 'point')} and the night had ${reason.left} left`);
+    case 'depends-on-buried':
+      return reason.buriedDependencies.every((key) => epitaph.includes(key));
+    case 'blocked-by-put-down':
+      return epitaph.includes(reason.putDownKey);
+  }
+}
+
+// ---- the title ---------------------------------------------------------------------------------------------------------
+
+export const TAGLINE = 'Not everything gets inside before the freeze.';
 // ---- the two grounds ---------------------------------------------------------------------------------------------------
 
 /** The heading line of the safehouse: "12 tickets · 59 of 59 points · saved cod 167". */
@@ -140,6 +165,34 @@ export function verdictSentences(view: View): string[] {
   ];
   if (solution.marginPct > 0) sentences.push(`Capacity ${solution.capacity}, ${solution.marginPct} % reserve.`);
   return sentences;
+}
+
+export interface Figure {
+  /** Which colour the painted number takes. */
+  readonly tone: 'time' | 'available' | 'inside' | 'outside' | 'needed';
+  readonly value: string;
+  readonly label: string;
+}
+
+/** The painted headline of the sign: freeze time, points available, points inside, tickets outside (or points needed when impossible). */
+export function verdictFigures(view: View): Figure[] {
+  const solution = view.solution;
+  const time: Figure = { tone: 'time', value: view.candle.label, label: 'freeze' };
+  if (solution.status === 'impossible') {
+    return [
+      time,
+      { tone: 'available', value: String(solution.effectiveCapacity), label: 'points available' },
+      { tone: 'needed', value: String(solution.needed), label: 'points needed' },
+    ];
+  }
+  const t = view.totals;
+  if (t === null) return [time];
+  return [
+    time,
+    { tone: 'available', value: String(solution.effectiveCapacity), label: 'points available' },
+    { tone: 'inside', value: String(t.keptEffort), label: 'points inside' },
+    { tone: 'outside', value: String(t.buriedCount), label: t.buriedCount === 1 ? 'ticket outside' : 'tickets outside' },
+  ];
 }
 
 // ---- the change note ---------------------------------------------------------------------------------------------------

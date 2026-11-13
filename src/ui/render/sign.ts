@@ -1,7 +1,8 @@
 import type { Ctx, Part } from '../context';
 import { el, setAttr, setClass, setText } from '../dom';
 import { createGesture } from '../gestures';
-import { changeNote, verdictSentences } from '../text';
+import type { Figure } from '../text';
+import { changeNote, verdictFigures, verdictSentences } from '../text';
 
 /**
  * The taped plywood sign: the verdict, what the last change did, and the reserve slider. It has no live region of its own: what a screen
@@ -41,8 +42,27 @@ function syncTexts(container: HTMLElement, tag: 'p' | 'li', texts: readonly stri
   });
 }
 
+/** Keeps one painted figure per entry: a number in the colour of its meaning, and a small label under it. */
+function syncFigures(container: HTMLElement, figures: readonly Figure[]): void {
+  while (container.children.length > figures.length) container.lastElementChild?.remove();
+  figures.forEach((figure, i) => {
+    let node = container.children[i] as HTMLElement | undefined;
+    if (node === undefined) {
+      node = el('div', { class: 'figure' }, [el('span', { class: 'figure-value' }), el('span', { class: 'figure-label' })]);
+      container.append(node);
+    }
+    setAttr(node, 'data-tone', figure.tone);
+    setText(node.children[0] as HTMLElement, figure.value);
+    setText(node.children[1] as HTMLElement, figure.label);
+  });
+}
+
 export function mountSign(section: HTMLElement, ctx: Ctx): Part {
-  const verdict = el('div', { class: 'verdict', data: { region: 'verdict' } });
+  // The painted headline is for the eyes (aria-hidden); the sentences carry the same facts for a screen reader, and show on the sign only
+  // when the freeze is impossible and the advice is needed.
+  const figures = el('div', { class: 'verdict-figures', attrs: { 'aria-hidden': 'true' } });
+  const sentences = el('div', { class: 'verdict-sentences' });
+  const verdict = el('div', { class: 'verdict', data: { region: 'verdict' } }, [figures, sentences]);
   const headline = el('p', { class: 'change-headline' });
   const lines = el('ul', { class: 'change-lines' });
   const note = el('div', { class: 'change-note', data: { region: 'change', alert: 'false', kind: 'none' } }, [headline, lines]);
@@ -56,8 +76,8 @@ export function mountSign(section: HTMLElement, ctx: Ctx): Part {
   const output = el('output', { class: 'reserve-output num', attrs: { for: RESERVE_INPUT_ID } });
   const reserve = el('div', { class: 'reserve' }, [
     el('label', { class: 'reserve-label', attrs: { for: RESERVE_INPUT_ID }, text: 'Reserve' }),
-    output,
     input,
+    output,
     el('p', { class: 'reserve-hint', text: 'Keeps part of the capacity free, so the cut only fits what is left.' }),
   ]);
 
@@ -79,8 +99,11 @@ export function mountSign(section: HTMLElement, ctx: Ctx): Part {
 
   return {
     update(view, state) {
-      syncTexts(verdict, 'p', verdictSentences(view));
-      setClass(board, 'is-impossible', view.solution.status === 'impossible');
+      const impossible = view.solution.status === 'impossible';
+      syncTexts(sentences, 'p', verdictSentences(view));
+      setClass(sentences, 'visually-hidden', !impossible);
+      syncFigures(figures, verdictFigures(view));
+      setClass(board, 'is-impossible', impossible);
 
       const shown = changeNote(state.change);
       setText(headline, shown.headline);

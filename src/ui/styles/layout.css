@@ -5,14 +5,15 @@
   z-index: 0;
   isolation: isolate;
   min-height: 100vh;
+  overflow-x: clip; /* rotated tape and fallen stones never make the page wider than the screen */
 }
 
 main {
   display: grid;
-  gap: 40px;
+  gap: 18px;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 8px var(--gutter) 80px;
+  padding: 4px var(--gutter) 56px;
 }
 
 .region {
@@ -20,7 +21,7 @@ main {
 }
 
 .region-title {
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 /* ---- title card ---- */
@@ -28,8 +29,8 @@ main {
 .title-card {
   display: grid;
   justify-items: center;
-  gap: 14px;
-  padding: 88px var(--gutter) 32px;
+  gap: 6px;
+  padding: 52px var(--gutter) 4px;
   text-align: center;
 }
 
@@ -37,27 +38,24 @@ main {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 /* ---- the sign ---- */
 
 .sign-board {
   display: grid;
-  gap: 20px;
+  gap: 8px;
 }
 
+/* The reserve is one row: its name, the slider, its value. */
 .reserve {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  column-gap: 16px;
-  row-gap: 6px;
-}
-
-.reserve-range {
-  grid-column: 1 / -1;
+  column-gap: 14px;
+  row-gap: 0;
 }
 
 .reserve-hint {
@@ -70,7 +68,7 @@ main {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 16px 28px;
+  gap: 12px 24px;
 }
 
 .candle-controls {
@@ -91,7 +89,7 @@ main {
 .team {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 16px;
+  gap: 6px 8px;
 }
 
 .team-member {
@@ -104,8 +102,8 @@ main {
 
 .grounds {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 32px 24px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 24px 24px;
   align-items: start;
 }
 
@@ -115,13 +113,33 @@ main {
   }
 }
 
-.planks {
-  display: grid;
-  gap: 12px;
+@media (min-width: 1100px) {
+  /* On a wide screen a row of the shelf needs the whole width to stay on one line, and the yard gets four stones across. */
+  .grounds {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .yard-field {
   position: relative;
+  isolation: isolate;
+}
+
+/* The ground the stones stand on: dark earth at the bottom of the yard. */
+.yard-field::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  right: -10px;
+  bottom: -8px;
+  left: -10px;
+  height: 88px;
+  border-radius: 6px;
+  background:
+    radial-gradient(circle at 30% 40%, rgb(235 228 211 / 0.1) 0 1px, transparent 1.5px) 0 0 / 31px 17px,
+    radial-gradient(circle at 70% 70%, rgb(0 0 0 / 0.4) 0 2px, transparent 2.5px) 0 0 / 23px 13px,
+    linear-gradient(180deg, transparent, var(--soil-top) 55%, var(--soil-bottom));
+  pointer-events: none;
 }
 
 .graves {
@@ -129,7 +147,9 @@ main {
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
-  gap: 20px 16px;
+  align-items: start;
+  gap: 18px 14px;
+  padding-bottom: 26px;
 }
 
 .chains {

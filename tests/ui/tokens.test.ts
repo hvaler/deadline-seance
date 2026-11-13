@@ -111,7 +111,7 @@ describe('type', () => {
 
 describe('text colours', () => {
   const ALLOWED = new Set(['--bone', '--stone', '--tape', '--amber', '--green', '--red', '--night']);
-  const RED_ONLY_HERE = /(\.title-card h1|is-impossible|data-alert|data-kind='sinks'|data-kind='loss'|\.rec-dot)/;
+  const RED_ONLY_HERE = /(\.title-card h1|is-impossible|data-alert|data-kind='sinks'|data-kind='loss'|data-tone='(?:outside|needed)'|\.rec-dot)/;
 
   const textRules = Object.entries(css).flatMap(([file, text]) =>
     rules(text).flatMap((rule) =>
@@ -140,22 +140,27 @@ describe('text colours', () => {
     }
   });
 
-  test('red text appears only on the night: the title, the impossible-freeze panel, alerts, losses and the REC dot', () => {
+  test('red text appears only on the night: the title, the impossible-freeze panel, alerts, losses, the painted figures for tickets outside or points needed, and the REC dot', () => {
     for (const r of textRules.filter((x) => x.value.includes('--red'))) expect(r.selector, r.selector).toMatch(RED_ONLY_HERE);
   });
 
-  test('night text appears only on a coloured fill (amber, green, red or tape)', () => {
+  test('night text appears only on a coloured fill (amber, green, red or tape) or on the stone slab of a tombstone', () => {
     for (const r of textRules.filter((x) => x.value.includes('--night'))) {
-      expect(r.body, r.selector).toMatch(/background:\s*var\(--(amber|green|red|tape)\)/);
+      expect(r.body, r.selector).toMatch(/background:\s*var\(--(amber|green|red|tape)\)|var\(--slab-top\)/);
     }
   });
 
-  test('stone text is never put on plywood 2: the tombstones use tape for secondary text', () => {
-    const stoneInGraves = textRules.filter((r) => r.value.includes('--stone') && r.selector.includes('.grave'));
-    expect(stoneInGraves).toEqual([]);
+  test('text on a tombstone is night, set once on the slab; only the zombie badge and the action buttons (night fills) use bone', () => {
+    const inGraves = textRules.filter((r) => r.selector.includes('.grave'));
+    expect(inGraves.length).toBeGreaterThan(0);
+    for (const r of inGraves) {
+      if (/\.badge|\.action/.test(r.selector)) expect(r.value, r.selector).toContain('--bone');
+      else expect(r.selector, r.selector).toBe('.grave .card');
+    }
+    const slab = inGraves.find((r) => r.selector === '.grave .card');
+    expect(slab?.value).toContain('--night');
   });
 });
-
 describe('focus and size', () => {
   test('every focusable element gets a 3 px amber ring with an offset; the ring is never removed for keyboard users', () => {
     const base = rules(css['base.css'] ?? '');
@@ -191,12 +196,14 @@ describe('focus and size', () => {
 describe('layout', () => {
   const layout = without(css['layout.css'] ?? '');
 
-  test('the two grounds sit side by side and stack in one column under 820 px', () => {
+  test('the two grounds sit side by side from 820 px, stack in one column under it, and stack again from 1100 px so a shelf row fits on one line', () => {
     const grounds = rules(layout).filter((r) => r.selector === '.grounds');
-    expect(grounds).toHaveLength(2);
-    expect(grounds[0]?.body).toContain('grid-template-columns: repeat(2, minmax(0, 1fr))');
+    expect(grounds).toHaveLength(3);
+    expect(grounds[0]?.body).toContain('grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr)');
     expect(grounds[1]?.body).toContain('grid-template-columns: minmax(0, 1fr)');
+    expect(grounds[2]?.body).toContain('grid-template-columns: minmax(0, 1fr)');
     expect(layout).toContain('@media (max-width: 819.98px)');
+    expect(layout).toContain('@media (min-width: 1100px)');
   });
 
   test('tombstones and slots wrap to the screen: the minimum column width is capped by 100 %', () => {

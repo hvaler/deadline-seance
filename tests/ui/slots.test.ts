@@ -106,7 +106,7 @@ describe('the title card', () => {
   test('has the product line above the title, the tour slot and the sound button, in that order', () => {
     const { root } = mountWith();
     const header = root.querySelector('header')!;
-    expect([...header.children].map((c) => c.className.split(' ')[0])).toEqual(['product-line', 'title', 'title-actions', 'slot-note']);
+    expect([...header.children].map((c) => c.className.split(' ')[0])).toEqual(['product-line', 'title', 'tagline', 'title-actions', 'slot-note']);
     expect(header.querySelector('h1')?.textContent).toBe('Night of the Living Backlog');
     const buttons = [...header.querySelectorAll('.title-actions button')].map((b) => b.textContent);
     expect(buttons).toEqual(['Play the night · 60 s', 'Sound off']);

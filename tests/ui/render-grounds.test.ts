@@ -29,23 +29,26 @@ describe('the safehouse', () => {
     const card = plank(root, 'HB-101');
     expect(card.querySelector('.card-key')?.textContent).toBe('HB-101');
     expect(card.querySelector('.card-title')?.textContent).toBe('Fix stale balance after a transfer');
-    expect(fact(card, 'Effort')).toBe('5');
-    expect(fact(card, 'Cost of delay')).toBe('value 8 + urgency 5 + risk 5 = 18');
+    expect(card.querySelector('.row-effort')?.textContent).toBe('Effort 5');
+    expect(card.querySelector('.row-effort .num')?.textContent).toBe('5');
+    expect(card.querySelector('.row-cost')?.textContent).toBe('value 8 + urgency 5 + risk 5 = 18');
     expect(card.querySelector('article')?.getAttribute('aria-labelledby')).toBe(card.querySelector('.card-title')?.id);
   });
 
   test('hunger is shown: urgency 1 → 5 and how long the ticket has been left out', () => {
     const { root } = mountWith();
     const card = plank(root, 'HB-105');
-    expect(fact(card, 'Cost of delay')).toBe('value 3 + urgency 1 → 5 + risk 3 = 11');
-    expect(card.querySelector('.card-releases')?.textContent).toBe('left out 3 releases');
-    expect(fact(plank(root, 'HB-113'), 'Cost of delay')).toBe('value 3 + urgency 3 → 8 + risk 3 = 14');
-    expect(visible(plank(root, 'HB-101').querySelector('.card-releases')!)).toBe(false);
+    expect(card.querySelector('.row-cost')?.textContent).toBe('value 3 + urgency 1 → 5 + risk 3 = 11');
+    const tag = card.querySelector('.tag-hungry');
+    expect(tag?.textContent).toBe('hungry (left out 3 releases)');
+    expect(tag?.getAttribute('title')).toBe('left out 3 releases');
+    expect(plank(root, 'HB-113').querySelector('.row-cost')?.textContent).toBe('value 3 + urgency 3 → 8 + risk 3 = 14');
+    expect(plank(root, 'HB-101').querySelector('.tag-hungry')).toBeNull();
   });
 
-  test('must-haves carry a badge; the others do not', () => {
+  test('must-haves carry a small tag; the others do not', () => {
     const { root } = mountWith();
-    const badges = (key: string) => texts(plank(root, key).querySelectorAll('.badge'));
+    const badges = (key: string) => texts(plank(root, key).querySelectorAll('.tag-must-have'));
     expect(badges('HB-101')).toEqual(['must-have']);
     expect(badges('HB-103')).toEqual(['must-have']);
     expect(badges('HB-104')).toEqual([]);
@@ -82,8 +85,10 @@ describe('the yard', () => {
     expect(stone.querySelector('.card-title')?.textContent).toBe('Transaction search');
     expect(fact(stone, 'Effort')).toBe('8');
     expect(fact(stone, 'Cost of delay')).toBe('value 5 + urgency 2 + risk 3 = 10');
-    expect(fact(stone, 'Why')).toBe('Needs 8 points, 0 left.');
     expect(fact(stone, 'Waiting costs')).toBe('20 over 2 weeks');
+    // The engine's reason is the epitaph's own sentence, so it is not written twice.
+    expect(stone.querySelector('.card-epitaph')?.textContent).toContain('It needed 8 points and the night had 0 left.');
+    expect(visible(stone.querySelector('.card-why')!)).toBe(false);
   });
 
   test('the epitaph is the fixed template, built from the facts', () => {
@@ -108,7 +113,8 @@ describe('the yard', () => {
     expect(actionsOf(grave(root, 'HB-108'))).toEqual(['Exhume']);
     expect(grave(root, 'HB-110').dataset.zombie).toBe('true');
     expect(grave(root, 'HB-108').dataset.zombie).toBe('false');
-    expect(grave(root, 'HB-110').querySelector('.card-releases')?.textContent).toBe('left out 2 releases');
+    // A zombie's releases are in its epitaph; a second line would say them again.
+    expect(visible(grave(root, 'HB-110').querySelector('.card-releases')!)).toBe(false);
   });
 
   test('actions have accessible names that include the key', () => {
@@ -129,7 +135,7 @@ describe('the yard', () => {
     expect(stone.dataset.fell).toBe('true');
     expect(stone.querySelector('.card-fell')?.textContent).toBe('Fell behind HB-112');
     expect(stone.querySelector('.card-chained')?.textContent).toBe('Chained to HB-112');
-    expect(fact(stone, 'Why')).toBe('Depends on HB-112, which is buried.');
+    expect(visible(stone.querySelector('.card-why')!)).toBe(false);
     expect(stone.querySelector('.card-epitaph')?.textContent).toBe('Here lies HB-114. It followed HB-112 into the ground. Waiting 2 weeks costs 22.');
     expect(grave(root, 'HB-108').dataset.fell).toBe('false');
     expect(visible(grave(root, 'HB-108').querySelector('.card-fell')!)).toBe(false);
@@ -149,7 +155,7 @@ describe('actions', () => {
     expect(shownKeys(root, 'safehouse')).toContain('HB-108');
     expect(shownKeys(root, 'yard')).toContain('HB-115');
     expect(shownKeys(root, 'yard')).not.toContain('HB-108');
-    expect(texts(plank(root, 'HB-108').querySelectorAll('.badge'))).toEqual(['must-have']);
+    expect(texts(plank(root, 'HB-108').querySelectorAll('.tag-must-have'))).toEqual(['must-have']);
     expect(region(root, 'safehouse-summary').textContent).toBe('12 tickets · 59 of 59 points · saved cod 164');
     expect(texts(region(root, 'change').querySelectorAll('li'))).toEqual(['Rises: HB-108 (10).', 'Sinks: HB-115 (13).', 'Loss: 3.', 'Saved cod 167 → 164.']);
     expect(app.store.getState().board.tickets.find((t) => t.key === 'HB-108')?.mustHave).toBe(true);
@@ -184,7 +190,7 @@ describe('actions', () => {
     expect(region(root, 'closed').textContent).toBe("Closed as Won't Do: HB-112");
     expect(visible(region(root, 'closed'))).toBe(true);
     const stone = grave(root, 'HB-114');
-    expect(fact(stone, 'Why')).toBe('Depends on HB-112, which was put down.');
+    expect(stone.querySelector('.card-epitaph')?.textContent).toContain('HB-112 was closed as Won\'t Do, so it can never ship.');
     expect(stone.querySelector('.card-needs')?.textContent).toBe("Needs HB-112 (closed as Won't Do)");
     expect(stone.dataset.fell).toBe('false');
     expect(texts(region(root, 'change').querySelectorAll('li'))).toEqual(['HB-114 can never ship.', 'No change in the cut.']);
@@ -354,5 +360,72 @@ describe('text stays text', () => {
     expect(grave(root, 'HB-114').querySelector('.card-epitaph')?.textContent).toContain(`It followed ${key} into the ground.`);
     expect(grave(root, 'HB-114').querySelector('.card-fell')?.textContent).toBe(`Fell behind ${key}`);
     expect(document.querySelector('b')).toBeNull();
+  });
+});
+
+describe('the look of a tombstone and a shelf row (the structure the styles hang on)', () => {
+  test('every tombstone has R · I · P engraved at the top, hidden from assistive technology, above the key', () => {
+    const { root } = mountWith();
+    for (const key of shownKeys(root, 'yard')) {
+      const stone = grave(root, key);
+      const rip = stone.querySelector('.grave-rip');
+      expect(rip?.textContent, key).toBe('R · I · P');
+      expect(rip?.getAttribute('aria-hidden'), key).toBe('true');
+      const article = stone.querySelector('article')!;
+      expect(article.firstElementChild, key).toBe(rip);
+      expect(article.textContent?.indexOf('R · I · P')).toBeLessThan(article.textContent?.indexOf(key) ?? -1);
+    }
+  });
+
+  test('the epitaph is the main line: right after the title and before the details', () => {
+    const { root } = mountWith();
+    const order = [...grave(root, 'HB-108').querySelectorAll('article > *')].map((n) => n.className.split(' ')[0]);
+    expect(order.indexOf('card-title')).toBeLessThan(order.indexOf('card-epitaph'));
+    expect(order.indexOf('card-epitaph')).toBeLessThan(order.indexOf('card-facts'));
+  });
+
+  test('a zombie says how much hungrier it gets next release, with the engine numbers', () => {
+    const { root } = mountWith();
+    expect(grave(root, 'HB-110').querySelector('.card-hunger')?.textContent).toBe('Hungrier next release: urgency 5 → 8');
+    expect(grave(root, 'HB-112').querySelector('.card-hunger')?.textContent).toBe('Hungrier next release: urgency 8 → 13');
+  });
+
+  test('no other tombstone has a hunger line', () => {
+    const { root } = mountWith();
+    for (const key of ['HB-108', 'HB-111', 'HB-114', 'HB-117', 'HB-119']) {
+      expect(visible(grave(root, key).querySelector('.card-hunger')!), key).toBe(false);
+      expect(grave(root, key).textContent, key).not.toContain('Hungrier');
+    }
+  });
+
+  test('the reason is never written twice: no tombstone repeats a sentence of its own epitaph in the details', () => {
+    const { root } = mountWith();
+    for (const key of shownKeys(root, 'yard')) {
+      const stone = grave(root, key);
+      expect(visible(stone.querySelector('.card-why')!), key).toBe(false);
+      expect(stone.querySelector('.card-why dd')?.textContent, key).toBe('');
+      expect(stone.textContent, key).not.toMatch(/Needs \d+ points?, \d+ left\./);
+      expect(stone.textContent, key).not.toMatch(/which (is|are) buried\./);
+    }
+  });
+
+  test('the details are a two-column block of effort, waiting cost and cost of delay', () => {
+    const { root } = mountWith();
+    const labels = [...grave(root, 'HB-108').querySelectorAll('dl > div:not([hidden]) dt')].map((n) => n.textContent);
+    expect(labels).toEqual(['Effort', 'Waiting costs', 'Cost of delay']);
+  });
+
+  test('the safehouse is one framed shelf; each ticket is one row of key, title, effort and the cost formula, then small tags', () => {
+    const { root } = mountWith();
+    const shelf = region(root, 'safehouse').querySelector('ul.shelf[data-list="safehouse"]')!;
+    expect(shelf.children).toHaveLength(12);
+    const row = plank(root, 'HB-105').querySelector('article')!;
+    const parts = [...row.children].map((n) => n.className.split(' ')[0]);
+    expect(parts).toEqual(['card-key', 'card-title', 'row-tags', 'row-effort', 'row-cost', 'card-needs']);
+    expect(row.querySelector('dl')).toBeNull();
+    expect(row.querySelector('.row-tags')?.textContent).toContain('hungry');
+    expect(texts(plank(root, 'HB-101').querySelectorAll('.tag'))).toEqual(['must-have']);
+    expect(plank(root, 'HB-101').querySelector('.row-tags')?.hasAttribute('hidden')).toBe(false);
+    expect(plank(root, 'HB-104').querySelector('.row-tags')?.hasAttribute('hidden')).toBe(true);
   });
 });
