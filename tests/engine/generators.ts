@@ -25,6 +25,8 @@ export interface BoardOptions {
   readonly withWontDo?: boolean;
   /** Most dependencies per ticket. Default 3. */
   readonly maxDeps?: number;
+  /** Tiny efforts (0-2) and imported cods (0-2), so many sets tie and the tie-breaks decide. Default false. */
+  readonly ties?: boolean;
 }
 
 export const arbCost: fc.Arbitrary<Cost> = fc.oneof(
@@ -49,6 +51,12 @@ interface TicketSpec {
 }
 
 function arbTicketSpec(i: number, wontCount: number, o: Required<Omit<BoardOptions, 'minTickets' | 'withWontDo'>>): fc.Arbitrary<TicketSpec> {
+  const arbEffort: fc.Arbitrary<number> = o.ties
+    ? fc.integer({ min: 0, max: 2 })
+    : fc.oneof({ weight: 1, arbitrary: fc.constant(0) }, { weight: 7, arbitrary: fc.integer({ min: 1, max: o.maxEffort }) });
+  const arbTicketCost: fc.Arbitrary<Cost> = o.ties
+    ? fc.integer({ min: 0, max: 2 }).map((cod): Cost => ({ kind: 'imported', cod }))
+    : arbCost;
   const arbDeps: fc.Arbitrary<number[]> =
     i === 0 || o.maxDeps === 0
       ? fc.constant([])
@@ -62,11 +70,8 @@ function arbTicketSpec(i: number, wontCount: number, o: Required<Omit<BoardOptio
         );
   return fc.record({
     prefix: fc.constantFrom('A', 'B', 'CRYPT'),
-    effort: fc.oneof(
-      { weight: 1, arbitrary: fc.constant(0) },
-      { weight: 7, arbitrary: fc.integer({ min: 1, max: o.maxEffort }) },
-    ),
-    cost: arbCost,
+    effort: arbEffort,
+    cost: arbTicketCost,
     // noBias: fast-check favors small integers, which would make "n < rate" far more likely than rate percent.
     mustHave: fc.noBias(fc.integer({ min: 0, max: 99 })).map((n) => n < o.mustHaveRate),
     past: fc.integer({ min: 0, max: 5 }),
@@ -87,6 +92,7 @@ export function arbBoard(options: BoardOptions): fc.Arbitrary<Board> {
     maxEffort: options.maxEffort ?? (options.maxTickets > 12 ? 30 : 13),
     mustHaveRate: options.mustHaveRate ?? 10,
     maxDeps: options.maxDeps ?? 3,
+    ties: options.ties ?? false,
   };
   const arbCount = fc.integer({ min, max: options.maxTickets });
   const arbWontCount = options.withWontDo ? fc.integer({ min: 0, max: 3 }) : fc.constant(0);
@@ -125,6 +131,19 @@ export function arbBoard(options: BoardOptions): fc.Arbitrary<Board> {
         wontDo: wontKeys,
       };
     });
+}
+
+export interface SolveCase {
+  readonly board: Board;
+  readonly capacity: number;
+  readonly marginPct: number;
+}
+
+/** A board, a capacity and a margin, for the solver properties. */
+export function arbSolveCase(options: BoardOptions): fc.Arbitrary<SolveCase> {
+  return arbBoard(options).chain((board) =>
+    fc.tuple(arbCapacity(board), arbMargin).map(([capacity, marginPct]) => ({ board, capacity, marginPct })),
+  );
 }
 
 /** Total effort of all tickets. */

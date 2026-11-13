@@ -34,26 +34,26 @@ Run `npm run typecheck` and `npm test` before ticking any task; tick it only whe
   - [x] 5.4 `P11 capacity never grows` property test (four variants)
   - _Requirements: 3.1–3.9, 6.2_
 
-- [ ] 6. Cost of delay and hunger
-  - [ ] 6.1 `src/engine/cod.ts`: scale, `effectiveUrgency`, `costOfDelay`, `codParts`, `burialCost`
-  - [ ] 6.2 `P23 hunger` property test and the "urgency 1 → 5 after 3 releases" example
-  - [ ] 6.3 Example test for imported `cod` (no hunger)
+- [x] 6. Cost of delay and hunger
+  - [x] 6.1 `src/engine/cod.ts`: scale, `effectiveUrgency`, `costOfDelay`, `codParts`, `burialCost`
+  - [x] 6.2 `P23 hunger` property test and the "urgency 1 → 5 after 3 releases" example
+  - [x] 6.3 Example test for imported `cod` (no hunger)
   - _Requirements: 4.1–4.4, 4.5, 4.7_
 
-- [ ] 7. Brute-force oracle
-  - [ ] 7.1 `src/engine/oracle.ts`: enumerate subsets (throws above 16 tickets), own feasibility and ranking code, not exported
-  - [ ] 7.2 Example tests on hand-made boards, including a tie that only the alphabetical rule resolves and the "C beats A + B" jump from `docs/rule.md`
+- [x] 7. Brute-force oracle
+  - [x] 7.1 `src/engine/oracle.ts`: enumerate subsets (throws above 16 tickets), own feasibility and ranking code, not exported
+  - [x] 7.2 Example tests on hand-made boards, including a tie that only the alphabetical rule resolves and the "C beats A + B" jump from `docs/rule.md`
   - _Requirements: 11.1–11.4_
 
-- [ ] 8. Solver
-  - [ ] 8.1 `src/engine/solver.ts`: preparation, integer weights, branch and bound, reasons, zombies, `solveWithCapacity`, `solveFreeze`
-  - [ ] 8.2 `P1 fits` and `P22 margin`
-  - [ ] 8.3 `P2 must-haves`, `P3 dependencies`, `P4 partition`
-  - [ ] 8.4 `P5 optimal vs oracle` (1,000 runs, savedCod and kept set)
-  - [ ] 8.5 `P6 more capacity`, `P7 determinism` (1,000 runs)
-  - [ ] 8.6 `P8 nothing left over`, `P27 cascade`
-  - [ ] 8.7 `P16 formula` property test
-  - [ ] 8.8 Reason examples (one per kind) and the invariant that a `no-room` ticket has `needed > left`
+- [x] 8. Solver
+  - [x] 8.1 `src/engine/solver.ts`: preparation, integer weights, branch and bound, reasons, zombies, `solveWithCapacity`, `solveFreeze`
+  - [x] 8.2 `P1 fits` and `P22 margin`
+  - [x] 8.3 `P2 must-haves`, `P3 dependencies`, `P4 partition`
+  - [x] 8.4 `P5 optimal vs oracle` (1,000 runs, savedCod and kept set), plus a tie-heavy variant (tiny efforts and cods) so the tie-breaks decide
+  - [x] 8.5 `P6 more capacity`, `P7 determinism` (1,000 runs)
+  - [x] 8.6 `P8 nothing left over`, `P27 cascade`
+  - [x] 8.7 `P16 formula` property test (in `cod.test.ts`)
+  - [x] 8.8 Reason examples (one per kind) and the invariant that a `no-room` ticket has `needed > left`
   - _Requirements: 4.6, 5.1–5.15, 6.1, 6.3, 6.4_
 
 - [ ] 9. Impossible freeze
