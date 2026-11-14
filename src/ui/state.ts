@@ -76,6 +76,8 @@ export function reducer(state: AppState, action: Action): AppState {
       return reduceTombstone(state, action);
     case 'sound/set':
       return action.on === state.sound ? state : { ...state, sound: action.on };
+    case 'state/restore':
+      return action.state;
     case 'board/reset': {
       const next: AppState = { ...initialStateFor(state.home), sound: state.sound };
       return done(next, { kind: 'reset' }, compareStates(state, next));

@@ -501,3 +501,7 @@ cannot run in jsdom; they are the manual checklist in the last task, and the fin
 ## Addendum: the fog on the sign
 
 The fog slot was replaced by the fog block and the strip of the `fog` spec (`render/fog.ts`, placed by `render/sign.ts`). The block does not use the class `fog`, which belongs to the drifting-fog canvas of the atmosphere; a test guards that. The sign keeps one height: the fog block has a `min-height` per width next to the `.sign-readout` one.
+
+## Addendum: the tour
+
+`ctx.act(action, { announce })` and the reducer's internal `state/restore` action were added for the tour (`night-tour` spec). `Services.page` carries the address hash and the scrolling the tour needs.

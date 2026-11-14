@@ -459,3 +459,7 @@ network call of any kind.
 ## Addendum: the fog slot is filled
 
 Requirement 16 left a fog slot on the sign. The `fog` spec (`.kiro/specs/fog`) fills it: the slot `[data-slot="fog"]` is gone, and the sign carries a fog block (`[data-region="fog"]`) and a strip under the reserve slider. The other five slots are unchanged.
+
+## Addendum: the tour slot is filled
+
+The "Play the night · 60 s" slot is filled by the `night-tour` spec when the app is given a script (`mountApp(..., { tour })`); without one it stays the disabled slot. The other four slots are unchanged.

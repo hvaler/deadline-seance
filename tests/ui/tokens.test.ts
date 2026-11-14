@@ -296,3 +296,40 @@ describe('motion', () => {
     expect(all).not.toMatch(/transition:[^;]*\b(width|height|top|left|margin|padding)\b/);
   });
 });
+describe('the guided tour styles', () => {
+  const components = rules(css['components.css'] ?? '');
+  const bodyOf = (selector: string): string => components.find((r) => r.selector === selector)?.body ?? '';
+
+  test('the subtitle is large: 22 px at the smallest, about 36 px on a wide screen, bone on the night', () => {
+    expect(bodyOf('.tour-caption')).toContain('font-size: clamp(1.375rem, 1.1vw + 1rem, 2.25rem)');
+    expect(bodyOf('.tour-caption')).toContain('color: var(--bone)');
+    expect(bodyOf('.tour-bar')).toContain('background: var(--night)');
+  });
+
+  test('the bar is fixed to the bottom, as wide as the page column, and above the atmosphere; the prompt is above the bar', () => {
+    const bar = bodyOf('.tour-bar');
+    expect(bar).toContain('position: fixed');
+    expect(bar).toContain('max-width: var(--max-width)');
+    const z = (body: string): number => Number(/z-index:\s*(\d+)/.exec(body)?.[1] ?? 0);
+    expect(z(bar)).toBeGreaterThan(50);
+    expect(z(bodyOf('.tour-prompt'))).toBeGreaterThan(z(bar));
+  });
+
+  test('the prompt is large and painted: amber, in the sign face, from 2 rem to 4.5 rem (72 px)', () => {
+    const text = bodyOf('.tour-prompt-text');
+    expect(text).toContain('font-family: var(--font-sign)');
+    expect(text).toContain('font-size: clamp(2rem, 6vw + 0.5rem, 4.5rem)');
+    expect(text).toContain('color: var(--amber)');
+  });
+
+  test('the progress line moves with a transform, not a width, and the ring on a ticket has no animation', () => {
+    expect(bodyOf('.tour-progress-fill')).toContain('transform: scaleX(var(--p, 0))');
+    expect(bodyOf('.tour-progress-fill')).not.toMatch(/transition:[^;]*\bwidth\b/);
+    expect(bodyOf('[data-tour-spot]')).not.toMatch(/animation|transition/);
+    expect(bodyOf('[data-tour-spot]')).toContain('outline: 3px solid var(--amber)');
+  });
+
+  test('the page keeps room at its end for the bar while the tour shows it', () => {
+    expect(rules(css['layout.css'] ?? '').find((r) => r.selector === '.page.is-touring main')?.body).toMatch(/padding-bottom:\s*\d+rem/);
+  });
+});

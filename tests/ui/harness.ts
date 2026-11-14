@@ -1,7 +1,8 @@
 import { mountApp } from '../../src/ui/app';
 import type { MountedBoard } from '../../src/ui/app';
 import { sampleBoard } from '../../src/ui/sample-board';
-import type { Frame, Services, SoundPlayer, Timers } from '../../src/ui/services';
+import type { Frame, Page, Services, SoundPlayer, Timers } from '../../src/ui/services';
+import type { Script } from '../../src/ui/tour/types';
 import type { SoundEvent } from '../../src/ui/sound-events';
 import type { Board } from '../../src/engine/index';
 
@@ -84,26 +85,69 @@ export class RecordingSound implements SoundPlayer {
   }
 }
 
+/** A page that records what the tour asks of it, and lets a test set the address hash. */
+export class RecordingPage implements Page {
+  hashValue: string;
+  scrollYValue = 0;
+  readonly revealed: { element: Element; instant: boolean }[] = [];
+  readonly scrolledTo: number[] = [];
+  private readonly listeners = new Set<() => void>();
+  constructor(hash = '') {
+    this.hashValue = hash;
+  }
+  hash(): string {
+    return this.hashValue;
+  }
+  onHashChange(callback: () => void): () => void {
+    this.listeners.add(callback);
+    return () => void this.listeners.delete(callback);
+  }
+  /** The address changes: #play typed after the page loaded. */
+  changeHash(hash: string): void {
+    this.hashValue = hash;
+    for (const listener of [...this.listeners]) listener();
+  }
+  reveal(element: Element, options: { readonly instant: boolean }): void {
+    this.revealed.push({ element, instant: options.instant });
+  }
+  scrollY(): number {
+    return this.scrollYValue;
+  }
+  scrollTo(y: number): void {
+    this.scrolledTo.push(y);
+    this.scrollYValue = y;
+  }
+}
+
 export interface Harness {
   readonly app: MountedBoard;
   readonly root: HTMLElement;
   readonly frame: FakeFrame;
   readonly timers: FakeTimers;
   readonly sound: RecordingSound;
+  readonly page: RecordingPage;
 }
 
 /** Mounts the app on a board with fake frames, timers and sound. */
-export function mountWith(board: Board = sampleBoard(), overrides: Partial<Services> = {}): Harness {
+export interface MountExtras {
+  /** The guided tour to give the app. */
+  readonly tour?: Script;
+  /** The address hash the page loads with. */
+  readonly hash?: string;
+}
+
+export function mountWith(board: Board = sampleBoard(), overrides: Partial<Services> = {}, extras: MountExtras = {}): Harness {
   const root = document.createElement('div');
   root.id = 'app';
   document.body.append(root);
   const frame = new FakeFrame();
   const timers = new FakeTimers();
   const sound = new RecordingSound();
-  const app = mountApp(root, board, { services: { frame, timers, sound, ...overrides } });
+  const page = new RecordingPage(extras.hash ?? '');
+  const app = mountApp(root, board, { services: { frame, timers, sound, page, ...overrides }, ...(extras.tour === undefined ? {} : { tour: extras.tour }) });
   if (app.kind !== 'board') throw new Error('the board should be valid');
   frame.flush(); // the chains are drawn in the first frame after mounting; tests start from a quiet page
-  return { app, root, frame, timers, sound };
+  return { app, root, frame, timers, sound, page };
 }
 
 export function region(root: ParentNode, name: string): HTMLElement {

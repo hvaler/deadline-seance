@@ -25,7 +25,9 @@ export type Action =
   | { readonly type: 'tombstone/resurrect'; readonly key: string }
   | { readonly type: 'tombstone/put-down'; readonly key: string }
   | { readonly type: 'sound/set'; readonly on: boolean }
-  | { readonly type: 'board/reset' };
+  | { readonly type: 'board/reset' }
+  /** Only the guided tour sends this, to put the user's own state back exactly. No control of the page does. */
+  | { readonly type: 'state/restore'; readonly state: AppState };
 
 export type Subject =
   | { readonly kind: 'candle'; readonly from: number; readonly to: number }

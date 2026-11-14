@@ -31,8 +31,13 @@ The app opens on a built-in sample board, "Hollow Bank app 3.2 · release eve": 
 - Read the **fog of estimates** on the sign: in how many of 1,000 simulated nights the kept work still fits the team when every estimate lands between 80 % and 150 % of what was written, for each reserve from 0 to 30 %. On some boards a bigger reserve even lowers the chance, so the strip only shows the numbers.
 - Every number on the screen comes from the engine in `src/engine`. The epitaph on a stone only says why the ticket is buried; its cost of waiting, releases left out and hunger are in the stone's details.
 
-Out of scope for now: CSV import and export, the guided tour, the death certificate, the chronicle with undo and the MCP server. Their places on the page are inert, labelled slots.
+Out of scope for now: CSV import and export, the death certificate, the chronicle with undo and the MCP server. Their places on the page are inert, labelled slots.
 
+## Play the night
+
+The button **Play the night · 60 s** runs a 57-second tour of the real app: it presses the app's own controls (the candle, a person away, a zombie put down, an exhume, the reserve) with one subtitle per scene, and every number in a subtitle is what the engine returns at that moment. **Pause**, **Skip scene** and **Stop** (or `Esc`) are on the screen all the time; when it ends, your own state is put back exactly. The page is inert while it plays, and the tour never turns sound on.
+
+To record it: open the page, change the address to end in `#play` (the page shows "Press Space to play the night" and waits), and press **Space** when the recording runs. For the app's sounds, press **Sound on** first. The script of the video, with the real numbers of every scene, is [docs/video-tour-script.md](docs/video-tour-script.md); it is generated from the tour's data and a test fails if it drifts.
 ## Layout
 
 `src/engine` is the rule (pure, deterministic, no DOM); `src/ui` draws it and never decides anything; `tests` mirrors both. The design history is in `docs/rule.md`.

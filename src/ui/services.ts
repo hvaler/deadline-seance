@@ -25,10 +25,24 @@ export interface SoundPlayer {
   play(event: SoundEvent): void;
 }
 
+/** The browser page the tour reads and moves: the address hash and the scroll position. Behind an interface so tests record what it is asked. */
+export interface Page {
+  /** `location.hash`, for example `#play`, or `''`. */
+  hash(): string;
+  /** Calls `callback` when the hash changes. Returns the function that stops listening. */
+  onHashChange(callback: () => void): () => void;
+  /** Scrolls so that the top of `element` is near the top of the screen. `instant` jumps instead of gliding. */
+  reveal(element: Element, options: { readonly instant: boolean }): void;
+  scrollY(): number;
+  /** Jumps (never glides) to a scroll position. */
+  scrollTo(y: number): void;
+}
+
 export interface Services {
   readonly frame: Frame;
   readonly timers: Timers;
   readonly sound: SoundPlayer;
+  readonly page: Page;
 }
 
 export function browserFrame(): Frame {
@@ -58,6 +72,25 @@ export function browserAudioFactory(): AudioLike | null {
   return Ctor === undefined ? null : (new Ctor() as unknown as AudioLike);
 }
 
+/** Room kept above an element that is scrolled into view, in pixels. */
+const REVEAL_MARGIN = 16;
+
+export function browserPage(): Page {
+  return {
+    hash: () => window.location.hash,
+    onHashChange(callback) {
+      window.addEventListener('hashchange', callback);
+      return () => window.removeEventListener('hashchange', callback);
+    },
+    reveal(element, { instant }) {
+      const top = Math.max(0, element.getBoundingClientRect().top + window.scrollY - REVEAL_MARGIN);
+      window.scrollTo({ top, behavior: instant ? 'auto' : 'smooth' });
+    },
+    scrollY: () => window.scrollY,
+    scrollTo: (y) => window.scrollTo({ top: y, behavior: 'auto' }),
+  };
+}
+
 export function browserServices(): Services {
-  return { frame: browserFrame(), timers: browserTimers(), sound: createSound(browserAudioFactory) };
+  return { frame: browserFrame(), timers: browserTimers(), sound: createSound(browserAudioFactory), page: browserPage() };
 }

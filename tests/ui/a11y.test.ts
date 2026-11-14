@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, test } from 'vitest';
+import { sampleBoard } from '../../src/ui/sample-board';
+import { sampleScript } from '../../src/ui/tour/sample-script';
 import { byFocus, drag, mountWith, release } from './harness';
 import type { Harness } from './harness';
 
@@ -212,5 +214,40 @@ describe('what changes for assistive technology when the user acts', () => {
     byFocus(root, 'exhume:HB-108').click();
     expect(root.contains(document.activeElement)).toBe(true);
     expect(document.activeElement).not.toBe(document.body);
+  });
+});
+
+describe('the guided tour', () => {
+  const states: [string, (h: Harness) => void][] = [
+    ['the prompt', () => {}],
+    ['playing', (h) => h.app.tour?.start('button')],
+    ['paused', (h) => { h.app.tour?.start('button'); byFocus(h.root, 'tour-pause').click(); }],
+    ['ended', (h) => { h.app.tour?.start('button'); for (let i = 0; i < 700; i++) { h.timers.advance(100); h.frame.flush(); } }],
+  ];
+  for (const [name, drive] of states) {
+    test(`${name}: every control has a name, no tabindex is positive, ids are unique, the live regions are the announcer's and the subtitle's, and Tab reaches the bar or prompt first`, () => {
+      const h = mountWith(sampleBoard(), {}, { tour: sampleScript, hash: name === 'the prompt' ? '#play' : '' });
+      drive(h);
+      const root = h.root;
+      for (const control of root.querySelectorAll('button, input, [role="switch"]')) expect(nameOf(control, root), `${control.tagName} ${control.className}`).not.toBe('');
+      for (const node of root.querySelectorAll('[tabindex]')) expect(['0', '-1']).toContain(node.getAttribute('tabindex'));
+      const ids = idsIn(root);
+      expect(new Set(ids).size).toBe(ids.length);
+      const live = root.querySelectorAll('[aria-live]').length;
+      expect(live).toBe(name === 'the prompt' ? 1 : 2);
+      const first = root.querySelector('a[href], button, input, [tabindex="0"]');
+      expect(first?.className).toContain('skip-link');
+      const second = [...root.querySelectorAll('a[href], button, input, [tabindex="0"]')][1];
+      expect(second?.closest('.tour-bar, .tour-prompt'), 'the first control after the skip link belongs to the bar or the prompt').not.toBeNull();
+      expect(root.querySelectorAll('h1')).toHaveLength(1);
+    });
+  }
+
+  test('while it plays, the heading structure and the landmarks are the same as at rest, and the bar adds no heading', () => {
+    const h = mountWith(sampleBoard(), {}, { tour: sampleScript });
+    h.app.tour?.start('button');
+    expect(h.root.querySelector('.tour-bar')?.querySelector('h1, h2, h3, h4')).toBeNull();
+    expect(h.root.querySelectorAll('main section.region')).toHaveLength(6);
+    expect(h.root.querySelectorAll('header')).toHaveLength(1 + h.root.querySelectorAll('article header').length);
   });
 });

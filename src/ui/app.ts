@@ -14,6 +14,8 @@ import { renderInvalidBoard } from './render/invalid-board';
 import { mountSign } from './render/sign';
 import { mountSurvivors } from './render/survivors';
 import { mountTitleCard } from './render/title-card';
+import { mountTour } from './render/tour';
+import type { TourControls } from './render/tour';
 import { mountTools } from './render/tools';
 import { browserServices } from './services';
 import type { Services } from './services';
@@ -23,6 +25,7 @@ import type { Action, AppState, Change } from './state';
 import { createStore } from './store';
 import type { Store } from './store';
 import { announcementText } from './text';
+import type { Script } from './tour/types';
 
 /**
  * Builds the page and keeps it in step with the state. A board that fails validation never reaches the state: the app shows the list of
@@ -33,6 +36,8 @@ export interface MountedBoard {
   readonly kind: 'board';
   readonly store: Store<AppState, Action>;
   readonly root: HTMLElement;
+  /** The guided tour, when the app was given a script. */
+  readonly tour: TourControls | null;
   destroy(): void;
 }
 
@@ -50,6 +55,8 @@ export interface MountOptions {
   readonly services?: Partial<Services>;
   /** Starts the fog and the timecode. Left out in tests that do not need them; the page always has the static decoration. */
   readonly atmosphere?: AtmosphereDeps;
+  /** The guided tour for this board. Without one, the tour button is the disabled slot it always was. */
+  readonly tour?: Script;
 }
 
 /** The sections of the page, top to bottom, as `data-region` names. */
@@ -97,17 +104,18 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
   const backLayer = el('div', { class: 'atmosphere atmosphere-back', attrs: { 'aria-hidden': 'true' }, data: { layer: 'back' } });
   const frontLayer = el('div', { class: 'atmosphere atmosphere-front', attrs: { 'aria-hidden': 'true' }, data: { layer: 'front' } });
 
+  const main = el('main', { id: 'main' }, [
+    sections.sign,
+    sections.candle,
+    sections.survivors,
+    el('div', { class: 'grounds' }, [sections.safehouse, sections.yard]),
+    sections.tools,
+  ]);
   const page = el('div', { class: 'page' }, [
     el('a', { class: 'skip-link', attrs: { href: '#safehouse' }, text: 'Skip to the safehouse' }),
     backLayer,
     header,
-    el('main', { id: 'main' }, [
-      sections.sign,
-      sections.candle,
-      sections.survivors,
-      el('div', { class: 'grounds' }, [sections.safehouse, sections.yard]),
-      sections.tools,
-    ]),
+    main,
     frontLayer,
     polite,
     assertive,
@@ -117,12 +125,14 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
   const atmosphere: Atmosphere | null = options.atmosphere === undefined ? null : startAtmosphere(decor, options.atmosphere);
 
   // ---- saying what happened ----
-  function settle(change: Change, state: AppState): void {
+  function settle(change: Change, state: AppState, announce = true): void {
     const view = derive(state);
-    const text = announcementText(change, view);
-    const urgent = change.kind === 'rejected' || change.kind === 'refused' || view.solution.status === 'impossible';
-    if (urgent) announcer.alert(text);
-    else announcer.say(text);
+    if (announce) {
+      const text = announcementText(change, view);
+      const urgent = change.kind === 'rejected' || change.kind === 'refused' || view.solution.status === 'impossible';
+      if (urgent) announcer.alert(text);
+      else announcer.say(text);
+    }
     const event = soundEventFor(change, view);
     if (event !== null && state.sound) services.sound.play(event);
   }
@@ -132,19 +142,20 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
     services,
     announcer,
     root,
-    act(action) {
+    act(action, options) {
       const before = store.getState();
       store.dispatch(action);
       const after = store.getState();
-      if (after !== before && action.type !== 'sound/set') settle(after.change, after);
+      if (after !== before && action.type !== 'sound/set') settle(after.change, after, options?.announce !== false);
     },
     settle,
   };
 
   // ---- the regions ----
+  let tour: TourControls | null = null;
   const chains = createChainDrawer(services.frame, browserObserve());
   const parts: Part[] = [
-    mountTitleCard(header, ctx),
+    mountTitleCard(header, ctx, options.tour === undefined ? undefined : { onPlay: () => tour?.start('button') }),
     mountSign(sections.sign, ctx),
     mountCandle(sections.candle, ctx),
     mountSurvivors(sections.survivors, ctx),
@@ -159,12 +170,17 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
   }
   render(store.getState());
   const stop = store.subscribe(render);
+  // The tour needs the page to exist (it adds a bar and a prompt to it); #play shows its prompt as soon as it is mounted.
+  if (options.tour !== undefined) tour = mountTour({ ctx, script: options.tour, page, main, header });
+  const mountedTour = tour;
 
   return {
     kind: 'board',
     store,
     root,
+    tour: mountedTour,
     destroy() {
+      mountedTour?.destroy();
       stop();
       for (const part of parts) part.destroy?.();
       chains.destroy();

@@ -224,3 +224,7 @@ main {
     grid-area: hint;
   }
 }
+/* While the tour shows its bar, the page has room at its end to scroll the last region above it. */
+.page.is-touring main {
+  padding-bottom: 18rem;
+}

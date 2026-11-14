@@ -62,6 +62,29 @@ describe('the fog seed', () => {
   });
 });
 
+describe('state/restore (sent only by the guided tour)', () => {
+  test('returns the very state it is given, whatever the state it replaces', () => {
+    const mine = run(initialState(), { type: 'candle/set', step: 4 }, { type: 'survivor/toggle', name: 'Ana' }, { type: 'tombstone/put-down', key: 'HB-112' });
+    const other = run(initialState(), { type: 'reserve/set', pct: 15 });
+    expect(reducer(other, { type: 'state/restore', state: mine })).toBe(mine);
+    expect(reducer(mine, { type: 'state/restore', state: mine })).toBe(mine);
+  });
+
+  test('no other action returns a state it was not given: a state either stays the same object or is a new one built from it', () => {
+    fc.assert(
+      fc.property(fc.array(arbAction, { maxLength: 12 }), (actions) => {
+        let state = initialState();
+        for (const action of actions) {
+          const next = reducer(state, action);
+          expect(next === state || next.home === state.home).toBe(true);
+          state = next;
+        }
+      }),
+      { numRuns: 60 },
+    );
+  });
+});
+
 describe('candle/set', () => {
   test('moving the candle gives a diff with numbers: Fri 18:00 to Fri 13:00 sinks HB-115', () => {
     const next = reducer(initialState(), { type: 'candle/set', step: 9 });

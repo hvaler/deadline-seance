@@ -10,7 +10,12 @@ import { TAGLINE } from '../text';
 
 export const TITLE = 'Night of the Living Backlog';
 
-export function mountTitleCard(header: HTMLElement, ctx: Ctx): Part {
+/** What the title card needs when the app has a tour: what to do when its button is pressed. */
+export interface TourHook {
+  readonly onPlay: () => void;
+}
+
+export function mountTitleCard(header: HTMLElement, ctx: Ctx, tour?: TourHook): Part {
   const soundButton = el('button', {
     class: 'button sound-button',
     attrs: { type: 'button', 'aria-pressed': 'false' },
@@ -24,19 +29,29 @@ export function mountTitleCard(header: HTMLElement, ctx: Ctx): Part {
       },
     },
   });
-  const tourSlot = el('button', {
-    class: 'button slot',
-    attrs: { type: 'button', disabled: true, 'aria-describedby': 'slot-note-tour' },
-    data: { slot: 'tour' },
-    text: 'Play the night · 60 s',
-  });
+  // With a tour, the button plays it. Without one it stays what it was: an empty, disabled slot that says it is not built yet.
+  const tourSlot =
+    tour === undefined
+      ? el('button', {
+          class: 'button slot',
+          attrs: { type: 'button', disabled: true, 'aria-describedby': 'slot-note-tour' },
+          data: { slot: 'tour' },
+          text: 'Play the night · 60 s',
+        })
+      : el('button', {
+          class: 'button button-primary',
+          attrs: { type: 'button' },
+          data: { action: 'tour', focus: 'tour' },
+          text: 'Play the night · 60 s',
+          on: { click: () => tour.onPlay() },
+        });
 
   header.append(
     el('p', { class: 'product-line', text: PRODUCT_LINE }),
     el('h1', { class: 'title', text: TITLE }),
     el('p', { class: 'tagline', text: TAGLINE }),
     el('div', { class: 'title-actions' }, [tourSlot, soundButton]),
-    el('p', { id: 'slot-note-tour', class: 'slot-note', text: 'The guided tour is not built yet.' }),
+    ...(tour === undefined ? [el('p', { id: 'slot-note-tour', class: 'slot-note', text: 'The guided tour is not built yet.' })] : []),
   );
 
   return {
