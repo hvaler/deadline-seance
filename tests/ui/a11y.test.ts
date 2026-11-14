@@ -28,6 +28,8 @@ const STATES: [string, (h: Harness) => void][] = [
   ['after a rejected exhume (an alert)', (h) => byFocus(h.root, 'exhume:HB-119').click()],
   ['after a zombie was put down', (h) => byFocus(h.root, 'put-down:HB-112').click()],
   ['after a survivor was sent away', (h) => byFocus(h.root, 'survivor:Ana').click()],
+  ['with the death certificate open', (h) => byFocus(h.root, 'certificate').click()],
+  ['with the death certificate open in tour mode', (h) => h.app.certificate.openForTour()],
 ];
 
 const idsIn = (root: ParentNode): string[] => [...root.querySelectorAll('[id]')].map((n) => n.id);

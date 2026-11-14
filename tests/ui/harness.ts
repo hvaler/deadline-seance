@@ -1,7 +1,7 @@
 import { mountApp } from '../../src/ui/app';
 import type { MountedBoard } from '../../src/ui/app';
 import { sampleBoard } from '../../src/ui/sample-board';
-import type { Frame, Page, Services, SoundPlayer, Timers } from '../../src/ui/services';
+import type { ClipboardWriter, FileSaver, Frame, Page, Services, SoundPlayer, Timers } from '../../src/ui/services';
 import type { Script } from '../../src/ui/tour/types';
 import type { SoundEvent } from '../../src/ui/sound-events';
 import type { Board } from '../../src/engine/index';
@@ -119,6 +119,26 @@ export class RecordingPage implements Page {
   }
 }
 
+/** A clipboard that records what it was asked to write, and that accepts or refuses on request. */
+export class RecordingClipboard implements ClipboardWriter {
+  /** False: the browser refuses (an insecure page, a denied permission). */
+  accepts = true;
+  readonly written: string[] = [];
+  writeText(text: string): Promise<void> {
+    if (!this.accepts) return Promise.reject(new Error('refused'));
+    this.written.push(text);
+    return Promise.resolve();
+  }
+}
+
+/** A file saver that records every download it was asked for. */
+export class RecordingFiles implements FileSaver {
+  readonly saved: { name: string; text: string; type: string }[] = [];
+  save(name: string, text: string, type: string): void {
+    this.saved.push({ name, text, type });
+  }
+}
+
 export interface Harness {
   readonly app: MountedBoard;
   readonly root: HTMLElement;
@@ -126,6 +146,8 @@ export interface Harness {
   readonly timers: FakeTimers;
   readonly sound: RecordingSound;
   readonly page: RecordingPage;
+  readonly clipboard: RecordingClipboard;
+  readonly files: RecordingFiles;
 }
 
 /** Mounts the app on a board with fake frames, timers and sound. */
@@ -134,6 +156,8 @@ export interface MountExtras {
   readonly tour?: Script;
   /** The address hash the page loads with. */
   readonly hash?: string;
+  /** What the release is called, for the death certificate. */
+  readonly release?: string;
 }
 
 export function mountWith(board: Board = sampleBoard(), overrides: Partial<Services> = {}, extras: MountExtras = {}): Harness {
@@ -144,10 +168,16 @@ export function mountWith(board: Board = sampleBoard(), overrides: Partial<Servi
   const timers = new FakeTimers();
   const sound = new RecordingSound();
   const page = new RecordingPage(extras.hash ?? '');
-  const app = mountApp(root, board, { services: { frame, timers, sound, page, ...overrides }, ...(extras.tour === undefined ? {} : { tour: extras.tour }) });
+  const clipboard = new RecordingClipboard();
+  const files = new RecordingFiles();
+  const app = mountApp(root, board, {
+    services: { frame, timers, sound, page, clipboard, files, ...overrides },
+    ...(extras.tour === undefined ? {} : { tour: extras.tour }),
+    ...(extras.release === undefined ? {} : { release: extras.release }),
+  });
   if (app.kind !== 'board') throw new Error('the board should be valid');
   frame.flush(); // the chains are drawn in the first frame after mounting; tests start from a quiet page
-  return { app, root, frame, timers, sound, page };
+  return { app, root, frame, timers, sound, page, clipboard, files };
 }
 
 export function region(root: ParentNode, name: string): HTMLElement {

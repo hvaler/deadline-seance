@@ -7,7 +7,7 @@ import './ui/styles/atmosphere.css';
 import './ui/styles/motion.css';
 import { mountApp } from './ui/app';
 import { browserAtmosphere } from './ui/atmosphere/index';
-import { sampleBoard } from './ui/sample-board';
+import { SAMPLE_RELEASE, sampleBoard } from './ui/sample-board';
 import { sampleScript } from './ui/tour/sample-script';
 import { browserServices } from './ui/services';
 
@@ -15,4 +15,4 @@ const root = document.getElementById('app');
 if (root === null) throw new Error('the page has no #app element');
 
 const services = browserServices();
-mountApp(root, sampleBoard(), { services, atmosphere: browserAtmosphere(services.frame, services.timers), tour: sampleScript });
+mountApp(root, sampleBoard(), { services, atmosphere: browserAtmosphere(services.frame, services.timers), tour: sampleScript, release: SAMPLE_RELEASE });

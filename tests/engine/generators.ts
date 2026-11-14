@@ -1,7 +1,10 @@
 import * as fc from 'fast-check';
 import { allClosures } from '../../src/engine/chain';
 import { SCALE } from '../../src/engine/types';
-import type { Absence, Board, Cost, Key, Part, Person, Ticket } from '../../src/engine/types';
+import { exhume, putDown } from '../../src/engine/diff';
+import { solveFreeze } from '../../src/engine/solver';
+import { validateBoard } from '../../src/engine/validate';
+import type { Absence, Board, Cost, FreezeInput, Key, Part, Person, Ticket, ValidBoard } from '../../src/engine/types';
 
 /** Scale values (1, 2, 3, 5, 8, 13, 20). */
 export const arbScale: fc.Arbitrary<number> = fc.constantFrom(...SCALE);
@@ -306,3 +309,74 @@ export const arbCapacityCase: fc.Arbitrary<CapacityCase> = arbZoneWindow.chain((
       return { window, people, instants: sorted as unknown as [number, number, number, number] };
     }),
 );
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Nights, for the facts and the certificate
+// ---------------------------------------------------------------------------------------------------------------------
+
+const AWKWARD_TITLES = [
+  'a|b', 'back\\slash', 'trailing\\', '`tick`', '*bold*', '_it_', '~~gone~~', '# head', '<script>alert(1)</script>', '<img src=x onerror=1>', '&#49;', '&lt;b&gt;',
+  'two\nlines', 'tab\there', '5', '101', '2026-11-18', 'HB-999 hotfix', 'Fri 18:00', '[link](http://x)', '$x$', 'caf\u00e9 \u2192 \u00fc', '', '   ', '\u202eevil', '|', '||', '\\|',
+];
+
+/** Titles with every character that could change a Markdown table, digits that look like facts, keys, dates and times. */
+export const arbTitle: fc.Arbitrary<string> = fc.oneof(
+  { weight: 3, arbitrary: fc.constantFrom(...AWKWARD_TITLES) },
+  { weight: 2, arbitrary: fc.string({ maxLength: 24 }) },
+  { weight: 1, arbitrary: fc.string({ unit: 'binary', maxLength: 16 }) },
+  { weight: 1, arbitrary: fc.stringMatching(/^[A-Za-z0-9 |\\*_#<>&`$-]{0,20}$/) },
+);
+
+export interface NightCase {
+  readonly home: ValidBoard;
+  /** The full team, with the exhumes and put-downs applied. */
+  readonly board: ValidBoard;
+  readonly freeze: FreezeInput;
+  readonly away: string[];
+  readonly release: string | null;
+}
+
+/** The ends of the ten half days of the week of `ONE_SLOT_FROM` (Mon 2026-10-19, CEST): 13:00 and 18:00 local. */
+const WEEK_END_SLOTS: readonly number[] = [0, 1, 2, 3, 4].flatMap((day) => [Date.UTC(2026, 9, 19 + day, 11, 0), Date.UTC(2026, 9, 19 + day, 16, 0)]);
+const NIGHT_NOW = Date.UTC(2026, 9, 19, 7, 0);
+
+/**
+ * A night as the app has it: a board with awkward titles, a team with some people away, a candle, a reserve, and up to three engine
+ * exhumes and put-downs applied in order (the ones the engine refuses are skipped, as the screen does).
+ */
+export const arbNight: fc.Arbitrary<NightCase> = fc
+  .tuple(
+    arbBoard({ maxTickets: 20, withWontDo: true, mustHaveRate: 5 }),
+    fc.array(arbTitle, { minLength: 20, maxLength: 20 }),
+    fc.constantFrom(...WEEK_END_SLOTS),
+    arbMargin,
+    fc.array(fc.boolean(), { minLength: 4, maxLength: 4 }),
+    fc.array(fc.record({ op: fc.constantFrom('exhume', 'put-down'), pick: fc.nat() }), { maxLength: 3 }),
+    fc.option(arbTitle, { nil: null }),
+  )
+  .map(([raw, titles, freezeAt, marginPct, awayFlags, ops, release]): NightCase => {
+    const titled: Board = { ...raw, tickets: raw.tickets.map((t, i) => ({ ...t, title: titles[i] as string })) };
+    const checked = validateBoard(titled);
+    if (!checked.ok) throw new Error(`invalid generated board: ${JSON.stringify(checked.error)}`);
+    const home = checked.value;
+    const away = home.people.filter((_, i) => awayFlags[i] === true).map((p) => p.name);
+    const freeze: FreezeInput = { now: NIGHT_NOW, freezeAt, marginPct };
+    const team = (b: ValidBoard): ValidBoard => ({ ...b, people: home.people.filter((p) => !away.includes(p.name)) }) as ValidBoard;
+    let board: ValidBoard = home;
+    for (const { op, pick } of ops) {
+      const present = team(board);
+      const solved = solveFreeze(present, freeze);
+      if (!solved.ok || solved.value.status !== 'ok') break;
+      const buried = solved.value.buried;
+      if (buried.length === 0) break;
+      const key = (buried[pick % buried.length] as { key: Key }).key;
+      if (op === 'exhume') {
+        const r = exhume(present, freeze, key);
+        if (r.ok && r.value.kind === 'applied') board = { ...r.value.board, people: home.people } as ValidBoard;
+      } else {
+        const r = putDown(present, freeze, key);
+        if (r.ok) board = { ...r.value.board, people: home.people } as ValidBoard;
+      }
+    }
+    return { home, board, freeze, away, release };
+  });

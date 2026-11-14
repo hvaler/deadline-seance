@@ -39,6 +39,7 @@ function whatTheAppDoes(scene: SimulatedScene): string {
   const steps = scene.scene.actions.map((a) => describeAction(a, scene));
   const ring = (scene.scene.spot ?? []).map((id) => id.split(':')[1] ?? id);
   if (ring.length > 0) steps.push(`rings ${ring.join(' and ')}`);
+  if (scene.scene.show === 'certificate') steps.push('opens the death certificate (the note for the stakeholders)');
   if (steps.length === 0) return 'nothing is pressed';
   const text = steps.join(', then ');
   return text.charAt(0).toUpperCase() + text.slice(1);

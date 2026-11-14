@@ -1185,3 +1185,149 @@
     font-size: 0.9375rem;
   }
 }
+/* ---- the death certificate ---- */
+/* A sheet over the page: the note for stakeholders. The user's way is a modal dialog over a scrim; the tour's way (`.is-tour`) shows the same
+   sheet above the caption bar, with no scrim, and leaves the page as it is. Nothing here animates. */
+.certificate {
+  position: fixed;
+  z-index: 55;
+  inset: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  place-items: center;
+  padding: var(--gutter);
+  background: color-mix(in srgb, var(--night) 90%, transparent);
+}
+.certificate.is-tour {
+  bottom: 14rem; /* just above the tour's bar (222 px at the narrowest, 162 px at 1280) */
+  place-items: start center;
+  padding-top: 12px;
+  background: transparent;
+}
+.certificate-sheet {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, var(--max-width));
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border: 2px solid var(--bone);
+  border-radius: var(--radius);
+  background: var(--night);
+  box-shadow: var(--shadow);
+}
+.certificate-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 12px var(--gutter);
+  border-bottom: 2px solid var(--ply-2);
+}
+.certificate-title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: clamp(1.75rem, 2.4vw + 1rem, 2.75rem);
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--amber);
+}
+.certificate.is-tour .certificate-actions,
+.certificate.is-tour .certificate-status {
+  display: none; /* a viewer cannot press them, and the room is the note's */
+}
+.certificate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.certificate-status {
+  min-height: 1.5rem; /* the line is always there, so a message does not move the note */
+  margin: 8px var(--gutter) 0;
+  color: var(--bone);
+}
+.certificate-fallback {
+  margin: 8px var(--gutter) 0;
+  padding: 8px;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--bone);
+  border: 2px solid var(--stone);
+  border-radius: var(--radius);
+  background: var(--ply-1);
+  resize: vertical;
+}
+.certificate-fallback[hidden] {
+  display: none;
+}
+.certificate-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0 var(--gutter) 16px;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+.certificate-heading {
+  margin: 20px 0 6px;
+  font-family: var(--font-sign);
+  font-size: 1.375rem;
+  font-weight: 400;
+  color: var(--amber);
+}
+.certificate-text,
+.certificate-list {
+  margin: 6px 0;
+  line-height: 1.5;
+  color: var(--bone);
+}
+.certificate-list {
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+.certificate-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--ply-2);
+  border-radius: var(--radius);
+}
+.certificate-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  color: var(--bone);
+}
+.certificate-table th,
+.certificate-table td {
+  min-width: 6rem;
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--ply-2);
+}
+.certificate-table thead th {
+  font-weight: 600;
+  color: var(--tape);
+}
+.certificate-table tbody th {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.certificate-table td:last-child {
+  min-width: 16rem;
+}
+.certificate-table .is-number {
+  text-align: right;
+  white-space: nowrap;
+}
+@media (max-width: 639.98px) {
+  /* The three buttons keep their whole names: they take the width they need and wrap to a second row when the three do not fit. */
+  .certificate-actions {
+    flex: 1 1 100%;
+  }
+  .certificate-actions .button {
+    flex: 1 1 auto;
+    white-space: nowrap;
+  }
+}

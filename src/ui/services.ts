@@ -38,11 +38,23 @@ export interface Page {
   scrollTo(y: number): void;
 }
 
+/** Writes text to the clipboard. Rejects when the browser has no clipboard API or refuses (an insecure page, a denied permission). */
+export interface ClipboardWriter {
+  writeText(text: string): Promise<void>;
+}
+
+/** Saves a text as a file the user downloads. */
+export interface FileSaver {
+  save(name: string, text: string, type: string): void;
+}
+
 export interface Services {
   readonly frame: Frame;
   readonly timers: Timers;
   readonly sound: SoundPlayer;
   readonly page: Page;
+  readonly clipboard: ClipboardWriter;
+  readonly files: FileSaver;
 }
 
 export function browserFrame(): Frame {
@@ -91,6 +103,46 @@ export function browserPage(): Page {
   };
 }
 
+export function browserClipboard(): ClipboardWriter {
+  return {
+    writeText: (text) => {
+      const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
+      return clipboard === undefined ? Promise.reject(new Error('no clipboard')) : clipboard.writeText(text);
+    },
+  };
+}
+
+/** How long an object URL stays valid after the click that starts the download: long enough for the browser to take it, then it is revoked. */
+export const REVOKE_AFTER_MS = 1000;
+
+/**
+ * A download with no network: a Blob, an object URL and a temporary link with download. The URL is revoked afterwards (through the injected
+ * timers) and the link is removed at once.
+ */
+export function browserFiles(timers: Timers): FileSaver {
+  return {
+    save(name, text, type) {
+      const url = URL.createObjectURL(new Blob([text], { type }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = name;
+      link.hidden = true;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      timers.set(() => URL.revokeObjectURL(url), REVOKE_AFTER_MS);
+    },
+  };
+}
+
 export function browserServices(): Services {
-  return { frame: browserFrame(), timers: browserTimers(), sound: createSound(browserAudioFactory), page: browserPage() };
+  const timers = browserTimers();
+  return {
+    frame: browserFrame(),
+    timers,
+    sound: createSound(browserAudioFactory),
+    page: browserPage(),
+    clipboard: browserClipboard(),
+    files: browserFiles(timers),
+  };
 }

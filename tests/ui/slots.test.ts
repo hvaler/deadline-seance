@@ -7,7 +7,7 @@ afterEach(() => {
 });
 
 /** The empty slots of features that are out of scope for this version, and the text each one must show. */
-const SLOTS = ['tour', 'certificate', 'chronicle', 'csv', 'mcp'] as const;
+const SLOTS = ['tour', 'chronicle', 'csv', 'mcp'] as const;
 
 const slot = (root: ParentNode, name: string): HTMLElement[] => [...root.querySelectorAll<HTMLElement>(`[data-slot="${name}"]`)];
 
@@ -50,13 +50,12 @@ describe('empty slots', () => {
   test('the slots are where the brief puts them: the tour in the title card, the rest in the tools', () => {
     const { root } = mountWith();
     expect(slot(root, 'tour')[0]?.closest('header')).not.toBeNull();
-    for (const name of ['certificate', 'chronicle', 'csv', 'mcp']) expect(slot(root, name)[0]?.closest('[data-region="tools"]'), name).not.toBeNull();
+    for (const name of ['chronicle', 'csv', 'mcp']) expect(slot(root, name)[0]?.closest('[data-region="tools"]'), name).not.toBeNull();
   });
 
   test('the labels name the feature', () => {
     const { root } = mountWith();
     expect(slot(root, 'tour')[0]?.textContent).toBe('Play the night · 60 s');
-    expect(slot(root, 'certificate')[0]?.textContent).toBe('Death certificate');
     expect(slot(root, 'chronicle')[0]?.textContent).toBe('Night chronicle and undo');
     expect(slot(root, 'csv')[0]?.textContent).toBe('CSV import and export');
     expect(slot(root, 'mcp')[0]?.textContent).toBe('The rule as an MCP server for the Kiro agent');
@@ -112,6 +111,18 @@ describe('the title card', () => {
 });
 
 describe('the tools', () => {
+  test('"Death certificate" is a working button in the tools, next to Reset, and is not a slot (the death-certificate spec filled it)', () => {
+    const { root } = mountWith();
+    const button = byFocus(root, 'certificate');
+    expect(button.textContent).toBe('Death certificate');
+    expect(button.tagName).toBe('BUTTON');
+    expect((button as HTMLButtonElement).disabled).toBe(false);
+    expect(button.hasAttribute('data-slot')).toBe(false);
+    expect(button.closest('[data-region="tools"]')).not.toBeNull();
+    expect(button.previousElementSibling).toBe(byFocus(root, 'reset'));
+    expect(root.textContent).not.toContain('Death certificate Not built yet');
+  });
+
   test('"Reset the sample board" works and is not a slot', () => {
     const { root, app } = mountWith();
     app.store.dispatch({ type: 'candle/set', step: 4 });

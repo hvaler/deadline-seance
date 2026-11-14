@@ -505,3 +505,7 @@ The fog slot was replaced by the fog block and the strip of the `fog` spec (`ren
 ## Addendum: the tour
 
 `ctx.act(action, { announce })` and the reducer's internal `state/restore` action were added for the tour (`night-tour` spec). `Services.page` carries the address hash and the scrolling the tour needs.
+
+## Addendum: the certificate
+
+`render/tools.ts` takes a hook (`onCertificate`) and shows the button next to "Reset the sample board" (`data-focus="certificate"`); `render/certificate.ts` builds the dialog only while it is open. `Services` gained `clipboard` and `files`. See `.kiro/specs/death-certificate`.

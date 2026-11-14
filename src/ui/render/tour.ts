@@ -2,6 +2,7 @@ import { motionPreference } from '../atmosphere/motion';
 import type { MatchMedia } from '../atmosphere/motion';
 import type { Ctx } from '../context';
 import { el, setAttr, setText } from '../dom';
+import type { CertificateControls } from './certificate';
 import { createPlayer } from '../tour/player';
 import type { TourHost } from '../tour/player';
 import { restoreInto } from '../tour/restore';
@@ -32,6 +33,8 @@ export interface TourOptions {
   readonly main: HTMLElement;
   readonly header: HTMLElement;
   readonly matchMedia?: MatchMedia | undefined;
+  /** The death certificate view, for the scene that shows it. The tour closes it whenever the scene is over. */
+  readonly certificate?: CertificateControls | undefined;
 }
 
 export const PLAY_HASH = '#play';
@@ -45,7 +48,7 @@ interface Bar {
 }
 
 export function mountTour(options: TourOptions): TourControls {
-  const { ctx, script, page, main, header } = options;
+  const { ctx, script, page, main, header, certificate } = options;
   const { services } = ctx;
   const doc = ctx.root.ownerDocument;
   const motion = motionPreference(options.matchMedia ?? (typeof window.matchMedia === 'function' ? window.matchMedia.bind(window) : undefined));
@@ -70,6 +73,11 @@ export function mountTour(options: TourOptions): TourControls {
       services.page.scrollTo(savedScroll);
     },
     show(show) {
+      if (show === 'certificate') {
+        certificate?.openForTour();
+        return;
+      }
+      certificate?.close({ focus: false });
       const target = regionOf(show);
       if (target === null) return;
       // The region's top is where the eye starts. When the ticket the scene rings would then be under the bar (a tall list on a short or narrow
@@ -210,6 +218,7 @@ export function mountTour(options: TourOptions): TourControls {
       case 'paused': {
         if (!active) {
           active = true;
+          certificate?.close({ focus: false }); // a note the user had open does not stay under the tour
           hidePrompt();
           ctx.announcer.clear();
           savedScroll = services.page.scrollY();
@@ -222,12 +231,14 @@ export function mountTour(options: TourOptions): TourControls {
         break;
       }      case 'ended':
         active = false;
+        certificate?.close({ focus: false });
         setInert(false);
         if (headerButton !== null) headerButton.disabled = false;
         endControls();
         break;
       case 'idle': {
         active = false;
+        certificate?.close({ focus: false });
         const hadFocus = bar !== null && bar.node.contains(doc.activeElement);
         removeBar();
         page.classList.remove('is-touring');
@@ -319,6 +330,7 @@ export function mountTour(options: TourOptions): TourControls {
       doc.removeEventListener('keydown', onKey);
       stopWatchingHash();
       player.dispose();
+      certificate?.close({ focus: false });
       for (const node of spotted) node.removeAttribute('data-tour-spot');
       removeBar();
       hidePrompt();

@@ -15,7 +15,7 @@ describe('the script of the sample board', () => {
   test('has unique scene ids and at least the scenes of the story', () => {
     const ids = sampleScript.map((s) => s.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(ids).toEqual(['baseline', 'candle-burns', 'someone-away', 'zombie', 'put-down', 'someone-insists', 'fog-zero', 'fog-10', 'fog-15', 'fog-20', 'message', 'close']);
+    expect(ids).toEqual(['baseline', 'candle-burns', 'someone-away', 'zombie', 'put-down', 'someone-insists', 'certificate', 'fog-zero', 'fog-10', 'fog-15', 'fog-20', 'message', 'close']);
   });
 
   test('every action of every scene is accepted by the engine on the sample board', () => {
@@ -26,7 +26,7 @@ describe('the script of the sample board', () => {
     for (const s of sampleScript) {
       expect(Number.isInteger(s.durationMs), s.id).toBe(true);
       expect(s.durationMs, s.id).toBeGreaterThan(0);
-      expect(['top', 'sign', 'fog', 'candle', 'survivors', 'safehouse', 'yard'], s.id).toContain(s.show);
+      expect(['top', 'sign', 'fog', 'candle', 'survivors', 'safehouse', 'yard', 'certificate'], s.id).toContain(s.show);
     }
   });
 });
@@ -34,7 +34,7 @@ describe('the script of the sample board', () => {
 describe('time', () => {
   test('the tour takes at most 60 seconds', () => {
     expect(totalMs(sampleScript)).toBeLessThanOrEqual(60_000);
-    expect(seconds(totalMs(sampleScript))).toBe(57);
+    expect(seconds(totalMs(sampleScript))).toBe(59);
   });
 
   test('scenes follow each other with no gap, from 0 to the total', () => {
@@ -108,6 +108,7 @@ describe('what it says', () => {
       'HB-112, left out 3 releases, climbs from urgency 8 to 13.',
       'Put down: HB-114 can never ship, and the yard has 13 tickets left.',
       'Someone insists on HB-108: it comes in, and saved cost of delay falls to 63.',
+      'One note for the stakeholders: what is out, and why.',
       '0 % reserve: the cut holds on 0 of 1,000 nights.',
       '10 % reserve: it holds on 134 of 1,000 nights.',
       '15 % reserve: it holds on 347 of 1,000 nights.',
@@ -144,6 +145,6 @@ describe('docs/video-tour-script.md', () => {
     expect(doc).toContain('| 0 % | 12 | 59 of 59 | 0 of 1,000 | 0 % |');
     expect(doc).toContain('| 5 % | 11 | 56 of 59 | 6 of 1,000 | 0 % |');
     expect(doc).toContain('| 20 % | 10 | 46 of 59 | 707 of 1,000 | 70 % |');
-    expect(doc).toContain('57.0 seconds');
+    expect(doc).toContain('59.0 seconds');
   });
 });

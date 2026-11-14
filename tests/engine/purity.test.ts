@@ -17,7 +17,7 @@ describe('purity of src/engine', () => {
   test('the scan sees the engine sources', () => {
     const names = files.map((f) => f.name).sort();
     expect(names).toEqual(
-      expect.arrayContaining(['capacity.ts', 'chain.ts', 'cod.ts', 'diff.ts', 'fog.ts', 'hash.ts', 'index.ts', 'keys.ts', 'oracle.ts', 'solver.ts', 'types.ts', 'validate.ts', 'weights.ts']),
+      expect.arrayContaining(['capacity.ts', 'certificate.ts', 'chain.ts', 'cod.ts', 'diff.ts', 'facts.ts', 'fog.ts', 'guard.ts', 'hash.ts', 'index.ts', 'keys.ts', 'oracle.ts', 'solver.ts', 'types.ts', 'validate.ts', 'weights.ts']),
     );
   });
 
@@ -84,21 +84,32 @@ describe('public API', () => {
         'SCALE',
         'burialCost',
         'capacityBetween',
+        'certificateNote',
+        'checkNumbers',
         'codParts',
         'compareKeyLists',
         'compareKeys',
         'costOfDelay',
+        'deathCertificate',
         'diffSolutions',
         'effectiveCapacity',
         'effectiveUrgency',
         'err',
+        'escapeMarkdown',
         'exhume',
+        'extractTokens',
         'fogCurve',
         'fogFactor',
         'fogFromTable',
         'fogTable',
+        'guardCertificate',
+        'guardFacts',
+        'nightFacts',
         'ok',
+        'plainText',
         'putDown',
+        'renderCertificate',
+        'renderNote',
         'resurrect',
         'simulateFog',
         'solveFreeze',

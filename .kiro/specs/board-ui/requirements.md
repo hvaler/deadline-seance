@@ -463,3 +463,7 @@ Requirement 16 left a fog slot on the sign. The `fog` spec (`.kiro/specs/fog`) f
 ## Addendum: the tour slot is filled
 
 The "Play the night · 60 s" slot is filled by the `night-tour` spec when the app is given a script (`mountApp(..., { tour })`); without one it stays the disabled slot. The other four slots are unchanged.
+
+## Addendum: the certificate slot is filled
+
+The "Death certificate" slot of the tools is filled by the `death-certificate` spec: it is now a working button that opens the note for stakeholders (Copy, Download .md). It is no longer a slot (no `data-slot`, no "Not built yet" note); the chronicle, CSV and MCP slots stay as they were.

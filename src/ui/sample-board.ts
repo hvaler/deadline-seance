@@ -7,6 +7,9 @@ import type { Board, Cost, Ticket } from '../engine/index';
  */
 export const SAMPLE_NOW = Date.UTC(2026, 10, 16, 8, 0);
 
+/** What the release is called, for the death certificate (the engine's board has no name). */
+export const SAMPLE_RELEASE = 'Hollow Bank app 3.2';
+
 export const PRODUCT_LINE = 'Hollow Bank app 3.2 · release eve';
 
 /** Cost of delay from its three parts, each on the scale 1, 2, 3, 5, 8, 13, 20. */

@@ -137,9 +137,9 @@ describe('while it plays', () => {
     h.app.tour?.start('button');
     const fill = bar(h.root)!.querySelector<HTMLElement>('.tour-progress-fill')!;
     expect(Number(fill.style.getPropertyValue('--p'))).toBe(0);
-    run(h, 28_500);
+    run(h, totalMs(sampleScript) / 2);
     expect(Number(fill.style.getPropertyValue('--p'))).toBeCloseTo(0.5, 1);
-    run(h, 28_500);
+    run(h, totalMs(sampleScript) / 2);
     expect(h.app.tour?.phase).toBe('ended');
     expect(Number(fill.style.getPropertyValue('--p'))).toBe(1);
   });
@@ -234,7 +234,7 @@ describe('the page while it plays', () => {
     expect(h.app.tour?.phase).toBe('playing');
     run(h, 100);
     expect(h.app.tour?.phase).toBe('ended');
-    expect(h.page.revealed).toHaveLength(12);
+    expect(h.page.revealed).toHaveLength(sampleScript.length - 1); // every scene but the certificate one brings a region into view
     expect(h.page.revealed.every((r) => r.instant)).toBe(true);
   });
 
@@ -492,5 +492,76 @@ describe('sound', () => {
     run(h, totalMs(sampleScript));
     expect(h.sound.played).toEqual(['bury', 'cascade', 'put-down', 'resurrect', 'bury', 'bury', 'bury']);
     expect(h.sound.toggles.length).toBe(toggles);
+  });
+});
+
+describe('the death certificate scene', () => {
+  const dialog = (root: ParentNode): HTMLElement | null => root.querySelector<HTMLElement>('[data-region="certificate"]');
+  const BEFORE = 5500 + 6500 + 5000 + 4000 + 5000 + 6000; // scenes 1 to 6
+
+  test('opens the note over the page, above the bar, for the state the story has reached, and closes it when the scene is over', () => {
+    const h = tourApp();
+    h.app.tour?.start('button');
+    run(h, BEFORE - 100);
+    expect(dialog(h.root)).toBeNull();
+    run(h, 200);
+    expect(caption(h.root)).toBe('One note for the stakeholders: what is out, and why.');
+    const d = dialog(h.root)!;
+    expect(d.classList.contains('is-tour')).toBe(true);
+    expect(d.textContent).toContain('Freeze: Wed 2026-11-18 18:00');
+    expect(d.textContent).toContain('HB-108, Transaction search: 8 points, cost of delay 10. Pushed out: HB-105 (11), HB-109 (15).');
+    expect(d.textContent).toContain("HB-112, Multi-currency wallet: closed as Won't Do. Blocks HB-114.");
+    expect(d.textContent).toContain('- Ana'.slice(2));
+    // the bar and the page: the bar is live, the page is inert, the note is inert and hidden from assistive technology
+    expect(bar(h.root)?.closest('[inert]')).toBeNull();
+    expect(h.root.querySelector('main')?.hasAttribute('inert')).toBe(true);
+    expect(d.hasAttribute('inert')).toBe(true);
+    expect(d.getAttribute('aria-hidden')).toBe('true');
+    run(h, 4000);
+    expect(dialog(h.root)).toBeNull();
+    expect(caption(h.root)).toBe('0 % reserve: the cut holds on 0 of 1,000 nights.');
+  });
+
+  test('the tour does not move the focus into the note, and the note is the only extra thing on the page', () => {
+    const h = tourApp();
+    h.app.tour?.start('key');
+    run(h, BEFORE + 100);
+    expect(dialog(h.root)?.contains(document.activeElement)).toBe(false);
+    expect(h.root.querySelectorAll('[data-region="certificate"]')).toHaveLength(1);
+    // the subtitle is the only live region that says anything: the note's status line is empty, inert and hidden, the announcer is silent
+    const speaking = [...h.root.querySelectorAll('[aria-live], [role="status"], [role="alert"]')].filter((n) => (n.textContent ?? '').trim() !== '' && n.closest('[inert], [aria-hidden="true"]') === null);
+    expect(speaking.map((n) => n.getAttribute('data-tour'))).toEqual(['caption']);
+  });
+
+  test('stopping the tour while the note is shown closes it and restores the state', () => {
+    const h = tourApp();
+    const before = h.app.store.getState();
+    h.app.tour?.start('button');
+    run(h, BEFORE + 1000);
+    expect(dialog(h.root)).not.toBeNull();
+    h.app.tour?.stop();
+    expect(dialog(h.root)).toBeNull();
+    expect(h.app.store.getState()).toBe(before);
+    expect(h.root.querySelector('[inert]')).toBeNull();
+  });
+
+  test('Esc stops the tour and takes the note away', () => {
+    const h = tourApp();
+    h.app.tour?.start('button');
+    run(h, BEFORE + 1000);
+    press('Escape');
+    expect(h.app.tour?.phase).toBe('idle');
+    expect(dialog(h.root)).toBeNull();
+  });
+
+  test('skipping the scene that shows it, and playing the tour to its end, leave no note behind', () => {
+    const h = tourApp();
+    h.app.tour?.start('button');
+    run(h, BEFORE + 1000);
+    byFocus(h.root, 'tour-skip').click();
+    expect(dialog(h.root)).toBeNull();
+    run(h, totalMs(sampleScript));
+    expect(h.app.tour?.phase).toBe('ended');
+    expect(dialog(h.root)).toBeNull();
   });
 });

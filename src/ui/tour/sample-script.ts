@@ -3,7 +3,7 @@ import type { Snapshot, Scene, SceneFacts, Script } from './types';
 import { count, listOf, thousands } from '../text';
 
 /**
- * The sample board's tour: "Play the night", 57 seconds. Every subtitle is one sentence with one key number, built from the engine's answers
+ * The sample board's tour: "Play the night", 59 seconds. Every subtitle is one sentence with one key number, built from the engine's answers
  * (`SceneFacts`) and nothing else; the screen carries the rest (the sign, the ring on a ticket, the fog strip). The keys named here are
  * constants of this script, used by the actions of the scenes too; `tests/ui/tour-script.test.ts` checks they are on the board.
  */
@@ -152,11 +152,20 @@ const insists: Scene = {
   spot: [`card:${INSISTED}`],
 };
 
+/** The note for the stakeholders, on the screen: the one state of the tour in which every section of it has something to say (a zombie, a put-down, someone away, an exhume and what it pushed out). */
+const certificate: Scene = {
+  id: 'certificate',
+  actions: [],
+  caption: () => 'One note for the stakeholders: what is out, and why.',
+  durationMs: 4000,
+  show: 'certificate',
+};
+
 const fogZero: Scene = {
   id: 'fog-zero',
   actions: [{ type: 'board/reset' }, { type: 'reserve/set', pct: 0 }],
   caption: ({ after }) => fogLine(after, 'the cut'),
-  durationMs: 5000,
+  durationMs: 4500,
   show: 'fog',
 };
 
@@ -174,7 +183,7 @@ const message: Scene = {
   id: 'message',
   actions: [],
   caption: (_facts: SceneFacts) => 'You have to cut more than the arithmetic says.',
-  durationMs: 4500,
+  durationMs: 3500,
   show: 'fog',
 };
 
@@ -182,8 +191,8 @@ const close: Scene = {
   id: 'close',
   actions: [],
   caption: () => 'The rule decides, not the loudest voice: now play your own night.',
-  durationMs: 5000,
+  durationMs: 4500,
   show: 'top',
 };
 
-export const sampleScript: Script = [baseline, candleBurns, someoneAway, zombie, putDown, insists, fogZero, fogStep(10), fogStep(15), fogStep(20), message, close];
+export const sampleScript: Script = [baseline, candleBurns, someoneAway, zombie, putDown, insists, certificate, fogZero, fogStep(10), fogStep(15), fogStep(20), message, close];

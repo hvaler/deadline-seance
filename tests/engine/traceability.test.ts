@@ -1,15 +1,18 @@
 import { describe, expect, test } from 'vitest';
 
+
 /**
  * Keeps `.kiro/specs/rule-engine/requirements.md` (the traceability table) honest: every property in scope has its own
  * test named with its number, in the file the table names, and nothing in the tests is skipped or focused.
  *
- * Out of scope for this spec: P12 (epitaph guard), P13 (CSV round trip), P24 (certificate), P25 (undo) and P26 (CSV import). They\n * belong to later specs. P19-P21 (the fog) joined in with the og spec; their tests are in og.test.ts.
+ * Out of scope: P13 (CSV round trip), P25 (undo) and P26 (CSV import). They belong to later specs. P19-P21 (the fog) joined in with the fog spec (tests in fog.test.ts);
+ * P12 (epitaph guard, in tests/ui/epitaph-guard.test.ts) and P24 (certificate, in certificate.test.ts) joined in with the death-certificate spec.
+
  */
 
-const tests = import.meta.glob('./*.test.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const tests = import.meta.glob(['./*.test.ts', '../ui/*.test.ts'], { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const files = Object.entries(tests)
-  .map(([path, text]) => ({ name: path.replace('./', ''), text }))
+  .map(([path, text]) => ({ name: path.replace(/^\.\.\//, '').replace(/^\.\//, ''), text }))
   .filter((f) => f.name !== 'traceability.test.ts');
 
 function code(text: string): string {
@@ -29,6 +32,7 @@ const TABLE: Readonly<Record<number, string>> = {
   9: 'impossible.test.ts',
   10: 'exhume.test.ts',
   11: 'capacity.test.ts',
+  12: 'ui/epitaph-guard.test.ts',
   14: 'capacity.test.ts',
   15: 'diff.test.ts',
   16: 'cod.test.ts',
@@ -39,6 +43,7 @@ const TABLE: Readonly<Record<number, string>> = {
   21: 'fog.test.ts',
   22: 'solver.test.ts',
   23: 'cod.test.ts',
+  24: 'certificate.test.ts',
   27: 'solver.test.ts',
 };
 

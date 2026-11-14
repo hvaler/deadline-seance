@@ -408,3 +408,23 @@ Este apartado precisa la sección «2. Niebla de las estimaciones» y P19–P21 
 
   Con otras 20 semillas (1 a 20) cada paso se mueve poco: 10 % entre 9 y 12 %, 15 % entre 29 y 33 %, 20 % entre 67 y 72 %, 25 % entre 94 y 96 %,
   30 % entre 99 y 100 %; 0 % y 5 % dan 0 % siempre. Los números 0 / 20 / 81 / 100 del prototipo salían de su tablero falso y no se usan.
+
+## 2026-11-15 — El certificado de defunción y la guardia de números (spec `death-certificate`)
+
+Este apartado precisa «7. El epitafio», «4. Certificado de defunción (reglas)», P12 y P24. Donde diga otra cosa que las anteriores, **manda esta**.
+
+- **Qué es un número para la guardia.** Se miran las fichas de un texto, de izquierda a derecha, en este orden: fecha `2026-11-18` (una sola ficha, no tres números), hora `18:00`, clave (`HB-108`: no es un número ni lleva signo),
+  día de la semana (`Mon`, `Friday`), decimal (`3.5`: siempre rechazado, el motor solo da enteros), entero (`59`, `1,000` = 1000 con comas solo entre grupos de tres, `13 %` = 13: el `%` es una unidad), entero con signo
+  (`−15`, `-15`, `+8`: el signo va pegado al dígito y no detrás de una letra, un dígito o un punto, así que `HB-108`, `80-150` y `Mon-Fri` no llevan signo) y palabra numérica (`zero` … `twenty`, `thirty` … `ninety`, `hundred`, `thousand`, `million`, `dozen`).
+  Un número sin signo vale si los hechos tienen ese número o su negativo («Loss: 16» para −16); un negativo solo vale si los hechos tienen el negativo; si la magnitud está con el otro signo, se rechaza como `wrong-sign`.
+  La guardia devuelve las fichas rechazadas con su posición, no solo un booleano.
+- **Datos del tablero.** Títulos, nombres y nombre de la versión son datos del usuario: se escapan en el Markdown y la guardia los ignora **por posición** (el certificado devuelve los tramos), nunca buscando el título en el texto.
+  Las claves no son datos: se comprueban como claves.
+- **Límites.** La guardia prueba la procedencia, no el significado (un número equivocado que sea otro hecho pasa; lo cubren los certificados de referencia y las pruebas de igualdad con el solver). No lee «twice», «half», ordinales en letra ni números romanos.
+- **Los motivos de un ticket fuera**, por este orden: (a) *bloqueado por un rematado* (lo dice el solver; nombra la clave rematada); (b) *sigue a una dependencia enterrada* (el solver; nombra las dependencias); (c) *desplazado por una exhumación*; (d) *no cabe*.
+  (c) se calcula así: el solver dice «no hay sitio» y el mismo cálculo con las exhumaciones deshechas (el imprescindible vuelve al valor del tablero de origen) lo mantiene dentro. Se nombra la exhumación (o las exhumaciones) cuyo deshacer **por sí solo** lo trae de vuelta;
+  si ninguna lo hace sola (hacen falta dos a la vez), se nombran **todas** las exhumadas y nunca se dice que una sola lo hizo.
+- **El certificado** tiene siempre las mismas secciones y en este orden: cabecera (versión, congelación, «a fecha de» el `now` del tablero), el corte, ¿aguanta?, lo que queda fuera (tabla ordenada por coste de esperar, de mayor a menor, y por clave), zombis, rematados (Won't Do),
+  personas ausentes y exhumados por decisión. Una sección vacía dice «None.». Sin congelación posible, el certificado es corto: cabecera, lo que necesitan los imprescindibles y los bloqueados por un rematado.
+- **P12** (reformulada): el epitafio plantilla de cada lápida que muestra la app pasa la guardia contra los hechos de ese ticket. **P24** (reformulada): el certificado de cualquier noche generada (vela, reserva, ausentes, exhumados, rematados, títulos con dígitos y caracteres de Markdown)
+  pasa la guardia con los hechos de la noche, sin fichas rechazadas. La plantilla no contiene ningún dígito ni palabra numérica: todo número sale de los hechos.

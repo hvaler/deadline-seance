@@ -2,31 +2,43 @@ import type { Ctx, Part } from '../context';
 import { el } from '../dom';
 
 /**
- * The tools: the one thing that works (back to the sample board) and, clearly marked, the places where later features will go. Each slot
+ * The tools: what works (back to the sample board, the death certificate) and, clearly marked, the places where later features will go. Each slot
  * is a disabled button or plain text that says it is not built yet, and does nothing.
  */
 
 export interface SlotSpec {
-  readonly name: 'certificate' | 'chronicle' | 'csv' | 'mcp';
+  readonly name: 'chronicle' | 'csv' | 'mcp';
   readonly label: string;
   /** Plain text instead of a disabled button. */
   readonly plain?: boolean;
 }
 
 export const TOOL_SLOTS: readonly SlotSpec[] = [
-  { name: 'certificate', label: 'Death certificate' },
   { name: 'chronicle', label: 'Night chronicle and undo' },
   { name: 'csv', label: 'CSV import and export' },
   { name: 'mcp', label: 'The rule as an MCP server for the Kiro agent', plain: true },
 ];
 
-export function mountTools(section: HTMLElement, ctx: Ctx): Part {
+/** What the tools need from the rest of the app: what to do when the death certificate button is pressed. */
+export interface ToolsHook {
+  readonly onCertificate: (opener: HTMLElement) => void;
+}
+
+export function mountTools(section: HTMLElement, ctx: Ctx, hook: ToolsHook): Part {
   const reset = el('button', {
     class: 'button button-primary',
     attrs: { type: 'button' },
     data: { action: 'reset', focus: 'reset' },
     text: 'Reset the sample board',
     on: { click: () => ctx.act({ type: 'board/reset' }) },
+  });
+
+  const certificate = el('button', {
+    class: 'button',
+    attrs: { type: 'button', 'aria-haspopup': 'dialog' },
+    data: { action: 'certificate', focus: 'certificate' },
+    text: 'Death certificate',
+    on: { click: (event) => hook.onCertificate(event.currentTarget as HTMLElement) },
   });
 
   const slots = el(
@@ -47,6 +59,6 @@ export function mountTools(section: HTMLElement, ctx: Ctx): Part {
     }),
   );
 
-  section.append(el('div', { class: 'tools-row' }, [reset]), slots);
+  section.append(el('div', { class: 'tools-row' }, [reset, certificate]), slots);
   return { update() {} };
 }

@@ -31,11 +31,18 @@ The app opens on a built-in sample board, "Hollow Bank app 3.2 · release eve": 
 - Read the **fog of estimates** on the sign: in how many of 1,000 simulated nights the kept work still fits the team when every estimate lands between 80 % and 150 % of what was written, for each reserve from 0 to 30 %. On some boards a bigger reserve even lowers the chance, so the strip only shows the numbers.
 - Every number on the screen comes from the engine in `src/engine`. The epitaph on a stone only says why the ticket is buried; its cost of waiting, releases left out and hunger are in the stone's details.
 
-Out of scope for now: CSV import and export, the death certificate, the chronicle with undo and the MCP server. Their places on the page are inert, labelled slots.
+Out of scope for now: CSV import and export, the chronicle with undo and the MCP server. Their places on the page are inert, labelled slots.
+
+## The death certificate
+
+**Death certificate** (in the tools) opens a note for stakeholders about the night you are looking at: the freeze and the capacity, what is kept and what is left outside, the chance the cut holds on 1,000 simulated nights, and for every ticket left out its reason (does not fit, follows a buried dependency, was pushed out by an exhume, or cannot ship because its dependency was put down), its cost of delay with the formula and what waiting for the next release costs. Then the zombies, the tickets put down, who is away and what was exhumed. **Copy** puts the Markdown on the clipboard (if the browser refuses, the text is shown selected so you can copy it by hand) and **Download .md** saves it as a file. Nothing leaves the page.
+
+Every number in the note is computed by the engine (src/engine/facts.ts) and checked by a deterministic number guard (src/engine/guard.ts): the text is rejected if it says a number, date, time or ticket key that is not one of the facts. The guard proves where a number came from, not that it is the right one, so two real notes are kept as references: [Friday 18:00](docs/examples/death-certificate-friday.md) and [after the tour's actions](docs/examples/death-certificate-tour.md). To regenerate them after a change on purpose: 
+px vitest run tests/ui/certificate-golden.test.ts -u.
 
 ## Play the night
 
-The button **Play the night · 60 s** runs a 57-second tour of the real app: it presses the app's own controls (the candle, a person away, a zombie put down, an exhume, the reserve) with one subtitle per scene, and every number in a subtitle is what the engine returns at that moment. **Pause**, **Skip scene** and **Stop** (or `Esc`) are on the screen all the time; when it ends, your own state is put back exactly. The page is inert while it plays, and the tour never turns sound on.
+The button **Play the night · 60 s** runs a 59-second tour of the real app: it presses the app's own controls (the candle, a person away, a zombie put down, an exhume, the reserve) with one subtitle per scene, and every number in a subtitle is what the engine returns at that moment. **Pause**, **Skip scene** and **Stop** (or `Esc`) are on the screen all the time; when it ends, your own state is put back exactly. The page is inert while it plays, and the tour never turns sound on.
 
 To record it: open the page, change the address to end in `#play` (the page shows "Press Space to play the night" and waits), and press **Space** when the recording runs. For the app's sounds, press **Sound on** first. The script of the video, with the real numbers of every scene, is [docs/video-tour-script.md](docs/video-tour-script.md); it is generated from the tour's data and a test fails if it drifts.
 ## Layout

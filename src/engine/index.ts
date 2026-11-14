@@ -28,3 +28,13 @@ export type { ExhumeApplied, ExhumeOutcome, ExhumeRejected, PutDownApplied } fro
 // The fog of estimates
 export { FOG_NIGHTS, FOG_MIN_PCT, FOG_MAX_PCT, FOG_RESERVE_STEPS, fogCurve, fogFactor, fogFromTable, fogTable, simulateFog } from './fog';
 export type { FogPoint, FogPointImpossible, FogPointOk, FogResult, FogTable } from './fog';
+
+// What a text may say, and the guard that checks it
+export { nightFacts } from './facts';
+export type { ImpossibleNight, LocalStamp, NightFacts, NightInput, OutsideFact, OutsideReason, PushedOut, SolvedNight } from './facts';
+export { checkNumbers, extractTokens, guardFacts } from './guard';
+export type { ExtractOptions, GuardFacts, GuardResult, Offending, OffendingReason, Span, Token, TokenKind } from './guard';
+
+// The death certificate
+export { certificateNote, deathCertificate, escapeMarkdown, guardCertificate, plainText, renderCertificate, renderNote } from './certificate';
+export type { Block, Data, KeyRef, Note, RenderedCertificate, Text } from './certificate';

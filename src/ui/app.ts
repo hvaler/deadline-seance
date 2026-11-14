@@ -8,6 +8,8 @@ import type { Ctx, Part } from './context';
 import { derive } from './derive';
 import { el } from './dom';
 import { mountCandle } from './render/candle';
+import { mountCertificate } from './render/certificate';
+import type { CertificateControls } from './render/certificate';
 import { browserObserve, createChainDrawer } from './render/chains';
 import { mountGrounds } from './render/grounds';
 import { renderInvalidBoard } from './render/invalid-board';
@@ -38,6 +40,8 @@ export interface MountedBoard {
   readonly root: HTMLElement;
   /** The guided tour, when the app was given a script. */
   readonly tour: TourControls | null;
+  /** The death certificate view. */
+  readonly certificate: CertificateControls;
   destroy(): void;
 }
 
@@ -57,6 +61,8 @@ export interface MountOptions {
   readonly atmosphere?: AtmosphereDeps;
   /** The guided tour for this board. Without one, the tour button is the disabled slot it always was. */
   readonly tour?: Script;
+  /** What the release is called, for the death certificate. The board has no name of its own; without one the note has no release line. */
+  readonly release?: string;
 }
 
 /** The sections of the page, top to bottom, as `data-region` names. */
@@ -153,6 +159,7 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
 
   // ---- the regions ----
   let tour: TourControls | null = null;
+  let certificate: CertificateControls | null = null;
   const chains = createChainDrawer(services.frame, browserObserve());
   const parts: Part[] = [
     mountTitleCard(header, ctx, options.tour === undefined ? undefined : { onPlay: () => tour?.start('button') }),
@@ -160,7 +167,7 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
     mountCandle(sections.candle, ctx),
     mountSurvivors(sections.survivors, ctx),
     mountGrounds(sections.safehouse, sections.yard, ctx, { yardChanged: (field, svg, view) => chains.schedule(field, svg, view) }),
-    mountTools(sections.tools, ctx),
+    mountTools(sections.tools, ctx, { onCertificate: (opener) => certificate?.open(opener) }),
   ];
 
   // ---- keeping the page in step with the state ----
@@ -170,8 +177,10 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
   }
   render(store.getState());
   const stop = store.subscribe(render);
+  const mountedCertificate = mountCertificate({ ctx, page, header, main, release: options.release ?? null });
+  certificate = mountedCertificate;
   // The tour needs the page to exist (it adds a bar and a prompt to it); #play shows its prompt as soon as it is mounted.
-  if (options.tour !== undefined) tour = mountTour({ ctx, script: options.tour, page, main, header });
+  if (options.tour !== undefined) tour = mountTour({ ctx, script: options.tour, page, main, header, certificate: mountedCertificate });
   const mountedTour = tour;
 
   return {
@@ -179,8 +188,10 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
     store,
     root,
     tour: mountedTour,
+    certificate: mountedCertificate,
     destroy() {
       mountedTour?.destroy();
+      mountedCertificate.destroy();
       stop();
       for (const part of parts) part.destroy?.();
       chains.destroy();

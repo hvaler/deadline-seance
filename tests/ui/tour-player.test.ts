@@ -75,7 +75,7 @@ describe('playing', () => {
     r.timers.advance(100);
     expect(r.player.phase).toBe('ended');
     expect(scenesOf(r.events).map((s) => s.caption)).toEqual(sim.map((s) => s.caption));
-    expect(scenesOf(r.events).map((s) => [s.index, s.total])).toEqual(sim.map((s) => [s.index, 12]));
+    expect(scenesOf(r.events).map((s) => [s.index, s.total])).toEqual(sim.map((s) => [s.index, sampleScript.length]));
     expect(afterEach).toHaveLength(sim.length);
     afterEach.forEach((state, i) => expect(state, sim[i]?.scene.id).toEqual(sim[i]?.facts.after.state));
   });
@@ -112,8 +112,8 @@ describe('playing', () => {
     r.player.start();
     r.timers.advance(totalMs(sampleScript));
     const progress = r.events.filter((e): e is Extract<Event, { kind: 'progress' }> => e.kind === 'progress');
-    expect(progress[0]).toMatchObject({ elapsed: 0, total: 57000 });
-    expect(progress.at(-1)).toMatchObject({ elapsed: 57000, total: 57000 });
+    expect(progress[0]).toMatchObject({ elapsed: 0, total: totalMs(sampleScript) });
+    expect(progress.at(-1)).toMatchObject({ elapsed: totalMs(sampleScript), total: totalMs(sampleScript) });
     for (let i = 1; i < progress.length; i++) expect(progress[i]!.elapsed).toBeGreaterThanOrEqual(progress[i - 1]!.elapsed);
   });
 
@@ -318,7 +318,7 @@ describe('play again, dispose, and scenes that are only data', () => {
     r.timers.advance(totalMs(sampleScript));
     expect(r.player.phase).toBe('ended');
     expect(r.store.getState()).toBe(start);
-    expect(scenesOf(r.events)).toHaveLength(24);
+    expect(scenesOf(r.events)).toHaveLength(sampleScript.length * 2);
   });
 
   test('dispose clears the timer and the ring and restores nothing', () => {
@@ -389,6 +389,6 @@ describe('a browser\'s timers are always a little late', () => {
     timers.runWhile(() => player.phase === 'playing');
     expect(player.phase).toBe('ended');
     expect(timers.clock).toBeGreaterThanOrEqual(totalMs(sampleScript));
-    expect(timers.clock).toBeLessThanOrEqual(totalMs(sampleScript) + 12 * 5 + 5);
+    expect(timers.clock).toBeLessThanOrEqual(totalMs(sampleScript) + sampleScript.length * 5 + 5);
   });
 });

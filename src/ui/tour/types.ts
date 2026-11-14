@@ -7,7 +7,7 @@ import type { Action, AppState } from '../state';
  */
 
 /** The part of the page a scene brings into view. */
-export type Show = 'top' | 'sign' | 'fog' | 'candle' | 'survivors' | 'safehouse' | 'yard';
+export type Show = 'top' | 'sign' | 'fog' | 'candle' | 'survivors' | 'safehouse' | 'yard' | 'certificate';
 
 /** A state and the view the screen derives from it. */
 export interface Snapshot {
