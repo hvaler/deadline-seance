@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, test } from 'vitest';
-import { byFocus, mountWith } from './harness';
+import { byFocus, destroyMounted, mountWith } from './harness';
 
 afterEach(() => {
+  destroyMounted();
   document.body.replaceChildren();
 });
 
@@ -87,3 +88,38 @@ describe('what plays, when sound is on', () => {
     expect(sound.played).toHaveLength(1);
   });
 });
+
+describe('the undo sound (night-chronicle spec)', () => {
+  function withSound() {
+    const h = mountWith();
+    byFocus(h.root, 'sound').click();
+    return h;
+  }
+  const ctrlZ = (): void => void document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true, cancelable: true }));
+  test('undo plays once, for the button, Undo to here and Ctrl+Z, only when Sound is on', () => {
+    const { root, sound } = withSound();
+    byFocus(root, 'survivor:Ana').click();
+    byFocus(root, 'exhume:HB-108').click();
+    byFocus(root, 'undo').click();
+    expect(sound.played.filter((e) => e === 'undo')).toHaveLength(1);
+    ctrlZ();
+    expect(sound.played.filter((e) => e === 'undo')).toHaveLength(2);
+    byFocus(root, 'survivor:Bruno').click();
+    byFocus(root, 'exhume:HB-108').click();
+    root.querySelector<HTMLButtonElement>('ol.chronicle-entries li:last-child button.entry-undo')!.click();
+    expect(sound.played.filter((e) => e === 'undo')).toHaveLength(3);
+    expect(sound.played.at(-1)).toBe('undo');
+  });
+  test('nothing plays when Sound is off, or when there is nothing to undo', () => {
+    const off = mountWith();
+    byFocus(off.root, 'survivor:Ana').click();
+    byFocus(off.root, 'undo').click();
+    expect(off.sound.played).toEqual([]);
+    const on = withSound();
+    ctrlZ();
+    expect(on.sound.played).toEqual([]);
+  });
+});
+function afterEachDestroy(): void {
+  destroyMounted();
+}

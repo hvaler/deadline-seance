@@ -284,7 +284,7 @@ in Vitest and in the MCP server.
 | P27 cascade | 5.15 | `solver.test.ts` | yes |
 
 P12 and P13 fall inside the range P1–P18 but need the number guard and the CSV module, which this spec leaves out. They go in
-the next specs. P19–P21 (fog), P24 (certificate), P25 (undo) and P26 (CSV import) are also out of scope.
+the next specs. P19–P21 (fog), P24 (certificate), P25 (undo) and P26 (CSV import) are also out of scope. (Later: P19–P21, P24 and P26 joined in with their specs; P25 joined in with the `night-chronicle` spec, in `tests/ui/chronicle.test.ts`.)
 
 ## Decisions taken in this spec (not explicit in `docs/rule.md`)
 

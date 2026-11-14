@@ -21,6 +21,12 @@ export interface Ctx {
   settle(change: Change, state: AppState): void;
   /** A gesture (a drag of the candle or the reserve) starts (true) or has settled (false): on a big board the fog waits for the settle. */
   gestureActive(active: boolean): void;
+  /** A gesture settled: writes its one chronicle entry (the state it began in against the state now). Nothing is written for a change that is not a decision. */
+  record(start: AppState, change: Change): void;
+  /** A gesture of the page registers here, so an undo can settle a pending one first. */
+  addGesture(gesture: { commit(): void }): void;
+  /** Undoes the entry at index `to` of the chronicle and every later one: settles pending gestures, restores, announces once, plays the undo sound if Sound is on. With nothing to undo it says "Nothing to undo." and changes nothing. */
+  undo(to: number | 'last'): void;
 }
 
 /** One region of the page: it draws what the view says and nothing else. */

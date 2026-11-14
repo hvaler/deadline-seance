@@ -8,6 +8,7 @@ import type { Ctx, Part } from './context';
 import { derive } from './derive';
 import { el } from './dom';
 import { mountCandle } from './render/candle';
+import { mountChronicle } from './render/chronicle';
 import { mountBanner } from './render/banner';
 import type { BannerPart } from './render/banner';
 import { mountCertificate } from './render/certificate';
@@ -23,12 +24,17 @@ import type { TourControls } from './render/tour';
 import { mountTools } from './render/tools';
 import { browserServices } from './services';
 import type { Services } from './services';
+import { decisionEffect, undoLine } from '../engine/index';
+import type { DecisionEffect } from '../engine/index';
+import { undoTo } from './chronicle';
+import { isTextField, isUndoKey } from './keys';
+import { solveState } from './solve';
 import { soundEventFor } from './sound-events';
 import { initialStateFor, reducer } from './state';
 import type { Action, AppState, Change } from './state';
 import { createStore } from './store';
 import type { Store } from './store';
-import { announcementText } from './text';
+import { NOTHING_TO_UNDO, announcementText } from './text';
 import type { Script } from './tour/types';
 
 /**
@@ -68,7 +74,7 @@ export interface MountOptions {
 }
 
 /** The sections of the page, top to bottom, as `data-region` names. */
-export const REGIONS = ['sign', 'candle', 'survivors', 'safehouse', 'yard', 'tools'] as const;
+export const REGIONS = ['sign', 'candle', 'survivors', 'chronicle', 'safehouse', 'yard', 'tools'] as const;
 export type Region = (typeof REGIONS)[number];
 
 function section(region: Region, headingId: string, heading: string, extra: { id?: string; focusable?: boolean } = {}): HTMLElement {
@@ -100,6 +106,7 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
     sign: section('sign', 'h-verdict', 'Verdict'),
     candle: section('candle', 'h-candle', 'The candle'),
     survivors: section('survivors', 'h-survivors', 'Survivors'),
+    chronicle: section('chronicle', 'h-chronicle', 'Night chronicle'),
     safehouse: section('safehouse', 'h-safehouse', 'Inside the safehouse', { id: 'safehouse', focusable: true }),
     yard: section('yard', 'h-yard', 'Left outside', { id: 'yard', focusable: true }),
     tools: section('tools', 'h-tools', 'Tools'),
@@ -116,6 +123,7 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
     sections.sign,
     sections.candle,
     sections.survivors,
+    sections.chronicle,
     el('div', { class: 'grounds' }, [sections.safehouse, sections.yard]),
     sections.tools,
   ]);
@@ -147,6 +155,7 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
 
   // How many drags (the candle, the reserve) are going on. While one is, a big board's fog waits for it to settle (plan B of the fog spec).
   let moving = 0;
+  const gestures: { commit(): void }[] = [];
   const ctx: Ctx = {
     store,
     services,
@@ -156,9 +165,35 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
       const before = store.getState();
       store.dispatch(action);
       const after = store.getState();
-      if (after !== before && action.type !== 'sound/set' && action.type !== 'release/set') settle(after.change, after, options?.announce !== false);
+      const inner = action.type === 'tour/step' ? action.action : action;
+      const silent = inner.type === 'sound/set' || inner.type === 'release/set' || inner.type === 'chronicle/settle' || inner.type === 'chronicle/undo';
+      if (after !== before && !silent) settle(after.change, after, options?.announce !== false);
     },
     settle,
+    record(start, change) {
+      if (change.kind === 'done') store.dispatch({ type: 'chronicle/settle', from: start, subject: change.subject });
+    },
+    addGesture(gesture) {
+      gestures.push(gesture);
+    },
+    undo(to) {
+      for (const gesture of gestures) gesture.commit(); // a gesture still going is settled first, so its entry exists
+      const live = store.getState();
+      const index = to === 'last' ? live.chronicle.entries.length - 1 : to;
+      const undone = live.chronicle.entries[index];
+      const target = undone === undefined ? live : undoTo(live, index);
+      if (undone === undefined || target === live) {
+        announcer.say(NOTHING_TO_UNDO);
+        return;
+      }
+      // What the user will see change: the engine's diff between the night they leave and the one they get back.
+      const effect: DecisionEffect = undone.previous !== null ? { kind: 'new-board' } : decisionEffect(solveState(live), solveState(target));
+      const text = undoLine(undone.facts, live.chronicle.entries.length - index, effect);
+      store.dispatch({ type: 'chronicle/undo', to: index });
+      if (effect.kind === 'impossible') announcer.alert(text);
+      else announcer.say(text);
+      if (store.getState().sound) services.sound.play('undo');
+    },
     gestureActive(active) {
       moving = Math.max(0, moving + (active ? 1 : -1));
       if (!active && moving === 0) render(store.getState()); // the drag settled: the fog fills in
@@ -175,6 +210,7 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
     mountSign(sections.sign, ctx),
     mountCandle(sections.candle, ctx),
     mountSurvivors(sections.survivors, ctx),
+    mountChronicle(sections.chronicle, ctx),
     mountGrounds(sections.safehouse, sections.yard, ctx, { yardChanged: (field, svg, view) => chains.schedule(field, svg, view) }),
     banner,
     mountTools(sections.tools, ctx, { onCertificate: (opener) => certificate?.open(opener), banner: () => banner.node }),
@@ -192,6 +228,15 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
   // The tour needs the page to exist (it adds a bar and a prompt to it); #play shows its prompt as soon as it is mounted.
   if (options.tour !== undefined) tour = mountTour({ ctx, script: options.tour, page, main, header, certificate: mountedCertificate });
   const mountedTour = tour;
+  // Ctrl+Z / Cmd+Z undoes, unless the user is typing (the browser's own undo), the tour is running or the certificate dialog is open.
+  const doc = root.ownerDocument;
+  function onUndoKey(event: KeyboardEvent): void {
+    if (event.defaultPrevented || !isUndoKey(event) || isTextField(event.target)) return;
+    if (page.classList.contains('is-touring') || mountedCertificate.isOpen) return;
+    event.preventDefault();
+    ctx.undo('last');
+  }
+  doc.addEventListener('keydown', onUndoKey);
 
   return {
     kind: 'board',
@@ -200,6 +245,7 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
     tour: mountedTour,
     certificate: mountedCertificate,
     destroy() {
+      doc.removeEventListener('keydown', onUndoKey);
       mountedTour?.destroy();
       mountedCertificate.destroy();
       stop();

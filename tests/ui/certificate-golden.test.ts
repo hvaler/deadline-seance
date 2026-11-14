@@ -35,6 +35,19 @@ describe('docs/examples', () => {
     await expect(deathCertificate(factsOf(tour))).toMatchFileSnapshot('../../docs/examples/death-certificate-tour.md');
   });
 
+  test('the chronicle adds one last section and changes nothing above it (night-chronicle spec)', () => {
+    for (const state of [friday, tour]) {
+      const facts = factsOf(state);
+      const withDecisions = deathCertificate(facts);
+      const without = deathCertificate({ ...facts, decisions: null });
+      expect(withDecisions.startsWith(without)).toBe(true);
+      expect(withDecisions.slice(without.length).startsWith('\n## Decisions tonight\n')).toBe(true);
+    }
+    expect(deathCertificate(factsOf(friday)).endsWith('## Decisions tonight\n\nNone.\n')).toBe(true);
+    const lines = deathCertificate(factsOf(tour)).split('## Decisions tonight\n\n')[1]!.trim().split('\n');
+    expect(lines).toHaveLength(4);
+    expect(lines.map((l) => l.slice(0, 5))).toEqual(['- 1 \u00b7', '- 2 \u00b7', '- 3 \u00b7', '- 4 \u00b7']);
+  });
   test('both pass the guard and say nothing that promises more reserve is safer', () => {
     for (const state of [friday, tour]) {
       const facts = factsOf(state);

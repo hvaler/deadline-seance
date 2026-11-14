@@ -1,5 +1,6 @@
 import { validateBoard } from '../engine/index';
 import type {
+  DecisionFacts,
   Diff,
   EngineError,
   FreezeInput,
@@ -34,7 +35,13 @@ export type Action =
   /** The name of the release, for the certificate and the export. */
   | { readonly type: 'release/set'; readonly name: string }
   /** Only the guided tour sends this, to put the user's own state back exactly. No control of the page does. */
-  | { readonly type: 'state/restore'; readonly state: AppState };
+  | { readonly type: 'state/restore'; readonly state: AppState }
+  /** A candle or reserve gesture settled: writes its one entry, comparing `from` (the state when the gesture began) with the state now. */
+  | { readonly type: 'chronicle/settle'; readonly from: AppState; readonly subject: Subject }
+  /** Undoes the entry at index `to` of the chronicle and every later one. `to` = the last index is "Undo". */
+  | { readonly type: 'chronicle/undo'; readonly to: number }
+  /** Only the guided tour sends this: the inner action runs, and the chronicle is not written. */
+  | { readonly type: 'tour/step'; readonly action: Action };
 
 export type Subject =
   | { readonly kind: 'candle'; readonly from: number; readonly to: number }
@@ -76,6 +83,28 @@ export type Source =
       readonly putDown: readonly Ticket[];
     };
 
+/** The most entries the chronicle keeps. The 51st decision drops the oldest. */
+export const CHRONICLE_CAP = 50;
+/** One decision of the night. */
+export interface Entry {
+  /** Its number: the decisions dropped by the cap plus its place, plus one, when it was written. It never changes. */
+  readonly no: number;
+  /** What was decided and what it did to the cut. The sentence is made from it, in the engine, wherever it is shown. */
+  readonly facts: DecisionFacts;
+  /** The state before the decision: a reference to an immutable state, not a copy. It carries no chronicle, so no chain of states grows behind it. */
+  readonly before: Omit<AppState, 'chronicle'>;
+  /** Only for a load or a back to the sample: the chronicle of the board that was replaced, so undoing the entry brings it back. */
+  readonly previous: Chronicle | null;
+}
+export interface Chronicle {
+  /** Oldest first, at most `CHRONICLE_CAP`. */
+  readonly entries: readonly Entry[];
+  /** How many older entries the cap removed. */
+  readonly dropped: number;
+  /** True when the cap dropped a load or sample entry: the board before it can no longer be brought back. */
+  readonly lost: boolean;
+}
+export const EMPTY_CHRONICLE: Chronicle = { entries: [], dropped: 0, lost: false };
 export interface AppState {
   /** The board as loaded, to go back to on reset. */
   readonly home: ValidBoard;
@@ -93,6 +122,8 @@ export interface AppState {
   /** The board and release the app started with (the sample): oard/sample goes back to them. */
   readonly builtIn: { readonly board: ValidBoard; readonly release: string | null };
   readonly source: Source;
+  /** The decisions of the night on this board, and how to undo them. */
+  readonly chronicle: Chronicle;
   /** The name of the release, or null. */
   readonly release: string | null;
 }
@@ -111,6 +142,7 @@ export function initialStateFor(board: ValidBoard, release: string | null = null
     builtIn: { board, release },
     source: { kind: 'built-in' },
     release,
+    chronicle: EMPTY_CHRONICLE,
   };
 }
 

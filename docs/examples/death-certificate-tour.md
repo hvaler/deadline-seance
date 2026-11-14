@@ -59,3 +59,10 @@ A ticket is a zombie when leaving it out again makes 3 releases in a row. Its ur
 ## Exhumed by decision
 
 - HB-108, Transaction search: 8 points, cost of delay 10. Pushed out: HB-105 (11), HB-109 (15).
+
+## Decisions tonight
+
+- 1 · Freeze moved to Wed 18:00 → HB-105, HB-113, HB-115, HB-118 out (−54)
+- 2 · Ana leaves → HB-105 in; HB-104, HB-106, HB-107, HB-116 out (−34)
+- 3 · Put down HB-112 → no change
+- 4 · Exhumed HB-108 → in; HB-105, HB-109 out (−16)

@@ -27,6 +27,9 @@ describe('candle steps', () => {
     expect(CANDLE_STEPS[0]?.freezeAt).toBe(SAMPLE_NOW);
   });
 
+  test('weekday and time are the two halves of the label', () => {
+    for (const step of CANDLE_STEPS) expect(`${step.weekday} ${step.time}`).toBe(step.label);
+  });
   test('every label is the Madrid local time of its instant', () => {
     for (const step of CANDLE_STEPS) expect(madridLabel(step.freezeAt)).toBe(step.label);
   });

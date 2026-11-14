@@ -71,11 +71,11 @@ describe('MCP: the web bundle does not change', () => {
     }
   });
 
-  test('the JavaScript and CSS stay inside the budget of the tech steering (60 kB gzip), and the JavaScript at today\'s 37 kB', () => {
+  test('the JavaScript and CSS stay inside the budget of the tech steering (60 kB gzip), and the JavaScript at today\'s 40 kB (the night-chronicle spec took it from about 37 kB to 39.9 kB: the engine sentences, the undo, the panel and the fifth sound)', () => {
     const size = (re: RegExp) => filesOf(out).filter((f) => re.test(f)).reduce((n, f) => n + gzipSync(readFileSync(f)).length, 0);
     const js = size(/\.js$/);
     const css = size(/\.css$/);
-    expect(js).toBeLessThan(37_500);
+    expect(js).toBeLessThan(40_500);
     expect(js + css).toBeLessThan(60_000);
   });
 });

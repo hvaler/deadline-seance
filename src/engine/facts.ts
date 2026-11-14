@@ -1,4 +1,5 @@
 import { blockedBy } from './chain';
+import type { DecisionFacts } from './chronicle';
 import { codParts, effectiveUrgency } from './cod';
 import type { CodParts } from './cod';
 import { FOG_MAX_PCT, FOG_MIN_PCT, simulateFog } from './fog';
@@ -20,10 +21,17 @@ export interface NightInput {
   readonly freeze: FreezeInput;
   /** Names of the people sent away. */
   readonly away: readonly string[];
+  /** The decisions of the night, oldest first. Left out, the note has no "Decisions tonight" section (the MCP server never gives them). */
+  readonly decisions?: Decisions;
   /** The board has no name field, so the caller says what the release is called. */
   readonly release: string | null;
 }
 
+/** The chronicle as a note needs it: the decisions still listed, and how many older ones the cap dropped. */
+export interface Decisions {
+  readonly entries: readonly DecisionFacts[];
+  readonly dropped: number;
+}
 /** A local time in the board's zone: `Fri`, `2026-11-20`, `18:00`. */
 export interface LocalStamp {
   readonly weekday: string;
@@ -69,6 +77,8 @@ export interface PushedOut {
 
 interface NightBase {
   readonly release: string | null;
+  /** Null when the caller gave no decisions. */
+  readonly decisions: Decisions | null;
   readonly zone: string;
   readonly asOf: LocalStamp;
   readonly freeze: LocalStamp;
@@ -210,6 +220,7 @@ export function nightFacts(input: NightInput): Result<NightFacts> {
   const keys = [...new Set([...board.tickets.map((t) => t.key), ...board.wontDo])].sort(compareKeys);
   const base: NightBase = {
     release: input.release,
+    decisions: input.decisions === undefined ? null : { entries: [...input.decisions.entries], dropped: input.decisions.dropped },
     zone,
     asOf: stampOf(freeze.now, zone),
     freeze: stampOf(freeze.freezeAt, zone),

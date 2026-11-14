@@ -67,7 +67,7 @@ export function mountTour(options: TourOptions): TourControls {
   // ---- the host: what the player asks the page to do ----
   const host: TourHost = {
     getState: () => ctx.store.getState(),
-    act: (action) => ctx.act(action, { announce: false }),
+    act: (action) => ctx.act({ type: 'tour/step', action }, { announce: false }),
     restore(state) {
       restoreInto(ctx.store, state);
       services.page.scrollTo(savedScroll);

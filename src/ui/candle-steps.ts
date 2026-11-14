@@ -9,22 +9,25 @@
 export interface CandleStep {
   /** Local time in Europe/Madrid, for example "Fri 18:00". */
   readonly label: string;
+  /** The day and the time of label apart (Fri, 18:00): the chronicle gives them to the engine as data. */
+  readonly weekday: string;
+  readonly time: string;
   /** Epoch milliseconds passed to the engine as `freezeAt`. */
   readonly freezeAt: number;
 }
 
 export const CANDLE_STEPS: readonly CandleStep[] = [
-  { label: 'Mon 09:00', freezeAt: Date.UTC(2026, 10, 16, 8, 0) },
-  { label: 'Mon 13:00', freezeAt: Date.UTC(2026, 10, 16, 12, 0) },
-  { label: 'Mon 18:00', freezeAt: Date.UTC(2026, 10, 16, 17, 0) },
-  { label: 'Tue 13:00', freezeAt: Date.UTC(2026, 10, 17, 12, 0) },
-  { label: 'Tue 18:00', freezeAt: Date.UTC(2026, 10, 17, 17, 0) },
-  { label: 'Wed 13:00', freezeAt: Date.UTC(2026, 10, 18, 12, 0) },
-  { label: 'Wed 18:00', freezeAt: Date.UTC(2026, 10, 18, 17, 0) },
-  { label: 'Thu 13:00', freezeAt: Date.UTC(2026, 10, 19, 12, 0) },
-  { label: 'Thu 18:00', freezeAt: Date.UTC(2026, 10, 19, 17, 0) },
-  { label: 'Fri 13:00', freezeAt: Date.UTC(2026, 10, 20, 12, 0) },
-  { label: 'Fri 18:00', freezeAt: Date.UTC(2026, 10, 20, 17, 0) },
+  { label: 'Mon 09:00', weekday: 'Mon', time: '09:00', freezeAt: Date.UTC(2026, 10, 16, 8, 0) },
+  { label: 'Mon 13:00', weekday: 'Mon', time: '13:00', freezeAt: Date.UTC(2026, 10, 16, 12, 0) },
+  { label: 'Mon 18:00', weekday: 'Mon', time: '18:00', freezeAt: Date.UTC(2026, 10, 16, 17, 0) },
+  { label: 'Tue 13:00', weekday: 'Tue', time: '13:00', freezeAt: Date.UTC(2026, 10, 17, 12, 0) },
+  { label: 'Tue 18:00', weekday: 'Tue', time: '18:00', freezeAt: Date.UTC(2026, 10, 17, 17, 0) },
+  { label: 'Wed 13:00', weekday: 'Wed', time: '13:00', freezeAt: Date.UTC(2026, 10, 18, 12, 0) },
+  { label: 'Wed 18:00', weekday: 'Wed', time: '18:00', freezeAt: Date.UTC(2026, 10, 18, 17, 0) },
+  { label: 'Thu 13:00', weekday: 'Thu', time: '13:00', freezeAt: Date.UTC(2026, 10, 19, 12, 0) },
+  { label: 'Thu 18:00', weekday: 'Thu', time: '18:00', freezeAt: Date.UTC(2026, 10, 19, 17, 0) },
+  { label: 'Fri 13:00', weekday: 'Fri', time: '13:00', freezeAt: Date.UTC(2026, 10, 20, 12, 0) },
+  { label: 'Fri 18:00', weekday: 'Fri', time: '18:00', freezeAt: Date.UTC(2026, 10, 20, 17, 0) },
 ];
 
 /** The last step: Friday 18:00, where the app starts. */

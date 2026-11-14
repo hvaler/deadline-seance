@@ -1,6 +1,6 @@
 import type { Ctx, Part } from '../context';
 import { el, setAttr, setClass, setText } from '../dom';
-import { createGesture } from '../gestures';
+import { createGesture, wireRange } from '../gestures';
 import type { Figure } from '../text';
 import { changeNote, verdictFigures, verdictSentences } from '../text';
 import { createFog } from './fog';
@@ -94,11 +94,14 @@ export function mountSign(section: HTMLElement, ctx: Ctx): Part {
     timers: ctx.services.timers,
     toAction: (pct) => ({ type: 'reserve/set', pct }),
     subjectOf: (start, end) => (start.marginPct === end.marginPct ? null : { kind: 'reserve', from: start.marginPct, to: end.marginPct }),
-    onSettle: (change, end) => ctx.settle(change, end),
+    onSettle: (change, end, start) => {
+      ctx.record(start, change);
+      ctx.settle(change, end);
+    },
     onActive: (active) => ctx.gestureActive(active),
   });
-  input.addEventListener('input', () => gesture.input(Number(input.value)));
-  input.addEventListener('change', () => gesture.commit());
+  ctx.addGesture(gesture);
+  wireRange(input, gesture);
 
   return {
     update(view, state) {

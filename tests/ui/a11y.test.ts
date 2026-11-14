@@ -88,7 +88,7 @@ describe.each(STATES)('the page, %s', (_name, drive) => {
   test('every section is a labelled region whose label is a real heading with text', () => {
     const { root } = page();
     const sections = [...root.querySelectorAll('main section.region')];
-    expect(sections).toHaveLength(6);
+    expect(sections).toHaveLength(7);
     for (const section of sections) {
       const id = section.getAttribute('aria-labelledby') ?? '';
       const heading = root.querySelector(`[id="${id}"]`);
@@ -260,7 +260,7 @@ describe('the guided tour', () => {
     const h = mountWith(sampleBoard(), {}, { tour: sampleScript });
     h.app.tour?.start('button');
     expect(h.root.querySelector('.tour-bar')?.querySelector('h1, h2, h3, h4')).toBeNull();
-    expect(h.root.querySelectorAll('main section.region')).toHaveLength(6);
+    expect(h.root.querySelectorAll('main section.region')).toHaveLength(7);
     expect(h.root.querySelectorAll('header')).toHaveLength(1 + h.root.querySelectorAll('article header').length);
   });
 });

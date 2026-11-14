@@ -32,7 +32,8 @@ The app opens on a built-in sample board, "Hollow Bank app 3.2 · release eve": 
 - Read the **fog of estimates** on the sign: in how many of 1,000 simulated nights the kept work still fits the team when every estimate lands between 80 % and 150 % of what was written, for each reserve from 0 to 30 %. On some boards a bigger reserve even lowers the chance, so the strip only shows the numbers.
 - Every number on the screen comes from the engine in `src/engine`. The epitaph on a stone only says why the ticket is buried; its cost of waiting, releases left out and hunger are in the stone's details.
 
-Out of scope for now: the chronicle with undo, and the MCP server on the page (the server itself exists: see MCP server below). Their places on the page are inert, labelled slots.
+- Read the **night chronicle** under the survivors: one line per decision, newest first (`Ana leaves → HB-105 in; HB-104, HB-106, HB-107, HB-116 out (−34)`; the number in brackets is the change in saved cod). **Undo** takes back the last one, **Undo to here** goes back to before any line, and `Ctrl+Z` / `Cmd+Z` undoes when you are not typing in a text field (a soft rewind sound plays if Sound is on). There is no redo: the line you undid says exactly what to press again. The log keeps the last 50 decisions; loading a CSV or going back to the sample starts a new log, and undoing that load brings the old one back. The tour never writes into it, and the death certificate ends with a "Decisions tonight" section.
+Out of scope for now: the MCP server on the page (the server itself exists: see MCP server below). Its place on the page is an inert, labelled slot.
 
 ## Your tickets (Jira CSV)
 

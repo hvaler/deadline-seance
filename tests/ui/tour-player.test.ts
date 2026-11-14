@@ -40,7 +40,7 @@ function rig(script: Script = sampleScript, start: AppState = initialState()): R
     getState: () => store.getState(),
     act(action) {
       events.push({ kind: 'act', action });
-      store.dispatch(action);
+      store.dispatch({ type: 'tour/step', action }); // the host's wrapper: the tour writes no chronicle
     },
     restore(state) {
       events.push({ kind: 'restore' });

@@ -38,6 +38,11 @@ function describeAction(action: Action, scene: SimulatedScene): string {
       return 'renames the release';
     case 'state/restore':
       return 'restores a state';
+    case 'chronicle/settle':
+    case 'chronicle/undo':
+      return 'writes or undoes a chronicle entry';
+    case 'tour/step':
+      return describeAction(action.action, scene);
   }
 }
 

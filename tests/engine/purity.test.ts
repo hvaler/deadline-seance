@@ -73,6 +73,13 @@ describe('public API', () => {
     expect(Object.keys(engine).sort()).toEqual(
       [
         'ACCEPTED_HEADERS',
+        'decisionEffect',
+        'decisionLine',
+        'describeDecision',
+        'describeEffect',
+        'describeUndo',
+        'describeUndoEffect',
+        'describeWhat',
         'CSV_LIMITS',
         'DEFAULT_FOG_SEED',
         'DEFAULT_NEXT_RELEASE_WEEKS',
@@ -120,6 +127,7 @@ describe('public API', () => {
         'describeValidationError',
         'listOf',
         'thousands',
+        'undoLine',
         'SAMPLE_FREEZE_AT',
         'SAMPLE_NOW',
         'SAMPLE_RELEASE',
@@ -193,3 +201,4 @@ describe('no mutation', () => {
     );
   });
 });
+

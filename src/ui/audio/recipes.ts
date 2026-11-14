@@ -2,14 +2,15 @@ import type { SoundEvent } from '../sound-events';
 import type { AudioLike, BufferLike, GainLike, NodeLike } from './types';
 
 /**
- * The four sounds of the night, each built from a few oscillators and filters at the moment it is played. Every sound has its own
+ * The five sounds of the night, each built from a few oscillators and filters at the moment it is played. Every sound has its own
  * character, so they can be told apart with the eyes closed:
  *
  * - resurrect: rising and shimmering: two detuned saw waves glide up an octave through an opening filter, with a slow tremolo and a
  *   high breath at the end;
  * - put down: dry and final: a short crack, a low hollow note, and a small metallic ring;
  * - bury: a soft low thud that falls in pitch, with a puff of soil;
- * - cascade: a quick roll of five falling thuds, each lower and quieter, like a row of stones going down.
+ * - cascade: a quick roll of five falling thuds, each lower and quieter, like a row of stones going down;
+ * - undo: a soft rewind, the resurrect turned around (see its recipe).
  *
  * Each recipe schedules everything from `start`, stops every source, and returns when it will be silent.
  */
@@ -198,7 +199,47 @@ const cascade: Recipe = (bus, start) => {
   return { duration: end - start };
 };
 
+/**
+ * undo: a soft rewind, the resurrect turned around: two detuned triangle waves glide down an octave through a low-pass that closes, with a
+ * short falling whirr at the start. Shorter and gentler than resurrect (no tremolo, no breath), so a person can tell "taken back" from "brought back".
+ */
+const undo: Recipe = (bus, start) => {
+  const { ctx } = bus;
+  const end = start + 0.6;
+  const send = makeSend(bus, 0.35);
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.Q.value = 2;
+  filter.frequency.setValueAtTime(2400, start);
+  filter.frequency.exponentialRampToValueAtTime(400, start + 0.5);
+  const body = envelope(bus, 0.3, start, 0.02, end - 0.02);
+  for (const [from, to] of [
+    [440, 220],
+    [446, 223],
+  ] as const) {
+    const tri = ctx.createOscillator();
+    tri.type = 'triangle';
+    tri.frequency.setValueAtTime(from, start);
+    tri.frequency.exponentialRampToValueAtTime(to, start + 0.5);
+    tri.connect(filter);
+    tri.start(start);
+    tri.stop(end);
+  }
+  filter.connect(body);
+  route(bus, body, send);
+  const whirr = ctx.createOscillator();
+  whirr.type = 'sine';
+  whirr.frequency.setValueAtTime(1320, start);
+  whirr.frequency.exponentialRampToValueAtTime(660, start + 0.2);
+  const whirrGain = envelope(bus, 0.05, start, 0.01, start + 0.22);
+  whirr.connect(whirrGain);
+  route(bus, whirrGain, send);
+  whirr.start(start);
+  whirr.stop(start + 0.22);
+  return { duration: end - start };
+};
 export const RECIPES: Readonly<Record<SoundEvent, Recipe>> = {
+  undo,
   resurrect,
   'put-down': putDown,
   bury,

@@ -71,3 +71,11 @@ describe('which sound a change makes', () => {
     expect(soundEventFor(gesture.change, derive(gesture))).toBe('cascade');
   });
 });
+
+describe('the undo sound is not a change sound', () => {
+  test('soundEventFor never returns undo, whatever the change', () => {
+    const s0 = initialState();
+    const states = [s0, reducer(s0, { type: 'candle/set', step: 6 }), reducer(s0, { type: 'survivor/toggle', name: 'Ana' }), reducer(s0, { type: 'tombstone/exhume', key: 'HB-108' }), reducer(s0, { type: 'board/reset' })];
+    for (const s of states) expect(soundEventFor(s.change, derive(s))).not.toBe('undo');
+  });
+});

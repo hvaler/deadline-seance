@@ -9,7 +9,7 @@
 - Tests: Vitest as runner, fast-check for property-based tests.
 - Audio: Web Audio API only (synthesized synth bass and effects). No audio files, no third-party music. One short
   convolution reverb is allowed, with an impulse response generated in code, shared by the eerie per-action sounds.
-  Each action has its own distinct sound: resurrect, put down, bury and cascade.
+  Each action has its own distinct sound: resurrect, put down, bury, cascade and undo (five sounds). The undo sound is a soft rewind, the resurrect turned around; it plays only when Sound is on, once per undo, and never during the tour's restore.
 - Optional LLM: called only for epitaphs and change explanations, behind a deterministic number guard with a fixed
   template fallback. The app must be fully usable with no API key and no network.
 - MCP server (feature 8): a small Node entry point that imports the same engine package as the web app. No duplicated

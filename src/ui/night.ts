@@ -7,5 +7,12 @@ import type { AppState } from './model';
  * freeze (whose `now` is the sample's constant, never the clock), who is away, and what the release is called.
  */
 export function nightInputOf(state: AppState): NightInput {
-  return { home: state.home, board: state.board, freeze: freezeFor(state), away: state.away, release: state.release };
+  return {
+    home: state.home,
+    board: state.board,
+    freeze: freezeFor(state),
+    away: state.away,
+    release: state.release,
+    decisions: { entries: state.chronicle.entries.map((e) => e.facts), dropped: state.chronicle.dropped },
+  };
 }

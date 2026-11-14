@@ -20,7 +20,9 @@ describe('MCP: death_certificate', () => {
   test('the markdown equals what the web app\'s certificate view is made from for the same state', () => {
     const web = nightFacts(nightInputOf(initialState()));
     if (!web.ok) throw new Error('facts');
-    expect(answer(deathCertificateTool(SAMPLE_REQUEST)).structured.markdown).toBe(deathCertificate(web.value));
+    // The page ends with the chronicle's section (empty here: None.); the server gives no decisions, so its note stops before it (night-chronicle spec).
+    const server = answer(deathCertificateTool(SAMPLE_REQUEST)).structured.markdown;
+    expect(deathCertificate(web.value)).toBe(`${server}\n## Decisions tonight\n\nNone.\n`);
   });
 
   test('exhumed and put_down are applied first, in the order given', () => {

@@ -8,14 +8,13 @@ import { createImportGroup } from './csv-group';
  */
 
 export interface SlotSpec {
-  readonly name: 'chronicle' | 'mcp';
+  readonly name: 'mcp';
   readonly label: string;
   /** Plain text instead of a disabled button. */
   readonly plain?: boolean;
 }
 
 export const TOOL_SLOTS: readonly SlotSpec[] = [
-  { name: 'chronicle', label: 'Night chronicle and undo' },
   { name: 'mcp', label: 'The rule as an MCP server for the Kiro agent', plain: true },
 ];
 

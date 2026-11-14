@@ -175,6 +175,11 @@ export interface MountExtras {
   readonly release?: string;
 }
 
+/** Every app mountWith made, so a test that listens to the document (Ctrl+Z) can destroy them and leave no stale listener behind. */
+const mounted: MountedBoard[] = [];
+export function destroyMounted(): void {
+  for (const app of mounted.splice(0)) app.destroy();
+}
 export function mountWith(board: Board = sampleBoard(), overrides: Partial<Services> = {}, extras: MountExtras = {}): Harness {
   const root = document.createElement('div');
   root.id = 'app';
@@ -192,6 +197,7 @@ export function mountWith(board: Board = sampleBoard(), overrides: Partial<Servi
     ...(extras.release === undefined ? {} : { release: extras.release }),
   });
   if (app.kind !== 'board') throw new Error('the board should be valid');
+  mounted.push(app);
   frame.flush(); // the chains are drawn in the first frame after mounting; tests start from a quiet page
   return { app, root, frame, timers, sound, page, clipboard, files, reader };
 }

@@ -1,6 +1,7 @@
 import { checkNumbers, guardFacts } from './guard';
 import type { GuardResult, Span } from './guard';
-import type { NightFacts, OutsideFact, OutsideReason, PushedOut, SolvedNight } from './facts';
+import { describeDecision } from './chronicle';
+import type { Decisions, NightFacts, OutsideFact, OutsideReason, PushedOut, SolvedNight } from './facts';
 import type { Key } from './types';
 
 /**
@@ -131,6 +132,17 @@ function header(facts: NightFacts): Block[] {
   return blocks;
 }
 
+/** The last section of a note: the chronicle, oldest first. Nothing when the caller gave no decisions. */
+function decisionBlocks(decisions: Decisions | null): Block[] {
+  if (decisions === null) return [];
+  const blocks: Block[] = [{ kind: 'heading', text: ['Decisions tonight'] }];
+  if (decisions.dropped > 0) {
+    blocks.push({ kind: 'paragraph', text: [decisions.dropped === 1 ? 'The oldest decision is not listed.' : `The ${decisions.dropped} oldest decisions are not listed.`] });
+  }
+  if (decisions.entries.length === 0) blocks.push({ kind: 'paragraph', text: ['None.'] });
+  else blocks.push({ kind: 'list', items: decisions.entries.map((e): Text => [`${e.no} \u00b7 `, ...describeDecision(e)]) });
+  return blocks;
+}
 function impossibleNote(facts: Extract<NightFacts, { status: 'impossible' }>): Note {
   const blocks = header(facts);
   blocks.push({ kind: 'heading', text: ['The freeze is impossible'] });
@@ -145,6 +157,7 @@ function impossibleNote(facts: Extract<NightFacts, { status: 'impossible' }>): N
     });
   }
   blocks.push({ kind: 'paragraph', text: ['Nothing can be decided until the must-haves fit.'] });
+  blocks.push(...decisionBlocks(facts.decisions));
   return { blocks };
 }
 
@@ -241,6 +254,7 @@ function solvedNote(facts: SolvedNight): Note {
       }),
     });
   }
+  blocks.push(...decisionBlocks(facts.decisions));
   return { blocks };
 }
 

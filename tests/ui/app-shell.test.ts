@@ -39,10 +39,10 @@ describe('the page shell', () => {
     expect(line?.nextElementSibling?.tagName).toBe('H1');
   });
 
-  test('has the six regions in the order of the brief, each labelled by its own heading', () => {
+  test('has the seven regions in the order of the brief, each labelled by its own heading', () => {
     mount();
     const regions = [...root.querySelectorAll<HTMLElement>('[data-region]')].map((r) => r.dataset.region).filter((r) => (REGIONS as readonly string[]).includes(r ?? ''));
-    expect(regions).toEqual(['sign', 'candle', 'survivors', 'safehouse', 'yard', 'tools']);
+    expect(regions).toEqual(['sign', 'candle', 'survivors', 'chronicle', 'safehouse', 'yard', 'tools']);
     for (const region of REGIONS) {
       const section = root.querySelector<HTMLElement>(`section[data-region="${region}"]`);
       expect(section, region).not.toBeNull();
@@ -53,6 +53,7 @@ describe('the page shell', () => {
       'Verdict',
       'The candle',
       'Survivors',
+      'Night chronicle',
       'Inside the safehouse',
       'Left outside',
       'Tools',

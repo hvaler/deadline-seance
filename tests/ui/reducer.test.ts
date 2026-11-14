@@ -502,7 +502,8 @@ describe('board/sample, board/reset, release/set and board/load (the jira-csv sp
     const touched = reducer(reducer(initialState(), { type: 'candle/set', step: 2 }), { type: 'tombstone/put-down', key: 'HB-112' });
     const a = reducer(touched, { type: 'board/sample' });
     const b = reducer(touched, { type: 'board/reset' });
-    expect({ ...a, change: null }).toEqual({ ...b, change: null });
+    // The night is the same; the chronicles differ on purpose (a sample starts a new one, a reset adds to it: night-chronicle spec).
+    expect({ ...a, change: null, chronicle: null }).toEqual({ ...b, change: null, chronicle: null });
   });
 
   test('board/reset keeps your tickets, your release and the banner', () => {

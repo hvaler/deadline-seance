@@ -256,7 +256,7 @@ describe('what the screen says is what the Markdown says (Requirement 7.3)', () 
     expect(d.querySelector('img, script, b, strong, em')).toBeNull();
     const cell = [...d.querySelectorAll('td')].find((td) => td.textContent?.includes('onerror'));
     expect(cell?.textContent).toBe(hostile);
-    expect(d.querySelectorAll('h3')).toHaveLength(7);
+    expect(d.querySelectorAll('h3')).toHaveLength(8); // the seven sections of before and Decisions tonight
   });
 });
 

@@ -20,7 +20,7 @@ export interface GestureOptions {
   /** What the gesture did, or null when it ended where it started. */
   readonly subjectOf: (start: AppState, end: AppState) => Subject | null;
   /** Called once per settled gesture with the change from its start to its end, and the state it ended in. */
-  readonly onSettle: (change: Change, end: AppState) => void;
+  readonly onSettle: (change: Change, end: AppState, start: AppState) => void;
   readonly settleMs?: number;
   /** Called with true on the first input of a gesture and with false once it has settled (after onSettle). */
   readonly onActive?: (active: boolean) => void;
@@ -77,7 +77,7 @@ export function createGesture(options: GestureOptions): Gesture {
     const end = store.getState();
     const subject = subjectOf(began, end);
     if (subject === null) return;
-    onSettle({ kind: 'done', subject, comparison: compareStates(began, end) }, end);
+    onSettle({ kind: 'done', subject, comparison: compareStates(began, end) }, end, began);
   }
 
   return {
@@ -109,4 +109,23 @@ export function createGesture(options: GestureOptions): Gesture {
       if (wasActive) onActive?.(false);
     },
   };
+}
+
+/**
+ * Connects a range input to a gesture. A pointer drag ends with the `change` event, which settles at once. A key press also fires `change`
+ * (once per press, also while a key is held), and that is not the end of a gesture: a burst of presses is one gesture, and it settles when
+ * 300 ms pass without input, so a held arrow key writes one chronicle entry and speaks once, as the header of this file says.
+ */
+export function wireRange(input: HTMLInputElement, gesture: Gesture): void {
+  let keyboard = false;
+  input.addEventListener('keydown', () => {
+    keyboard = true;
+  });
+  input.addEventListener('pointerdown', () => {
+    keyboard = false;
+  });
+  input.addEventListener('input', () => gesture.input(Number(input.value)));
+  input.addEventListener('change', () => {
+    if (!keyboard) gesture.commit();
+  });
 }

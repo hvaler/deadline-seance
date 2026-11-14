@@ -7,7 +7,7 @@ afterEach(() => {
 });
 
 /** The empty slots of features that are out of scope for this version, and the text each one must show. */
-const SLOTS = ['tour', 'chronicle', 'mcp'] as const;
+const SLOTS = ['tour', 'mcp'] as const; // the chronicle slot was filled by the night-chronicle spec: it is a working panel now
 
 const slot = (root: ParentNode, name: string): HTMLElement[] => [...root.querySelectorAll<HTMLElement>(`[data-slot="${name}"]`)];
 
@@ -50,13 +50,12 @@ describe('empty slots', () => {
   test('the slots are where the brief puts them: the tour in the title card, the rest in the tools', () => {
     const { root } = mountWith();
     expect(slot(root, 'tour')[0]?.closest('header')).not.toBeNull();
-    for (const name of ['chronicle', 'mcp']) expect(slot(root, name)[0]?.closest('[data-region="tools"]'), name).not.toBeNull();
+    for (const name of ['mcp']) expect(slot(root, name)[0]?.closest('[data-region="tools"]'), name).not.toBeNull();
   });
 
   test('the labels name the feature', () => {
     const { root } = mountWith();
     expect(slot(root, 'tour')[0]?.textContent).toBe('Play the night · 60 s');
-    expect(slot(root, 'chronicle')[0]?.textContent).toBe('Night chronicle and undo');
     expect(slot(root, 'mcp')[0]?.textContent).toBe('The rule as an MCP server for the Kiro agent');
   });
 

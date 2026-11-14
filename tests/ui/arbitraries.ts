@@ -1,6 +1,6 @@
 import * as fc from 'fast-check';
 import type { Action, AppState } from '../../src/ui/state';
-import { initialState, reducer } from '../../src/ui/state';
+import { decide, initialState } from '../../src/ui/state';
 
 /** Names on the sample board, plus one that is not. */
 export const NAMES = ['Ana', 'Bruno', 'Carla', 'Dev', 'Zed'] as const;
@@ -34,9 +34,9 @@ export const arbMeaningfulAction: fc.Arbitrary<Action> = fc.oneof(
   { weight: 1, arbitrary: fc.constant<Action>({ type: 'board/sample' }) },
 );
 
-/** Runs actions from the initial state, returning every state reached (the first one is the initial state). */
+/** Runs actions from the initial state as the page makes them (decide: a candle or reserve change is a settled gesture), returning every state reached (the first one is the initial state). */
 export function statesAfter(actions: readonly Action[]): AppState[] {
   const states = [initialState()];
-  for (const action of actions) states.push(reducer(states[states.length - 1] as AppState, action));
+  for (const action of actions) states.push(decide(states[states.length - 1] as AppState, action));
   return states;
 }

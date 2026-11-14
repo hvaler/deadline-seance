@@ -372,3 +372,5 @@ export function bannerSentences(state: AppState): { readonly lead: string; reado
     notes,
   };
 }
+/** What a screen reader hears when Undo is pressed with nothing to undo. */
+export const NOTHING_TO_UNDO = 'Nothing to undo.';

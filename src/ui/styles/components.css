@@ -1442,3 +1442,81 @@
 .fog-block[data-stale='true'] .fog-sentence {
   color: var(--stone);
 }
+/* ---- the night chronicle ---- */
+/* The list has a fixed height and scrolls inside itself, so a new line moves nothing else on the page (the height is measured, see the spec's report). */
+.region-chronicle {
+  --chronicle-h: 11rem;
+}
+.chronicle-help,
+.chronicle-dropped,
+.chronicle-empty {
+  margin: 0 0 8px;
+  color: var(--stone);
+  overflow-wrap: anywhere;
+}
+.chronicle-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 8px;
+}
+.chronicle-list {
+  box-sizing: border-box;
+  height: var(--chronicle-h);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 10px;
+  border: 2px solid var(--ply-2);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--night) 70%, var(--ply-1));
+}
+.chronicle-list:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: 2px;
+}
+.chronicle-entries {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.entry {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--dim);
+}
+.entry:first-child {
+  border-left: 3px solid var(--amber); /* decoration only: the newest line is also the first one */
+  padding-left: 8px;
+}
+.entry-no {
+  font-family: var(--font-mono);
+  color: var(--tape);
+}
+.entry-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.entry-undo {
+  padding: 6px 12px;
+}
+@media (max-width: 479.98px) {
+  .entry {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .entry-undo {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+/* On a phone a line wraps to two or three rows and its Undo to here button sits under it: the box shows two whole lines (measured at 320 and 360 px). */
+@media (max-width: 479.98px) {
+  .region-chronicle {
+    --chronicle-h: 15rem;
+  }
+}

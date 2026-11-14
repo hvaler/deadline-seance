@@ -38,7 +38,7 @@ export function simulateTour(script: Script, initial: AppState): readonly Simula
     const before = snapshotOf(state);
     let accepted = true;
     for (const action of scene.actions) {
-      const next = reducer(state, action);
+      const next = reducer(state, { type: 'tour/step', action }); // the same wrapper the player uses: the tour writes no chronicle
       // A reserve that is already the reserve changes nothing; that is not a refusal.
       const unchanged = next === state && action.type === 'reserve/set';
       if (!unchanged && !applied(state, next, action)) accepted = false;

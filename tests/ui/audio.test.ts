@@ -6,7 +6,7 @@ import type { SoundEvent } from '../../src/ui/sound-events';
 import { FakeAudio } from './fake-audio';
 import type { FakeGain, FakeOscillator } from './fake-audio';
 
-const EVENTS: SoundEvent[] = ['resurrect', 'put-down', 'bury', 'cascade'];
+const EVENTS: SoundEvent[] = ['resurrect', 'put-down', 'bury', 'cascade', 'undo'];
 
 /** A sound player on a fake context, turned on, with the graph it built at that moment counted apart from what a sound adds. */
 function ready() {
@@ -141,12 +141,12 @@ describe('each sound', () => {
     });
   }
 
-  test('the recipes are exactly the four events', () => {
+  test('the recipes are exactly the five events', () => {
     expect(Object.keys(RECIPES).sort()).toEqual([...EVENTS].sort());
   });
 });
 
-describe('the four sounds are different from each other', () => {
+describe('the five sounds are different from each other', () => {
   /** What a sound is made of: each source with its waveform and starting pitch, and each filter with its type. */
   function signature(event: SoundEvent): string {
     const { oscillators, sources, filters } = built(event);
@@ -160,7 +160,7 @@ describe('the four sounds are different from each other', () => {
 
   test('no two have the same signature', () => {
     const signatures = EVENTS.map(signature);
-    expect(new Set(signatures).size).toBe(4);
+    expect(new Set(signatures).size).toBe(5);
   });
 
   test('resurrect rises: two detuned saws gliding up an octave through a low-pass that opens, with a breath at the end', () => {
@@ -179,6 +179,25 @@ describe('the four sounds are different from each other', () => {
     expect(oscillators.some((o) => o.type === 'sine' && o.frequency.first === 1320)).toBe(true); // the breath
   });
 
+  test('undo is a soft rewind: two detuned triangles gliding down an octave through a low-pass that closes, and a short falling whirr; no tremolo, no samples', () => {
+    const { oscillators, filters, sources, audio } = built('undo');
+    const triangles = oscillators.filter((o) => o.type === 'triangle');
+    expect(triangles.map((o) => [o.frequency.first, o.frequency.last])).toEqual([
+      [440, 220],
+      [446, 223],
+    ]);
+    expect(filters.map((f) => f.type)).toEqual(['lowpass']);
+    expect(filters[0]?.frequency.first).toBe(2400);
+    expect(filters[0]?.frequency.last).toBe(400);
+    expect(oscillators.some((o) => o.type === 'sine' && o.frequency.first === 1320 && o.frequency.last === 660)).toBe(true);
+    expect(oscillators.some((o) => o.frequency.first === 6)).toBe(false);
+    expect(sources).toHaveLength(0);
+    expect(audio.of('convolver')).toHaveLength(1);
+  });
+  test('undo is shorter than resurrect, which it mirrors', () => {
+    const end = (e: SoundEvent): number => Math.max(...built(e).oscillators.map((o) => o.stoppedAt as number)) - built(e).audio.currentTime;
+    expect(end('undo')).toBeLessThan(end('resurrect'));
+  });
   test('put down is dry and final: a crack of noise, a low note, and a ring of two partials that are not harmonics', () => {
     const { oscillators, sources, filters } = built('put-down');
     expect(sources).toHaveLength(1);

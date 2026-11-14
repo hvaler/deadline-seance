@@ -1,0 +1,47 @@
+# Implementation plan: night-chronicle
+Run `npm run typecheck` and `npm test` before ticking any task; tick it only when both exit 0. Run mutation checks one at a time, never in parallel on the same file. Do not change the sample board, its seed or
+the tour's scenes. Do not commit or push. Start the implementation only after the requirements and design have been reviewed.
+- [x] 1. Engine: the facts, the sentence, the certificate section (Requirements 2, 10)
+  - [x] 1.1 `docs/rule.md`: append a dated section (Spanish, like the others) "La crónica de la noche (spec `night-chronicle`)": the entries and what is not one, D3 (carga y muestra empiezan una crónica nueva), D5, D6, D7, D10, the grammar of the line, P25 reformulada, `decisions` opcional en el certificado. Do it first.
+  - [x] 1.2 `engine/chronicle.ts`: `DecisionFacts`, `decisionEffect`, `describeDecision`, `describeUndo`; exports in `index.ts`; `purity.test.ts` still passes
+  - [x] 1.3 `facts.ts` / `certificate.ts`: `NightInput.decisions?`, `NightFacts.decisions`, the last section in both notes; `null` adds nothing
+  - [x] 1.4 `tests/engine/chronicle.test.ts` (design §12); P24 extended to generated chronicles; the MCP tests and `docs/mcp.md` unchanged and green
+  - [x] 1.5 Mutation checks: `decisionEffect` taking `codDelta` from the wrong side (the diff test must fail); a digit hard-coded in the grammar (the guard test must fail); the section emitted for `null` (the MCP test must fail)
+  - _Requirements: 2.1–2.8, 10.1–10.4_
+- [x] 2. State: the chronicle in `AppState` (Requirements 1, 3, 6, 8, 9)
+  - [x] 2.1 `model.ts`: `Chronicle`, `Entry`, `EMPTY_CHRONICLE`, the three actions; `initialStateFor` sets it; search every hand-built `AppState` in `src` and `tests` and route it through `initialStateFor`
+  - [x] 2.2 `candle-steps.ts`: each step gains `weekday` and `time` (label stays; `candle-steps.test.ts` checks `label === weekday + ' ' + time` and the Madrid time of the instant)
+  - [x] 2.3 `ui/chronicle.ts` (`recordEntry`, `undoTo`, `CHRONICLE_CAP`) and the reducer cases; `decide` helper. **Run the sequence of design §6 and write the real lines in the report**; fix the table in `design.md` if a number differs (never the board)
+  - [x] 2.4 `gestures.ts`: `onSettle(change, end, start)`; `candle.ts` and `sign.ts` send `chronicle/settle`; `ctx.record`, `ctx.flush`; existing gesture tests green
+  - [x] 2.5 `tour/step` wrapper in `state.ts`; `tour/simulate.ts` and the host use it
+  - [x] 2.6 `tests/ui/chronicle.test.ts`: **P25** (named with its number), the "undo everything" test, the example tests of Requirement 12.3 that are state-level; `traceability.test.ts` gains `25` and loses the "out of scope" comment; `rule-engine/requirements.md` table updated
+  - [x] 2.7 Mutation checks: undo keeping `change` of the later state (P25 must fail); `slice(0, to + 1)` (Undo to here test must fail); an entry written on `candle/set` (the one-per-gesture test must fail); a missing `previous` on load (the load-undo test must fail); the cap dropping the newest (the cap test must fail); the wrapper without the chronicle reset on a CSV tour (the tour test must fail)
+  - _Requirements: 1.1–1.6, 3.1–3.7, 6.1–6.4, 8.1–8.4, 9.1, 9.3, 12.1–12.2_
+- [x] 3. The announcement and the keys (Requirements 4, 5)
+  - [x] 3.1 `text.ts` (or `chronicle-text.ts` if `text.ts` would pass 700 lines): `undoSentence`, `nothingToUndo`; provenance test with `tests/ui/provenance.ts`
+  - [x] 3.2 `keys.ts` (`isTextField`, `isUndoKey`); the document handler in `app.ts`; `ctx.undo(to)` with flush, announce once (polite, alert on impossible), play `undo` once when Sound is on
+  - [x] 3.3 Tests: every rule of Requirement 4; announcement once (the announcer's frame is flushed once); `sound-wiring.test.ts`: `undo` plays once for the button, Undo to here and Ctrl+Z when Sound is on, never when off, never for "Nothing to undo.", never for the tour's restore; the alert variant; "Nothing to undo."
+  - _Requirements: 3.4–3.6, 4.1–4.5, 5.1–5.5_
+- [x] 4. The panel (Requirement 11)
+  - [x] 4.1 `render/chronicle.ts` as a `Part`; the region in `app.ts` and `REGIONS`; the slot removed from `tools.ts`; `slots.test.ts` and `app-shell.test.ts` edited
+  - [x] 4.2 CSS in `components.css` / `layout.css`: the fixed-height list, tokens only, 44 px targets, `overflow-wrap: anywhere`, opacity-only entry fade off in reduced motion; the contrast and token tests still pass
+  - [x] 4.3 `tests/ui/chronicle-view.test.ts`: structure, names, empty state, newest first, keyed update, focus rules, XSS, Plan B (45 tickets) entry text
+  - _Requirements: 9.1–9.2, 11.1–11.9_
+- [x] 5. The tour and the certificate on the page (Requirements 8, 10)
+  - [x] 5.1 `night.ts` passes the decisions; the certificate view shows the section; `certificate-view.test.ts` extended
+  - [x] 5.2 `statesAfter` in `tests/ui/arbitraries.ts` goes through `decide`, so the tour's golden state has its four entries. Regenerate the golden notes with `npx vitest run tests/ui/certificate-golden.test.ts -u`; `git diff docs/examples` must show only the new last section; add the "old text plus section" comparison; `docs/video-tour-script.md` must not change (`tour-script.test.ts`)
+  - [x] 5.3 Tour tests: writes nothing; restore returns the same chronicle (`toBe`) from a fresh session, a sample session with entries and a CSV session with entries; stop at generated ticks
+  - [x] 5.4 Mutation checks: restore without the chronicle (tour test must fail); the section placed first (golden test must fail)
+  - _Requirements: 8.1–8.4, 10.1–10.6_
+- [x] 6. Measure and fit (Requirements 9, 11)
+  - [x] 6.1 With the real page at 1280, 360 and 320 px, measure the longest line of the sequence and set `--chronicle-h` per breakpoint (the measurements go in the report)
+  - [x] 6.2 Time the entry on a 60-ticket board (two cached solves and one diff) and the undo (no solve); put both numbers in the report
+  - _Requirements: 9.3, 11.4_
+- [x] 7. Docs
+  - [x] 7.1 `README.md`: the chronicle and undo replace "out of scope"; Ctrl+Z; no redo and why, in one line each
+  - [x] 7.2 Check `docs/rule.md` section of 1.1 still matches what was built
+- [x] 8. Final checks
+  - [x] 8.1 `npm run typecheck`, `npm test`, `npm run build` exit 0; bundle growth reported
+  - [x] 8.2 Browser, 1280 / 360 / 320 px (Requirement 13): the sequence of §6, a candle drag as one entry, Undo, Undo to here on a middle entry, Ctrl+Z with focus on the candle and none in the release-name field, a cap of 50 reached, a CSV load and its undo, the tour from a session with entries; measure the tops of sign and candle before and after an entry; no horizontal scroll; no console errors; screenshots
+  - [x] 8.3 Report: the real lines, the golden diff, the tests edited on purpose (list), the numbers of 6.2, the bundle size, what was not checked
+  - _Requirements: 12.4–12.6, 13.1–13.3_

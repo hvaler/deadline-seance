@@ -1,8 +1,8 @@
 import type { View } from './derive';
 import type { Change } from './model';
 
-/** The four sounds of the night. */
-export type SoundEvent = 'resurrect' | 'put-down' | 'bury' | 'cascade';
+/** The five sounds of the night. `undo` is played by the undo itself (`ctx.undo`), never chosen from a `Change`: `soundEventFor` never returns it. */
+export type SoundEvent = 'resurrect' | 'put-down' | 'bury' | 'cascade' | 'undo';
 
 /**
  * Which sound a settled change makes, if any. One sound per change:

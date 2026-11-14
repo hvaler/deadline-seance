@@ -1,6 +1,6 @@
 import type { Ctx, Part } from '../context';
 import { el, setAttr, setClass, setText } from '../dom';
-import { createGesture } from '../gestures';
+import { createGesture, wireRange } from '../gestures';
 import { count } from '../text';
 
 /**
@@ -43,11 +43,14 @@ export function mountCandle(section: HTMLElement, ctx: Ctx): Part {
     timers: ctx.services.timers,
     toAction: (step) => ({ type: 'candle/set', step }),
     subjectOf: (start, end) => (start.candle === end.candle ? null : { kind: 'candle', from: start.candle, to: end.candle }),
-    onSettle: (change, end) => ctx.settle(change, end),
+    onSettle: (change, end, start) => {
+      ctx.record(start, change);
+      ctx.settle(change, end);
+    },
     onActive: (active) => ctx.gestureActive(active),
   });
-  input.addEventListener('input', () => gesture.input(Number(input.value)));
-  input.addEventListener('change', () => gesture.commit());
+  ctx.addGesture(gesture);
+  wireRange(input, gesture);
 
   return {
     update(view, state) {
