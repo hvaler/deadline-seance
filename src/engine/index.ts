@@ -42,3 +42,7 @@ export type { Block, Data, KeyRef, Note, RenderedCertificate, Text } from './cer
 // Jira CSV
 export { ACCEPTED_HEADERS, CSV_LIMITS, EXPORT_HEADERS, columnLetter, exportCsv, guardCell, importCsv, parseCsv, serializeCsv, toWellFormed, unguardCell } from './csv';
 export type { CsvColumn, CsvError, CsvErrorCode, CsvWarning, Delimiter, ExportInput, HeaderSpec, ImportBase, Imported, Meaning, ParsedCsv } from './csv';
+// The sample board (plain data), shared by the web app and the MCP server
+export { SAMPLE_FREEZE_AT, SAMPLE_NOW, SAMPLE_RELEASE, sampleBoard } from './sample';
+// Sentences for board and CSV errors
+export { describeCsvError, describeValidationError, listOf, thousands } from './messages';

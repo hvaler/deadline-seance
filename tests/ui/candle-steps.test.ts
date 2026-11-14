@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { capacityBetween } from '../../src/engine/index';
 import { CANDLE_STEPS, LAST_CANDLE_STEP } from '../../src/ui/candle-steps';
-import { SAMPLE_NOW, sampleBoard } from '../../src/ui/sample-board';
+import { SAMPLE_FREEZE_AT, SAMPLE_NOW, sampleBoard } from '../../src/ui/sample-board';
 
 /** "Mon 13:00": weekday and time in Europe/Madrid, formatted by the platform (not by the table's author). */
 function madridLabel(instant: number): string {
@@ -60,4 +60,9 @@ describe('candle steps', () => {
     const days = CANDLE_STEPS.slice(1).map((s) => s.label.slice(0, 3));
     expect(days).toEqual(['Mon', 'Mon', 'Tue', 'Tue', 'Wed', 'Wed', 'Thu', 'Thu', 'Fri', 'Fri']);
   });
+});
+
+test('the engine sample freeze (used by the MCP server) is the last candle step, Friday 18:00 in Madrid', () => {
+  expect(SAMPLE_FREEZE_AT).toBe(CANDLE_STEPS[LAST_CANDLE_STEP]?.freezeAt);
+  expect(CANDLE_STEPS[LAST_CANDLE_STEP]?.label).toBe('Fri 18:00');
 });

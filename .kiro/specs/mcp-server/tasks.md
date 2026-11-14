@@ -1,0 +1,51 @@
+# Implementation plan: mcp-server
+Run `npm run typecheck` and `npm test` before ticking any task; tick it only when both exit 0 (the suite starts at 63 files and 1326 tests). Run mutation checks one at a time, never in parallel on the same file, and revert each. Do not change the sample board's data or its seed. Do not loosen the CSP. Add no package beyond those in design D1 and D2. Do not commit or push. A task marked **stop** ends with a question to the user instead of going on.
+- [x] 1. The rule and the packages first (Requirements 9.4, 12)
+  - [x] 1.1 Append a dated section to `docs/rule.md` (Spanish, never rewriting history): the three tools and their inputs, the sample's defaults, the time-input rule, `away` with and without a date, the error codes, and that the server adds no rule
+  - [x] 1.2 Look up the release dates on the npm registry for `@modelcontextprotocol/server`, `@modelcontextprotocol/client` and `zod`; pick versions released at least 14 days before today; install them exactly (`--save-exact --save-dev`); report the versions and dates. **Stop** and ask only if 2.4.0 is no longer the choice (for example a newer patch is under 14 days old and 2.4.0 has a known fix)
+  - _Requirements: 9.4, 12.1, 12.2_
+- [x] 2. The sample board moves to the engine (Requirement 2.2; Decision D6)
+  - [x] 2.1 `src/engine/sample.ts` with `sampleBoard`, `SAMPLE_NOW`, `SAMPLE_RELEASE`, `SAMPLE_FREEZE_AT`; `src/engine/index.ts` exports; `src/ui/sample-board.ts` re-exports and keeps `PRODUCT_LINE`; `purity.test.ts` gets the new names on purpose; the sample's data is byte for byte the same (the existing sample tests and the golden notes stay green)
+  - [x] 2.2 A test that `SAMPLE_FREEZE_AT` equals the last candle step of `tests/ui/candle-steps.test.ts`'s table and is Friday 18:00 in Europe/Madrid
+  - _Requirements: 2.2, 3.2_
+- [x] 3. Scaffolding (Requirements 1, 9)
+  - [x] 3.1 `tsconfig.mcp.json` and the `typecheck` script; `mcp/vite.config.ts`; `mcp/start.mjs`; scripts `mcp:build` and `mcp`; `.gitignore` gets `dist-mcp/`
+  - [x] 3.2 `mcp/errors.ts` (`ToolError`, the server's codes, conversion from `EngineError`, `ValidationError`, `CsvError`) and `mcp/time.ts` (`parseInstant`)
+  - [x] 3.3 `tests/mcp/input.test.ts` (time part) and `tests/mcp/errors.test.ts` (first half)
+  - _Requirements: 1.4, 1.5, 3.1, 7.1, 7.2, 9.6_
+- [x] 4. Request state (Requirements 2, 3)
+  - [x] 4.1 `mcp/request.ts`: board sources, defaults, margin, away with and without a date, unknown person, size limits
+  - [x] 4.2 `tests/mcp/board.test.ts` and `tests/mcp/input.test.ts` (rest): sample, the sample CSV from `docs/examples/sample-board.csv`, CSV errors with row, column and the cap of 100, JSON defaults, validation errors, over the limits, the away forms
+  - _Requirements: 2.1–2.6, 3.2–3.5_
+- [x] 5. The handlers (Requirements 4, 5, 6, 8)
+  - [x] 5.1 `mcp/solve-freeze.ts`, `mcp/render.ts` and `tests/mcp/solve-freeze.test.ts`: golden numbers, every reason kind, impossible, margin, away, equal to the engine called directly
+  - [x] 5.2 `mcp/what-if.ts` and `tests/mcp/what-if.test.ts`: each change, exhume of HB-117, a rejected exhume with its numbers, `put_down` errors, a no-op, `move_freeze` and `margin` equal to a direct re-solve
+  - [x] 5.3 `mcp/certificate.ts` and `tests/mcp/death-certificate.test.ts`: equal to `deathCertificate(nightFacts(...))` and to the web view's text, the guard verdict, `exhumed` and `put_down`
+  - [x] 5.4 `tests/mcp/provenance.test.ts` and `tests/mcp/order.test.ts`: structure equals engine, text integers are in the structure, the certificate passes the guard, over generated boards; shuffled boards and repeated calls give the same answer
+  - _Requirements: 4.1–4.7, 5.1–5.7, 6.1–6.3, 8.1–8.3, 10.1, 10.5_
+- [x] 6. The server (Requirements 1, 7, 10)
+  - [x] 6.1 `mcp/tools.ts` (zod input and output schemas, titles, descriptions, annotations) and `mcp/server.ts` (`McpServer`, `registerTool` x3, `serveStdio`, `toResult` with the catch, `console.error` only)
+  - [x] 6.2 `.kiro/settings/mcp.json`; `tests/mcp/config.test.ts`
+  - [x] 6.3 `tests/mcp/fuzz.test.ts`: arbitrary JSON, strings and times to each handler and each schema; only results
+  - [x] 6.4 `tests/mcp/e2e.test.ts`: spawn `node mcp/start.mjs` with the SDK client, list three tools with schemas and annotations, call each once, check the answers equal the handlers'
+  - [x] 6.5 Measure the time from spawn to the first answer on this machine; report it. If it is over 2 s, add the staleness check to `start.mjs` (design D4)
+  - _Requirements: 1.1–1.8, 2.6, 7.3, 10.2–10.4_
+- [x] 7. Separation and the web bundle (Requirements 9, 10.6)
+  - [x] 7.1 `tests/mcp/imports.test.ts`; the check that nothing under `src/` imports `mcp/` lives in `tests/mcp/imports.test.ts` (`tests/ui/imports.test.ts` already refuses `mcp` in the UI)
+  - [x] 7.2 `tests/mcp/bundle.test.ts`: the web build holds no SDK, zod or server text; the server bundle runs from an empty folder; the JS stays under 37.5 kB gzip and JS+CSS under 60 kB (measured: 36.90 kB JS, 7.02 kB CSS; it was 36.72 kB before)
+  - _Requirements: 9.1–9.3, 9.5, 10.6_
+- [x] 8. Mutation checks (Requirement 10)
+  - [x] 8.1 One at a time, on a copy, reverted each time: a total off by one; a reason copied wrong; `away` with no date ignored; a time with no zone accepted; a thrown error left uncaught; a UI import in `mcp/`. Each must be caught by a named test; report which
+  - _Requirements: 10_
+- [x] 9. Docs (Requirement 11)
+  - [x] 9.1 `tests/mcp/docs.test.ts` and `docs/mcp.md`: Kiro and other clients, the Inspector command, one call and answer per tool between markers, the read-only and offline statement, the documentation list of design section 0; `UPDATE_MCP_DOCS=1` writes it
+  - [x] 9.2 `README.md`: a short "MCP server" section
+  - _Requirements: 11.1–11.4_
+- [x] 10. Checkpoint
+  - [x] 10.1 `npm run typecheck`, `npm test`, `npm run build` all exit 0; report files and tests, the bundle sizes, and that `dist/` is unchanged. Delete temporary files (`dist-mcp/` stays ignored, `dist/` as before)
+  - [x] 10.2 **Stop** and ask the user to commit, then go on to task 11
+- [x] 11. Use it from Kiro (Requirement 13)
+  - [x] 11.1 With the workspace config in place, ask in Kiro's chat: "With the sample board, what goes out if Ana is away on Friday?" and "What does it cost to exhume HB-117?". Report, for each: the tool called, the arguments, the answer
+  - [x] 11.2 Compare both answers with the engine called directly (numbers, keys)
+  - [x] 11.3 If Kiro cannot call the tools in this session, say what was tried, give the steps for the user, and label any client test as a test, not as Kiro
+  - _Requirements: 13.1–13.3_

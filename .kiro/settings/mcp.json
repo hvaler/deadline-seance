@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "deadline-seance": {
+      "command": "node",
+      "args": ["mcp/start.mjs"],
+      "disabled": false,
+      "autoApprove": ["solve_freeze", "what_if", "death_certificate"]
+    }
+  }
+}
