@@ -22,7 +22,8 @@ interface StripItem {
   readonly item: HTMLElement;
   readonly reserve: HTMLElement;
   readonly fill: HTMLElement;
-  readonly chance: HTMLElement;
+  readonly number: HTMLElement;
+  readonly percent: HTMLElement;
   readonly now: HTMLElement;
   readonly spoken: HTMLElement;
 }
@@ -32,7 +33,10 @@ export const FOG_HEADLINE_ID = 'fog-headline';
 function createItem(): StripItem {
   const reserve = el('span', { class: 'strip-reserve', attrs: { 'aria-hidden': 'true' } });
   const fill = el('span', { class: 'strip-fill' });
-  const chance = el('span', { class: 'strip-chance num', attrs: { 'aria-hidden': 'true' } });
+  // The number and its percent sign are two lines (the sign smaller, under the number), so seven of them fit a phone; the text still reads "34 %".
+  const number = el('span', { class: 'strip-number' });
+  const percent = el('span', { class: 'strip-percent' });
+  const chance = el('span', { class: 'strip-chance num', attrs: { 'aria-hidden': 'true' } }, [number, percent]);
   const now = el('span', { class: 'strip-now', attrs: { 'aria-hidden': 'true' } });
   const spoken = el('span', { class: 'visually-hidden' });
   const item = el('li', { class: 'strip-item' }, [
@@ -42,7 +46,7 @@ function createItem(): StripItem {
     now,
     spoken,
   ]);
-  return { item, reserve, fill, chance, now, spoken };
+  return { item, reserve, fill, number, percent, now, spoken };
 }
 
 export function createFog(): FogParts {
@@ -70,7 +74,8 @@ export function createFog(): FogParts {
         if (point === undefined) return;
         const isCurrent = index === fog.currentIndex;
         setText(parts.reserve, `${point.marginPct} %`);
-        setText(parts.chance, point.fog === null ? '—' : `${point.fog.pct} %`);
+        setText(parts.number, point.fog === null ? '—' : String(point.fog.pct));
+        setText(parts.percent, point.fog === null ? '' : ' %');
         // The bar is drawn from the engine's percentage; CSS turns it into a scale (layout only).
         parts.fill.style.setProperty('--pct', String(point.fog === null ? 0 : point.fog.pct));
         setText(parts.now, isCurrent ? 'now' : '');

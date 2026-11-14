@@ -4,6 +4,9 @@ import { sampleBoard } from '../../src/ui/sample-board';
 import { drag, mountWith, region, release } from './harness';
 import type { Harness } from './harness';
 
+const styles = import.meta.glob('../../src/ui/styles/*.css', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const css = (name: string): string => Object.entries(styles).find(([path]) => path.endsWith(name))?.[1] ?? '';
+
 afterEach(() => {
   document.body.replaceChildren();
 });
@@ -187,5 +190,42 @@ describe('the strip under the reserve slider', () => {
     expect(text).not.toMatch(/best|recommend|highest|lowest|trend|safe|better/i);
     expect(strip(root).querySelector('svg, path, line, canvas')).toBeNull();
     expect(new Set(items(root).map((i) => i.className)).size).toBe(1);
+  });
+});
+
+describe('the strip lines up with the slider (measured in a real browser; here, what the styles promise)', () => {
+  test('each chance is a number with its percent sign under it, and still reads "34 %" as text', () => {
+    const { root } = mountWith();
+    for (const item of items(root)) {
+      const chance = item.querySelector('.strip-chance')!;
+      expect([...chance.children].map((c) => c.className)).toEqual(['strip-number', 'strip-percent']);
+    }
+    expect(items(root).map((i) => i.querySelector('.strip-number')?.textContent)).toEqual(['0', '0', '13', '34', '70', '95', '99']);
+    expect(items(root).map((i) => i.querySelector('.strip-percent')?.textContent)).toEqual(Array(7).fill(' %'));
+  });
+
+  test('an impossible freeze keeps the line of the percent sign, empty, so the strip does not change height', () => {
+    const h = mountWith();
+    h.app.store.dispatch({ type: 'candle/set', step: 0 });
+    expect(items(h.root).map((i) => i.querySelector('.strip-number')?.textContent)).toEqual(Array(7).fill('—'));
+    expect(items(h.root).map((i) => i.querySelector('.strip-percent')?.textContent)).toEqual(Array(7).fill(''));
+    expect(css('components.css')).toMatch(/\.strip-percent\s*\{[^}]*min-height:\s*1\.1em/);
+  });
+
+  test('the strip is as wide as the slider plus (W - thumb) / 6 minus the thumb, so the item centres sit on the thumb centres', () => {
+    expect(css('components.css')).toMatch(/\.fog-strip\s*\{[^}]*margin-inline:\s*calc\(var\(--thumb\) \/ 2 - \(100% - var\(--thumb\)\) \/ 12\)/);
+    expect(css('components.css')).toMatch(/\.fog-strip\s*\{[^}]*grid-template-columns:\s*repeat\(7, minmax\(0, 1fr\)\)/);
+    expect(css('components.css')).toMatch(/\.fog-strip\s*\{[^}]*padding:\s*6px 0;/);
+  });
+
+  test('on a phone the slider takes a row of its own and the strip the row under it, in the same columns', () => {
+    const layout = css('layout.css');
+    expect(layout).toMatch(/@media \(max-width: 639\.98px\)\s*\{\s*\.reserve\s*\{[^}]*grid-template-areas:\s*'label output'\s*'range range'\s*'strip strip'\s*'hint hint'/);
+    expect(layout).toMatch(/\.fog-strip\s*\{\s*grid-area:\s*strip;/);
+    expect(layout).toMatch(/\.reserve-range\s*\{\s*grid-area:\s*range;/);
+  });
+
+  test('on a wide screen the strip is in the slider\'s column', () => {
+    expect(css('layout.css')).toMatch(/\.fog-strip\s*\{\s*grid-column:\s*2;/);
   });
 });

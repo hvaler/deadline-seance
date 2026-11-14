@@ -904,8 +904,15 @@
 .fog-strip {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
+  /*
+   * The centres of the seven items sit on the centres of the slider's thumb at its seven steps. The thumb travels (W - thumb) between its first
+   * and last centre, so neighbouring centres are (W - thumb) / 6 apart; seven columns of that width make a strip of W + (W - thumb) / 6 - thumb,
+   * which is the slider's width W with this margin on each side. The margin is negative when the slider is wide. (A percentage margin is of the
+   * width of the grid area, which is the slider's own.)
+   */
   margin-top: 6px;
-  padding: 6px calc(var(--thumb) / 2);
+  margin-inline: calc(var(--thumb) / 2 - (100% - var(--thumb)) / 12);
+  padding: 6px 0;
   border-radius: 4px;
   background: var(--night);
 }
@@ -950,9 +957,20 @@
 }
 
 .strip-chance {
-  font-size: 0.8125rem;
+  display: grid;
+  justify-items: center;
+  line-height: 1.1;
   font-weight: 600;
   color: var(--bone);
+}
+
+.strip-number {
+  font-size: 0.9375rem;
+}
+
+.strip-percent {
+  min-height: 1.1em; /* keeps its line when there is no percent sign, so the strip has one height */
+  font-size: 0.6875rem;
 }
 
 .strip-now {
@@ -1011,12 +1029,5 @@
 @media (max-width: 479.98px) {
   .fog-block {
     min-height: 12.5rem;
-  }
-}
-
-@media (max-width: 639.98px) {
-  /* Seven numbers across a phone: a little smaller, so neighbours do not touch. */
-  .strip-chance {
-    font-size: 0.75rem;
   }
 }

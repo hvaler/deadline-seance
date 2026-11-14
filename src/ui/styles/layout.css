@@ -188,15 +188,39 @@ main {
   justify-items: start;
 }
 
-/* The strip of the fog sits under the slider itself; on a narrow screen it takes the whole row, so seven numbers fit. */
+/* The strip of the fog sits under the slider, in the slider's column, and is centred on the slider's seven positions (see components.css).
+   On a phone the slider takes the whole row, with the name and the value above it, and the strip takes the row under it, so they still line up. */
 .fog-strip {
   grid-column: 2;
 }
 
 @media (max-width: 639.98px) {
+  .reserve {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'label output'
+      'range range'
+      'strip strip'
+      'hint hint';
+  }
+
+  .reserve-label {
+    grid-area: label;
+  }
+
+  .reserve-output {
+    grid-area: output;
+  }
+
+  .reserve-range {
+    grid-area: range;
+  }
+
   .fog-strip {
-    grid-column: 1 / -1;
-    padding-right: 4px;
-    padding-left: 4px;
+    grid-area: strip;
+  }
+
+  .reserve-hint {
+    grid-area: hint;
   }
 }

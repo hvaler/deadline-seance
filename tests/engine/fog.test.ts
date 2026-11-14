@@ -363,7 +363,10 @@ describe('what the screen must never promise', () => {
         capacity: fc.integer({ min: 6, max: 36 }),
         seed: fc.integer({ min: 0, max: 999 }),
       })
-      .map(({ tickets, capacity, seed }) => atCapacity(makeBoard(tickets.map((t, i) => ticket(`T${i}`, t.effort, t.cod)), { fogSeed: seed }), capacity));    const outcome = fc.check(
+      .map(({ tickets, capacity, seed }) =>
+        atCapacity(makeBoard(tickets.map((t, i) => ticket(`T${i}`, t.effort, t.cod)), { fogSeed: seed }), capacity),
+      );
+    const outcome = fc.check(
       fc.property(arbSmall, ({ board, freeze }) => decrease(must(fogCurve(board, freeze))) === null),
       { seed: 20261116, numRuns: 3000, verbose: 0 },
     );
