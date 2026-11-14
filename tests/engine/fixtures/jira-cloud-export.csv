@@ -1,0 +1,12 @@
+﻿Summary,Issue key,Issue id,Issue Type,Status,Priority,Resolution,Created,Sprint,Sprint,Labels,Labels,Custom field (Story point estimate),Custom field (Value),Custom field (Urgency),Custom field (Risk),Custom field (Cost of Delay),Inward issue link (Blocks),Inward issue link (Blocks),Outward issue link (Blocks)
+"Fix stale balance, after a transfer",HB-1,10001,Bug,In Progress,High,,14/Nov/26 9:00 AM,Sprint 12,,backend,,5.0,8,5,5,,,,
+Strong-auth callback (PSD2),HB-2,10002,Story,To Do,Highest,,14/Nov/26 9:05 AM,Sprint 12,Sprint 13,security,payments,8,8,13,8,,,,
+"Card freeze toggle
+with a line break",HB-3,10003,Story,To Do,Medium,,14/Nov/26 9:10 AM,,,,,5,8,5,3,,HB-1,,
+"Push alerts ""freeze""",HB-4,10004,Story,To Do,Low,,14/Nov/26 9:15 AM,,,,,3,5,3,3,,HB-3,HB-1,
+Savings goals,HB-5,10005,Story,To Do,Medium,,14/Nov/26 9:20 AM,,,,,13,,,,14,,,
+Old login page,HB-6,10006,Story,Done,Low,Done,10/Nov/26 9:00 AM,,,,,3,3,2,2,,,,
+Multi-currency wallet,HB-7,10007,Story,Closed,Low,Won't Do,10/Nov/26 9:00 AM,,,,,21,5,2,3,,,,
+Dashboard widget,HB-8,10008,Story,To Do,Medium,,14/Nov/26 9:30 AM,,,,,2,3,2,2,,HB-6,,HB-9
+Statement export,HB-9,10009,Story,To Do,Medium,,14/Nov/26 9:35 AM,,,,,3,5,3,3,,,,
+FX rate alerts,HB-10,10010,Story,To Do,Medium,,14/Nov/26 9:40 AM,,,,,5,5,3,3,,HB-7,,

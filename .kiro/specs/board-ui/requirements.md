@@ -467,3 +467,7 @@ The "Play the night · 60 s" slot is filled by the `night-tour` spec when the ap
 ## Addendum: the certificate slot is filled
 
 The "Death certificate" slot of the tools is filled by the `death-certificate` spec: it is now a working button that opens the note for stakeholders (Copy, Download .md). It is no longer a slot (no `data-slot`, no "Not built yet" note); the chronicle, CSV and MCP slots stay as they were.
+
+## Addendum: the CSV slot is filled
+
+The "CSV import and export" slot of the tools is filled by the `jira-csv` spec: the tools have a group "Your tickets" (import, download the sample, export for Jira) and the page a banner while your own tickets are loaded. The chronicle and MCP slots stay as they were.

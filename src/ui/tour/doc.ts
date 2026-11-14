@@ -30,6 +30,12 @@ function describeAction(action: Action, scene: SimulatedScene): string {
       return `puts ${action.key} down (Won't Do)`;
     case 'sound/set':
       return action.on ? 'turns sound on' : 'turns sound off';
+    case 'board/sample':
+      return 'loads the sample board: back to the plain night (Friday 18:00, no reserve, nobody away)';
+    case 'board/load':
+      return 'imports a CSV file';
+    case 'release/set':
+      return 'renames the release';
     case 'state/restore':
       return 'restores a state';
   }

@@ -7,10 +7,11 @@ import type {
   Person,
   Solution,
   SolvedSolution,
+  Ticket,
   ValidBoard,
 } from '../engine/index';
 import { CANDLE_STEPS, LAST_CANDLE_STEP } from './candle-steps';
-import { SAMPLE_NOW, sampleBoard } from './sample-board';
+import { SAMPLE_NOW, SAMPLE_RELEASE, sampleBoard } from './sample-board';
 
 /**
  * The shape of the UI state: one plain value (no functions, no DOM nodes, no class instances) changed only by the reducer
@@ -26,6 +27,12 @@ export type Action =
   | { readonly type: 'tombstone/put-down'; readonly key: string }
   | { readonly type: 'sound/set'; readonly on: boolean }
   | { readonly type: 'board/reset' }
+  /** Your tickets from a CSV file replace the board. The board has been built and validated by the engine's importer. */
+  | { readonly type: 'board/load'; readonly board: ValidBoard; readonly name: string; readonly release: string | null; readonly skipped: number; readonly warnings: readonly string[]; readonly putDown: readonly Ticket[] }
+  /** Back to the board the app started with (the sample), whatever is loaded. */
+  | { readonly type: 'board/sample' }
+  /** The name of the release, for the certificate and the export. */
+  | { readonly type: 'release/set'; readonly name: string }
   /** Only the guided tour sends this, to put the user's own state back exactly. No control of the page does. */
   | { readonly type: 'state/restore'; readonly state: AppState };
 
@@ -34,7 +41,9 @@ export type Subject =
   | { readonly kind: 'reserve'; readonly from: number; readonly to: number }
   | { readonly kind: 'survivor'; readonly name: string; readonly away: boolean }
   | { readonly kind: 'exhume' | 'resurrect' | 'put-down'; readonly key: string }
-  | { readonly kind: 'reset' };
+  | { readonly kind: 'reset'; readonly yours?: boolean }
+  | { readonly kind: 'load'; readonly name: string; readonly count: number; readonly skipped: number }
+  | { readonly kind: 'sample' };
 
 /** What two solutions have in common, for the change note. */
 export type Comparison =
@@ -43,7 +52,9 @@ export type Comparison =
   /** One side (or both) is an impossible freeze: `diffSolutions` has nothing to compare. */
   | { readonly kind: 'not-comparable'; readonly before: Solution; readonly after: Solution }
   /** Both are solved but come from boards that no longer share every ticket (a reset after a put down): only the totals are comparable. */
-  | { readonly kind: 'no-diff'; readonly before: SolvedSolution; readonly after: SolvedSolution };
+  | { readonly kind: 'no-diff'; readonly before: SolvedSolution; readonly after: SolvedSolution }
+  /** A different board was loaded (a file, or the sample again): nothing to compare, even if some keys coincide. */
+  | { readonly kind: 'new-board' };
 
 export type Change =
   | { readonly kind: 'none' }
@@ -52,6 +63,18 @@ export type Change =
   | { readonly kind: 'rejected'; readonly subject: Subject; readonly impossible: ImpossibleSolution }
   /** An action the engine refused as invalid (unknown key, not a zombie). The board is untouched. */
   | { readonly kind: 'refused'; readonly subject: Subject; readonly error: EngineError };
+
+/** Where the loaded board came from. */
+export type Source =
+  | { readonly kind: 'built-in' }
+  | {
+      readonly kind: 'file';
+      readonly name: string;
+      readonly skipped: number;
+      readonly warnings: readonly string[];
+      /** The tickets the file closed as Won't Do, with their data: they are not on the board, and the export writes them back. */
+      readonly putDown: readonly Ticket[];
+    };
 
 export interface AppState {
   /** The board as loaded, to go back to on reset. */
@@ -67,19 +90,35 @@ export interface AppState {
   readonly sound: boolean;
   /** What the last action did. */
   readonly change: Change;
+  /** The board and release the app started with (the sample): oard/sample goes back to them. */
+  readonly builtIn: { readonly board: ValidBoard; readonly release: string | null };
+  readonly source: Source;
+  /** The name of the release, or null. */
+  readonly release: string | null;
 }
 
 export const RESERVE_STEPS: readonly number[] = [0, 5, 10, 15, 20, 25, 30];
 
-export function initialStateFor(board: ValidBoard): AppState {
-  return { home: board, board, candle: LAST_CANDLE_STEP, marginPct: 0, away: [], sound: false, change: { kind: 'none' } };
+export function initialStateFor(board: ValidBoard, release: string | null = null): AppState {
+  return {
+    home: board,
+    board,
+    candle: LAST_CANDLE_STEP,
+    marginPct: 0,
+    away: [],
+    sound: false,
+    change: { kind: 'none' },
+    builtIn: { board, release },
+    source: { kind: 'built-in' },
+    release,
+  };
 }
 
 /** The built-in sample board in its initial state: Friday 18:00, no reserve, nobody away, sound off. */
 export function initialState(): AppState {
   const r = validateBoard(sampleBoard());
   if (!r.ok) throw new Error(`the sample board is invalid: ${JSON.stringify(r.error)}`);
-  return initialStateFor(r.value);
+  return initialStateFor(r.value, SAMPLE_RELEASE);
 }
 
 // ---- what the engine is asked ------------------------------------------------------------------------------------------

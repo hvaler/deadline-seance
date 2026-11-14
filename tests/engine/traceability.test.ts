@@ -5,7 +5,7 @@ import { describe, expect, test } from 'vitest';
  * Keeps `.kiro/specs/rule-engine/requirements.md` (the traceability table) honest: every property in scope has its own
  * test named with its number, in the file the table names, and nothing in the tests is skipped or focused.
  *
- * Out of scope: P13 (CSV round trip), P25 (undo) and P26 (CSV import). They belong to later specs. P19-P21 (the fog) joined in with the fog spec (tests in fog.test.ts);
+ * Out of scope: P25 (undo), which belongs to a later spec. P13 and P26 (the CSV round trip, in csv.test.ts) joined in with the jira-csv spec. P19-P21 (the fog) joined in with the fog spec (tests in fog.test.ts);
  * P12 (epitaph guard, in tests/ui/epitaph-guard.test.ts) and P24 (certificate, in certificate.test.ts) joined in with the death-certificate spec.
 
  */
@@ -33,6 +33,7 @@ const TABLE: Readonly<Record<number, string>> = {
   10: 'exhume.test.ts',
   11: 'capacity.test.ts',
   12: 'ui/epitaph-guard.test.ts',
+  13: 'csv.test.ts',
   14: 'capacity.test.ts',
   15: 'diff.test.ts',
   16: 'cod.test.ts',
@@ -44,6 +45,7 @@ const TABLE: Readonly<Record<number, string>> = {
   22: 'solver.test.ts',
   23: 'cod.test.ts',
   24: 'certificate.test.ts',
+  26: 'csv.test.ts',
   27: 'solver.test.ts',
 };
 

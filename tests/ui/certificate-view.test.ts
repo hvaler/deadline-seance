@@ -30,8 +30,8 @@ const key = (target: EventTarget, name: string, init: KeyboardEventInit = {}): K
 };
 
 const dialog = (root: ParentNode): HTMLElement | null => root.querySelector<HTMLElement>('[data-region="certificate"]');
-const markdownOf = (h: Harness, release: string | null = null): string => {
-  const facts = nightFacts(nightInputOf(h.app.store.getState(), release));
+const markdownOf = (h: Harness): string => {
+  const facts = nightFacts(nightInputOf(h.app.store.getState()));
   if (!facts.ok) throw new Error('no facts');
   return deathCertificate(facts.value);
 };
@@ -183,7 +183,7 @@ describe('what the screen says is what the Markdown says (Requirement 7.3)', () 
   test('on the Friday night, every line, item and cell, in the same order', () => {
     const h = mountWith(undefined, {}, { release: SAMPLE_RELEASE });
     byFocus(h.root, 'certificate').click();
-    expect(shown(h.root)).toEqual(readMarkdown(markdownOf(h, SAMPLE_RELEASE)));
+    expect(shown(h.root)).toEqual(readMarkdown(markdownOf(h)));
   });
 
   test('after the tour\'s actions, with everything filled', () => {
@@ -196,7 +196,7 @@ describe('what the screen says is what the Markdown says (Requirement 7.3)', () 
     ] as const) h.app.store.dispatch(action);
     byFocus(h.root, 'certificate').click();
     const said = shown(h.root);
-    expect(said).toEqual(readMarkdown(markdownOf(h, SAMPLE_RELEASE)));
+    expect(said).toEqual(readMarkdown(markdownOf(h)));
     expect(said.some((s) => s.kind === 'item' && s.text.startsWith('HB-108, Transaction search: 8 points'))).toBe(true);
   });
 
@@ -266,8 +266,8 @@ describe('Copy (Requirement 8)', () => {
     byFocus(h.root, 'certificate').click();
     byFocus(h.root, 'certificate-copy').click();
     await settle(h);
-    expect(h.clipboard.written).toEqual([markdownOf(h, SAMPLE_RELEASE)]);
-    expect(h.root.querySelector('[role="status"]')?.textContent).toBe(COPIED);
+    expect(h.clipboard.written).toEqual([markdownOf(h)]);
+    expect(dialog(h.root)?.querySelector('[role="status"]')?.textContent).toBe(COPIED);
     expect(h.root.querySelector('textarea')?.hidden).toBe(true);
   });
 
@@ -279,7 +279,7 @@ describe('Copy (Requirement 8)', () => {
     byFocus(h.root, 'certificate-copy').click();
     await settle(h);
     expect(h.clipboard.written).toHaveLength(2);
-    expect(h.root.querySelector('[role="status"]')?.textContent).toBe(COPIED);
+    expect(dialog(h.root)?.querySelector('[role="status"]')?.textContent).toBe(COPIED);
   });
 
   test('when the browser refuses, the note is shown selected in a text area, focused, with the way out', async () => {
@@ -294,7 +294,7 @@ describe('Copy (Requirement 8)', () => {
     expect(area.value).toBe(markdownOf(h));
     expect(document.activeElement).toBe(area);
     expect([area.selectionStart, area.selectionEnd]).toEqual([0, area.value.length]);
-    expect(h.root.querySelector('[role="status"]')?.textContent).toBe(COPY_BLOCKED);
+    expect(dialog(h.root)?.querySelector('[role="status"]')?.textContent).toBe(COPY_BLOCKED);
     expect(h.clipboard.written).toEqual([]);
   });
 
@@ -306,7 +306,7 @@ describe('Copy (Requirement 8)', () => {
     await settle(h);
     byFocus(h.root, 'certificate-close').click();
     byFocus(h.root, 'certificate').click();
-    expect(h.root.querySelector('[role="status"]')?.textContent).toBe('');
+    expect(dialog(h.root)?.querySelector('[role="status"]')?.textContent).toBe('');
     expect(h.root.querySelector<HTMLTextAreaElement>('textarea')?.hidden).toBe(true);
   });
 });
@@ -317,8 +317,8 @@ describe('Download (Requirement 9)', () => {
     byFocus(h.root, 'certificate').click();
     byFocus(h.root, 'certificate-download').click();
     h.frame.flush();
-    expect(h.files.saved).toEqual([{ name: 'death-certificate-2026-11-20.md', text: markdownOf(h, SAMPLE_RELEASE), type: MARKDOWN_TYPE }]);
-    expect(h.root.querySelector('[role="status"]')?.textContent).toBe(DOWNLOADED);
+    expect(h.files.saved).toEqual([{ name: 'death-certificate-2026-11-20.md', text: markdownOf(h), type: MARKDOWN_TYPE }]);
+    expect(dialog(h.root)?.querySelector('[role="status"]')?.textContent).toBe(DOWNLOADED);
   });
 
   test('the name follows the candle and is plain ASCII, with no title and no name in it', () => {

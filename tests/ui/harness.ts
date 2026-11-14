@@ -1,7 +1,7 @@
 import { mountApp } from '../../src/ui/app';
 import type { MountedBoard } from '../../src/ui/app';
 import { sampleBoard } from '../../src/ui/sample-board';
-import type { ClipboardWriter, FileSaver, Frame, Page, Services, SoundPlayer, Timers } from '../../src/ui/services';
+import type { ClipboardWriter, FileSaver, Frame, Page, Services, SoundPlayer, TextReader, Timers } from '../../src/ui/services';
 import type { Script } from '../../src/ui/tour/types';
 import type { SoundEvent } from '../../src/ui/sound-events';
 import type { Board } from '../../src/engine/index';
@@ -139,6 +139,20 @@ export class RecordingFiles implements FileSaver {
   }
 }
 
+/** A file reader that gives back the text a test chose for each file name, and records what it was asked to read. */
+export class RecordingReader implements TextReader {
+  /** Text by file name. A name that is not here reads as empty. */
+  readonly texts = new Map<string, string>();
+  readonly read_: string[] = [];
+  /** True: the read fails. */
+  fails = false;
+  read(file: File): Promise<string> {
+    this.read_.push(file.name);
+    if (this.fails) return Promise.reject(new Error('unreadable'));
+    return Promise.resolve(this.texts.get(file.name) ?? '');
+  }
+}
+
 export interface Harness {
   readonly app: MountedBoard;
   readonly root: HTMLElement;
@@ -148,6 +162,7 @@ export interface Harness {
   readonly page: RecordingPage;
   readonly clipboard: RecordingClipboard;
   readonly files: RecordingFiles;
+  readonly reader: RecordingReader;
 }
 
 /** Mounts the app on a board with fake frames, timers and sound. */
@@ -170,14 +185,15 @@ export function mountWith(board: Board = sampleBoard(), overrides: Partial<Servi
   const page = new RecordingPage(extras.hash ?? '');
   const clipboard = new RecordingClipboard();
   const files = new RecordingFiles();
+  const reader = new RecordingReader();
   const app = mountApp(root, board, {
-    services: { frame, timers, sound, page, clipboard, files, ...overrides },
+    services: { frame, timers, sound, page, clipboard, files, reader, ...overrides },
     ...(extras.tour === undefined ? {} : { tour: extras.tour }),
     ...(extras.release === undefined ? {} : { release: extras.release }),
   });
   if (app.kind !== 'board') throw new Error('the board should be valid');
   frame.flush(); // the chains are drawn in the first frame after mounting; tests start from a quiet page
-  return { app, root, frame, timers, sound, page, clipboard, files };
+  return { app, root, frame, timers, sound, page, clipboard, files, reader };
 }
 
 export function region(root: ParentNode, name: string): HTMLElement {

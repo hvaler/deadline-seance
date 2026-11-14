@@ -46,8 +46,9 @@ export function mountTitleCard(header: HTMLElement, ctx: Ctx, tour?: TourHook): 
           on: { click: () => tour.onPlay() },
         });
 
+  const productLine = el('p', { class: 'product-line', text: PRODUCT_LINE });
   header.append(
-    el('p', { class: 'product-line', text: PRODUCT_LINE }),
+    productLine,
     el('h1', { class: 'title', text: TITLE }),
     el('p', { class: 'tagline', text: TAGLINE }),
     el('div', { class: 'title-actions' }, [tourSlot, soundButton]),
@@ -56,6 +57,7 @@ export function mountTitleCard(header: HTMLElement, ctx: Ctx, tour?: TourHook): 
 
   return {
     update(_view, state) {
+      setText(productLine, state.source.kind === 'built-in' ? PRODUCT_LINE : `${state.release ?? 'Your release'} · your tickets`);
       setText(soundButton, state.sound ? 'Sound on' : 'Sound off');
       setAttr(soundButton, 'aria-pressed', state.sound ? 'true' : 'false');
       // Turning sound off from anywhere else also silences the player. Turning it on happens only inside the click above.

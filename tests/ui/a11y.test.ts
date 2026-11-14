@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, test } from 'vitest';
+import { importCsv } from '../../src/engine/index';
 import { sampleBoard } from '../../src/ui/sample-board';
 import { sampleScript } from '../../src/ui/tour/sample-script';
 import { byFocus, drag, mountWith, release } from './harness';
@@ -28,6 +29,16 @@ const STATES: [string, (h: Harness) => void][] = [
   ['after a rejected exhume (an alert)', (h) => byFocus(h.root, 'exhume:HB-119').click()],
   ['after a zombie was put down', (h) => byFocus(h.root, 'put-down:HB-112').click()],
   ['after a survivor was sent away', (h) => byFocus(h.root, 'survivor:Ana').click()],
+  [
+    'with your own tickets loaded (the banner)',
+    (h) => {
+      const home = h.app.store.getState().home;
+      const text = 'Issue key,Summary,Story Points,Cost of Delay\nZ-1,One,5,9\nZ-2,Two,3,4\n';
+      const r = importCsv(text, { people: home.people, timeZone: home.timeZone, nextReleaseWeeks: home.nextReleaseWeeks, zombieThreshold: home.zombieThreshold });
+      if (!r.ok) throw new Error('import failed');
+      h.app.store.dispatch({ type: 'board/load', board: r.value.board, name: 'mine.csv', release: 'mine', skipped: 1, warnings: [], putDown: [] });
+    },
+  ],
   ['with the death certificate open', (h) => byFocus(h.root, 'certificate').click()],
   ['with the death certificate open in tour mode', (h) => h.app.certificate.openForTour()],
 ];

@@ -7,7 +7,7 @@ afterEach(() => {
 });
 
 /** The empty slots of features that are out of scope for this version, and the text each one must show. */
-const SLOTS = ['tour', 'chronicle', 'csv', 'mcp'] as const;
+const SLOTS = ['tour', 'chronicle', 'mcp'] as const;
 
 const slot = (root: ParentNode, name: string): HTMLElement[] => [...root.querySelectorAll<HTMLElement>(`[data-slot="${name}"]`)];
 
@@ -50,14 +50,13 @@ describe('empty slots', () => {
   test('the slots are where the brief puts them: the tour in the title card, the rest in the tools', () => {
     const { root } = mountWith();
     expect(slot(root, 'tour')[0]?.closest('header')).not.toBeNull();
-    for (const name of ['chronicle', 'csv', 'mcp']) expect(slot(root, name)[0]?.closest('[data-region="tools"]'), name).not.toBeNull();
+    for (const name of ['chronicle', 'mcp']) expect(slot(root, name)[0]?.closest('[data-region="tools"]'), name).not.toBeNull();
   });
 
   test('the labels name the feature', () => {
     const { root } = mountWith();
     expect(slot(root, 'tour')[0]?.textContent).toBe('Play the night · 60 s');
     expect(slot(root, 'chronicle')[0]?.textContent).toBe('Night chronicle and undo');
-    expect(slot(root, 'csv')[0]?.textContent).toBe('CSV import and export');
     expect(slot(root, 'mcp')[0]?.textContent).toBe('The rule as an MCP server for the Kiro agent');
   });
 
@@ -86,7 +85,9 @@ describe('what the language-model slot must not have', () => {
   test('the page has no key field, no model name and no call to a model', () => {
     const { root } = mountWith();
     expect(root.textContent).not.toMatch(/api[ -]?key|\bllm\b|language model|gpt|claude|openai|anthropic|gemini|chatbot/i);
-    expect(root.querySelector('input[type="password"], input[type="text"], textarea')).toBeNull();
+    expect(root.querySelector('input[type="password"], textarea')).toBeNull();
+    // the only text fields are the two names the CSV tools ask for: the next release and the release
+    expect([...root.querySelectorAll('input[type="text"]')].map((i) => i.id)).toEqual(['source-release', 'csv-next-release']);
   });
 
   test('the epitaph text is the fixed template, the same on every mount', () => {

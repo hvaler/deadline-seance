@@ -12,8 +12,12 @@ import { boardFor, freezeFor } from './model';
  *   reserve slider only moves the highlight and never computes anything.
  */
 const MAX_PER_BOARD = 64;
+/** Boards with more tickets than this do not compute the fog while the candle is being dragged (measured: a curve of 80 tickets takes a median of 14 ms). */
+export const FOG_ON_SETTLE_FROM = 30;
 const tables = new WeakMap<ValidBoard, FogTable>();
 const curves = new WeakMap<ValidBoard, Map<string, readonly FogPoint[]>>();
+/** The last curve made for a board, whatever the candle was: what the sign keeps showing, marked stale, while the next one is worked out. */
+const lastCurves = new WeakMap<ValidBoard, readonly FogPoint[]>();
 
 function tableFor(board: ValidBoard): FogTable {
   let table = tables.get(board);
@@ -26,6 +30,16 @@ function tableFor(board: ValidBoard): FogTable {
 
 function curveKey(state: AppState): string {
   return `${state.candle}|${state.away.join(',')}`;
+}
+
+/** The curve for the state if it is already made; never computes. */
+export function peekCurve(state: AppState): readonly FogPoint[] | null {
+  return curves.get(state.board)?.get(curveKey(state)) ?? null;
+}
+
+/** The last curve made for the board of this state, for any candle: null if none was made yet. */
+export function lastCurveOf(state: AppState): readonly FogPoint[] | null {
+  return lastCurves.get(state.board) ?? null;
 }
 
 /** The chance at each reserve step for the state's candle and team; null only if the engine returned an error (it cannot for a valid state). */
@@ -43,5 +57,6 @@ export function curveFor(state: AppState): readonly FogPoint[] | null {
   if (!result.ok) return null;
   if (perBoard.size >= MAX_PER_BOARD) perBoard.clear();
   perBoard.set(key, result.value);
+  lastCurves.set(state.board, result.value);
   return result.value;
 }

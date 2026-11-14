@@ -48,6 +48,11 @@ export interface FileSaver {
   save(name: string, text: string, type: string): void;
 }
 
+/** Reads a file the user chose, as text, on this computer. Nothing is uploaded. */
+export interface TextReader {
+  read(file: File): Promise<string>;
+}
+
 export interface Services {
   readonly frame: Frame;
   readonly timers: Timers;
@@ -55,6 +60,7 @@ export interface Services {
   readonly page: Page;
   readonly clipboard: ClipboardWriter;
   readonly files: FileSaver;
+  readonly reader: TextReader;
 }
 
 export function browserFrame(): Frame {
@@ -135,6 +141,10 @@ export function browserFiles(timers: Timers): FileSaver {
   };
 }
 
+export function browserReader(): TextReader {
+  return { read: (file) => file.text() };
+}
+
 export function browserServices(): Services {
   const timers = browserTimers();
   return {
@@ -144,5 +154,6 @@ export function browserServices(): Services {
     page: browserPage(),
     clipboard: browserClipboard(),
     files: browserFiles(timers),
+    reader: browserReader(),
   };
 }

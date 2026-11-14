@@ -1,6 +1,6 @@
 import * as fc from 'fast-check';
 import { describe, expect, test } from 'vitest';
-import { validateBoard } from '../../src/engine/index';
+import { exportCsv, importCsv, validateBoard } from '../../src/engine/index';
 import { CANDLE_STEPS, LAST_CANDLE_STEP } from '../../src/ui/candle-steps';
 import { solveState } from '../../src/ui/solve';
 import { initialState, reducer } from '../../src/ui/state';
@@ -461,5 +461,73 @@ describe('any sequence of actions keeps the state sound', () => {
       }),
       { numRuns: 200 },
     );
+  });
+});
+
+describe('board/sample, board/reset, release/set and board/load (the jira-csv spec)', () => {
+  const imported = (): AppState => {
+    const base = initialState();
+    const text = 'Issue key,Summary,Story Points,Cost of Delay\nZ-1,One,5,9\nZ-2,Two,3,4\n';
+    const r = importCsv(text, { people: base.home.people, timeZone: base.home.timeZone, nextReleaseWeeks: base.home.nextReleaseWeeks, zombieThreshold: base.home.zombieThreshold });
+    if (!r.ok) throw new Error('import failed');
+    return reducer(base, { type: 'board/load', board: r.value.board, name: 'q4_freeze.csv', release: 'q4 freeze', skipped: 2, warnings: [], putDown: [] });
+  };
+
+  test('a loaded board replaces the board and the candle, reserve, team and decisions start again; sound stays', () => {
+    const base = reducer(reducer(reducer(initialState(), { type: 'candle/set', step: 3 }), { type: 'survivor/toggle', name: 'Ana' }), { type: 'sound/set', on: true });
+    const text = 'Issue key,Summary,Story Points,Cost of Delay\nZ-1,One,5,9\n';
+    const r = importCsv(text, { people: base.home.people, timeZone: 'Europe/Madrid', nextReleaseWeeks: 2, zombieThreshold: 3 });
+    if (!r.ok) throw new Error('import failed');
+    const next = reducer(base, { type: 'board/load', board: r.value.board, name: 'a.csv', release: 'a', skipped: 0, warnings: [], putDown: [] });
+    expect(next).toMatchObject({ candle: 10, marginPct: 0, away: [], sound: true, release: 'a', source: { kind: 'file', name: 'a.csv', skipped: 0, warnings: [] } });
+    expect(next.home).toBe(r.value.board);
+    expect(next.builtIn).toBe(base.builtIn);
+  });
+
+  test('it is announced as a new board: no comparison with the one before, even when the keys are the same', () => {
+    const next = imported();
+    expect(next.change).toMatchObject({ kind: 'done', subject: { kind: 'load', name: 'q4_freeze.csv', count: 2, skipped: 2 }, comparison: { kind: 'new-board' } });
+    const sample = initialState();
+    const same = importCsv(exportCsv({ board: sample.home, home: sample.home, kept: null, release: 'R', nextRelease: 'N' }), { people: sample.home.people, timeZone: sample.home.timeZone, nextReleaseWeeks: 2, zombieThreshold: 3 });
+    if (!same.ok) throw new Error('import failed');
+    const again = reducer(sample, { type: 'board/load', board: same.value.board, name: 'sample.csv', release: null, skipped: 0, warnings: [], putDown: [] });
+    expect(again.change).toMatchObject({ comparison: { kind: 'new-board' } });
+  });
+
+  test('board/sample goes back to the built-in board whatever is loaded, and on the built-in board it is the plain night', () => {
+    const back = reducer(imported(), { type: 'board/sample' });
+    expect(back.home).toBe(back.builtIn.board);
+    expect(back).toMatchObject({ source: { kind: 'built-in' }, candle: 10, marginPct: 0, away: [] });
+    expect(back.release).toBe(back.builtIn.release);
+    const touched = reducer(reducer(initialState(), { type: 'candle/set', step: 2 }), { type: 'tombstone/put-down', key: 'HB-112' });
+    const a = reducer(touched, { type: 'board/sample' });
+    const b = reducer(touched, { type: 'board/reset' });
+    expect({ ...a, change: null }).toEqual({ ...b, change: null });
+  });
+
+  test('board/reset keeps your tickets, your release and the banner', () => {
+    const state = reducer(imported(), { type: 'candle/set', step: 4 });
+    const reset = reducer(state, { type: 'board/reset' });
+    expect(reset.home).toBe(state.home);
+    expect(reset.source).toBe(state.source);
+    expect(reset.release).toBe('q4 freeze');
+    expect(reset).toMatchObject({ candle: 10 });
+    expect(reset.change).toMatchObject({ subject: { kind: 'reset', yours: true } });
+  });
+
+  test('release/set trims, collapses white space, cuts to 60 characters, and blank means none; the same name is the very same state; it leaves the change note alone', () => {
+    const state = imported();
+    const named = reducer(state, { type: 'release/set', name: '  My   release \n 2 ' });
+    expect(named.release).toBe('My release 2');
+    expect(named.change).toBe(state.change);
+    expect(reducer(named, { type: 'release/set', name: 'My release 2' })).toBe(named);
+    expect(reducer(named, { type: 'release/set', name: '   ' }).release).toBeNull();
+    expect(reducer(named, { type: 'release/set', name: 'x'.repeat(90) }).release).toBe('x'.repeat(60));
+  });
+
+  test('state/restore puts an imported board back exactly', () => {
+    const state = imported();
+    const other = reducer(state, { type: 'board/sample' });
+    expect(reducer(other, { type: 'state/restore', state })).toBe(state);
   });
 });

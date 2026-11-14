@@ -95,6 +95,7 @@ export function mountSign(section: HTMLElement, ctx: Ctx): Part {
     toAction: (pct) => ({ type: 'reserve/set', pct }),
     subjectOf: (start, end) => (start.marginPct === end.marginPct ? null : { kind: 'reserve', from: start.marginPct, to: end.marginPct }),
     onSettle: (change, end) => ctx.settle(change, end),
+    onActive: (active) => ctx.gestureActive(active),
   });
   input.addEventListener('input', () => gesture.input(Number(input.value)));
   input.addEventListener('change', () => gesture.commit());

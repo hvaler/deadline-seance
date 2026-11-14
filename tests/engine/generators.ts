@@ -380,3 +380,30 @@ export const arbNight: fc.Arbitrary<NightCase> = fc
     }
     return { home, board, freeze, away, release };
   });
+
+// ---------------------------------------------------------------------------------------------------------------------
+// CSV
+// ---------------------------------------------------------------------------------------------------------------------
+
+const CSV_TITLES = [
+  '=SUM(A1)', '+1', '-5', '@x', '\tx', '\rx', "'=x", "''+y", "'plain", 'a;b', 'a,b', 'q"uote', '"', '""', 'line\nbreak', 'cr\rbreak', 'crlf\r\nbreak',
+  '\u{1F600} emoji', 'caf\u00e9', '\ud800', 'x\udc00y', ' lead', 'trail ', 'sep=;', 'HB-1', '1,5', '5.0', 'a|b', '<b>x</b>',
+];
+
+/** Titles a spreadsheet could damage or a CSV reader could misread: never blank, never over 1,000 characters. */
+export const arbCsvTitle: fc.Arbitrary<string> = fc
+  .oneof(
+    { weight: 3, arbitrary: fc.constantFrom(...CSV_TITLES) },
+    { weight: 2, arbitrary: fc.string({ maxLength: 30 }) },
+    { weight: 1, arbitrary: fc.string({ unit: 'binary', maxLength: 20 }) },
+    { weight: 2, arbitrary: fc.stringMatching(/^[A-Za-z0-9 ,;"'=+@\t\r\n-]{1,24}$/) },
+  )
+  .filter((s) => s.trim() !== '');
+
+/** A board a CSV can carry (a file with no ticket is the error 
+o-tickets, so at least one): up to 60 tickets with awkward titles, must-haves, dependencies, put-down keys, formula and imported costs, `past`. */
+export function arbCsvBoard(maxTickets = 60): fc.Arbitrary<Board> {
+  return fc
+    .tuple(arbBoard({ minTickets: 1, maxTickets, withWontDo: true, mustHaveRate: 15 }), fc.array(arbCsvTitle, { minLength: maxTickets, maxLength: maxTickets }))
+    .map(([board, titles]) => ({ ...board, tickets: board.tickets.map((t, i) => ({ ...t, title: titles[i] as string })) }));
+}

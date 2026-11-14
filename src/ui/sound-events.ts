@@ -24,6 +24,8 @@ export function soundEventFor(change: Change, view: View): SoundEvent | null {
     case 'put-down':
       return 'put-down';
     case 'reset':
+    case 'load':
+    case 'sample':
       return null;
     case 'candle':
     case 'reserve':

@@ -19,6 +19,8 @@ export interface Ctx {
   act(action: Action, options?: ActOptions): void;
   /** Announces and plays the sound of a change that is not the store's own last change, such as the start-to-end change of a drag. */
   settle(change: Change, state: AppState): void;
+  /** A gesture (a drag of the candle or the reserve) starts (true) or has settled (false): on a big board the fog waits for the settle. */
+  gestureActive(active: boolean): void;
 }
 
 /** One region of the page: it draws what the view says and nothing else. */

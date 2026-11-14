@@ -1,6 +1,7 @@
 import { compareKeys, exhume, putDown, resurrect, validateBoard } from '../engine/index';
 import type { ValidBoard } from '../engine/index';
 import { LAST_CANDLE_STEP } from './candle-steps';
+import { cleanRelease } from './release';
 import type { Action, AppState, Comparison, Subject } from './model';
 import { boardFor, freezeFor, initialStateFor } from './model';
 import { compareStates } from './solve';
@@ -79,8 +80,27 @@ export function reducer(state: AppState, action: Action): AppState {
     case 'state/restore':
       return action.state;
     case 'board/reset': {
-      const next: AppState = { ...initialStateFor(state.home), sound: state.sound };
-      return done(next, { kind: 'reset' }, compareStates(state, next));
+      // Back to the loaded board: the built-in one, or your tickets.
+      const next: AppState = { ...initialStateFor(state.home, state.release), builtIn: state.builtIn, source: state.source, sound: state.sound };
+      return done(next, { kind: 'reset', ...(state.source.kind === 'file' ? { yours: true } : {}) }, compareStates(state, next));
+    }
+    case 'board/sample': {
+      const { board, release } = state.builtIn;
+      const next: AppState = { ...initialStateFor(board, release), builtIn: state.builtIn, sound: state.sound };
+      return done(next, { kind: 'sample' }, { kind: 'new-board' });
+    }
+    case 'board/load': {
+      const next: AppState = {
+        ...initialStateFor(action.board, action.release),
+        builtIn: state.builtIn,
+        source: { kind: 'file', name: action.name, skipped: action.skipped, warnings: action.warnings, putDown: action.putDown },
+        sound: state.sound,
+      };
+      return done(next, { kind: 'load', name: action.name, count: action.board.tickets.length, skipped: action.skipped }, { kind: 'new-board' });
+    }
+    case 'release/set': {
+      const release = cleanRelease(action.name);
+      return release === state.release ? state : { ...state, release };
     }
   }
 }

@@ -17,7 +17,7 @@ describe('purity of src/engine', () => {
   test('the scan sees the engine sources', () => {
     const names = files.map((f) => f.name).sort();
     expect(names).toEqual(
-      expect.arrayContaining(['capacity.ts', 'certificate.ts', 'chain.ts', 'cod.ts', 'diff.ts', 'facts.ts', 'fog.ts', 'guard.ts', 'hash.ts', 'index.ts', 'keys.ts', 'oracle.ts', 'solver.ts', 'types.ts', 'validate.ts', 'weights.ts']),
+      expect.arrayContaining(['capacity.ts', 'certificate.ts', 'chain.ts', 'cod.ts', 'csv.ts', 'diff.ts', 'facts.ts', 'fog.ts', 'guard.ts', 'hash.ts', 'index.ts', 'keys.ts', 'oracle.ts', 'solver.ts', 'types.ts', 'validate.ts', 'weights.ts']),
     );
   });
 
@@ -72,10 +72,13 @@ describe('public API', () => {
   test('index.ts exports exactly the documented functions and constants, and not the oracle', () => {
     expect(Object.keys(engine).sort()).toEqual(
       [
+        'ACCEPTED_HEADERS',
+        'CSV_LIMITS',
         'DEFAULT_FOG_SEED',
         'DEFAULT_NEXT_RELEASE_WEEKS',
         'DEFAULT_TIME_ZONE',
         'DEFAULT_ZOMBIE_THRESHOLD',
+        'EXPORT_HEADERS',
         'FOG_MAX_PCT',
         'FOG_MIN_PCT',
         'FOG_NIGHTS',
@@ -87,6 +90,7 @@ describe('public API', () => {
         'certificateNote',
         'checkNumbers',
         'codParts',
+        'columnLetter',
         'compareKeyLists',
         'compareKeys',
         'costOfDelay',
@@ -97,24 +101,31 @@ describe('public API', () => {
         'err',
         'escapeMarkdown',
         'exhume',
+        'exportCsv',
         'extractTokens',
         'fogCurve',
         'fogFactor',
         'fogFromTable',
         'fogTable',
+        'guardCell',
         'guardCertificate',
         'guardFacts',
+        'importCsv',
         'nightFacts',
         'ok',
+        'parseCsv',
         'plainText',
         'putDown',
         'renderCertificate',
         'renderNote',
         'resurrect',
+        'serializeCsv',
         'simulateFog',
         'solveFreeze',
         'solveWithCapacity',
         'sortedKeys',
+        'toWellFormed',
+        'unguardCell',
         'validateBoard',
       ].sort(),
     );

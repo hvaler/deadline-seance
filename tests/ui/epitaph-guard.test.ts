@@ -4,7 +4,6 @@ import { checkNumbers, guardFacts, nightFacts } from '../../src/engine/index';
 import type { OutsideFact } from '../../src/engine/index';
 import { derive } from '../../src/ui/derive';
 import { nightInputOf } from '../../src/ui/night';
-import { SAMPLE_RELEASE } from '../../src/ui/sample-board';
 import type { AppState } from '../../src/ui/state';
 import { reducer } from '../../src/ui/state';
 import { epitaphFor } from '../../src/ui/text';
@@ -22,7 +21,7 @@ function keysOf(entry: OutsideFact): string[] {
 
 /** The epitaphs of every tombstone of a state, each with the verdict of the guard against the facts of its own ticket. */
 function verdicts(state: AppState): { key: string; epitaph: string; offending: string[] }[] {
-  const facts = nightFacts(nightInputOf(state, SAMPLE_RELEASE));
+  const facts = nightFacts(nightInputOf(state));
   if (!facts.ok || facts.value.status !== 'ok') return [];
   const outside = facts.value.outside;
   return derive(state).yard.map((tomb) => {
@@ -62,7 +61,7 @@ describe('P12', () => {
 
   test('the guard would reject an epitaph with a changed number or a wrong key', () => {
     const state = run();
-    const facts = nightFacts(nightInputOf(state, null));
+    const facts = nightFacts(nightInputOf(state));
     if (!facts.ok || facts.value.status !== 'ok') throw new Error('no facts');
     const entry = facts.value.outside.find((o) => o.key === 'HB-108') as OutsideFact;
     const g = guardFacts([entry], { keys: keysOf(entry) });

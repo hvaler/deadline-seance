@@ -1,7 +1,7 @@
 import { capacityBetween, codParts, compareKeys, effectiveCapacity, effectiveUrgency } from '../engine/index';
 import type { CodParts, FogPoint, FreezeInput, Key, Reason, Solution, Ticket } from '../engine/index';
 import { CANDLE_STEPS } from './candle-steps';
-import { curveFor } from './fog-cache';
+import { FOG_ON_SETTLE_FROM, curveFor, lastCurveOf, peekCurve } from './fog-cache';
 import { freezeFor, presentPeople } from './model';
 import type { AppState } from './model';
 import { SAMPLE_NOW } from './sample-board';
@@ -64,6 +64,8 @@ export interface FogView {
   readonly points: readonly FogPoint[];
   /** The index of the point whose reserve is the state's reserve. Chosen here, so the renderer compares nothing. */
   readonly currentIndex: number | null;
+  /** True when these are the last figures made for this board, kept while a drag on a big board is going on; the sign says they are being updated. */
+  readonly stale: boolean;
 }
 
 export interface View {
@@ -118,14 +120,28 @@ function cardOf(ticket: Ticket): CardView {
   };
 }
 
-function fogViewFor(state: AppState): FogView | null {
+function fogViewFor(state: AppState, settled: boolean): FogView | null {
+  const viewOf = (points: readonly FogPoint[], stale: boolean): FogView => {
+    const index = points.findIndex((p) => p.marginPct === state.marginPct);
+    return { points, currentIndex: index < 0 ? null : index, stale };
+  };
+  const cached = peekCurve(state);
+  if (cached !== null) return viewOf(cached, false);
+  // Plan B: while a drag is going on, a big board keeps the last figures it had instead of working out one for every step.
+  if (!settled && state.board.tickets.length > FOG_ON_SETTLE_FROM) {
+    const last = lastCurveOf(state);
+    if (last !== null) return viewOf(last, true);
+  }
   const points = curveFor(state);
-  if (points === null) return null;
-  const index = points.findIndex((p) => p.marginPct === state.marginPct);
-  return { points, currentIndex: index < 0 ? null : index };
+  return points === null ? null : viewOf(points, false);
 }
 
-export function derive(state: AppState): View {
+export interface DeriveOptions {
+  /** False while a drag is going on (see ogViewFor). Default true. */
+  readonly settled?: boolean;
+}
+
+export function derive(state: AppState, options: DeriveOptions = {}): View {
   const freeze = freezeFor(state);
   const people = presentPeople(state);
   const zone = state.board.timeZone;
@@ -190,6 +206,6 @@ export function derive(state: AppState): View {
       .map((t) => ({ key: t.key, title: t.title, effort: t.effort }))
       .sort((a, b) => compareKeys(a.key, b.key)),
     putDown: [...state.board.wontDo].sort(compareKeys),
-    fog: fogViewFor(state),
+    fog: fogViewFor(state, options.settled !== false),
   };
 }

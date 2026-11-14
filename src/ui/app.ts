@@ -8,6 +8,8 @@ import type { Ctx, Part } from './context';
 import { derive } from './derive';
 import { el } from './dom';
 import { mountCandle } from './render/candle';
+import { mountBanner } from './render/banner';
+import type { BannerPart } from './render/banner';
 import { mountCertificate } from './render/certificate';
 import type { CertificateControls } from './render/certificate';
 import { browserObserve, createChainDrawer } from './render/chains';
@@ -90,7 +92,7 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
   }
 
   const services: Services = { ...browserServices(), ...options.services };
-  const store = createStore(reducer, initialStateFor(checked.value));
+  const store = createStore(reducer, initialStateFor(checked.value, options.release ?? null));
 
   // ---- the page ----
   const header = el('header', { class: 'title-card' });
@@ -143,6 +145,8 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
     if (event !== null && state.sound) services.sound.play(event);
   }
 
+  // How many drags (the candle, the reserve) are going on. While one is, a big board's fog waits for it to settle (plan B of the fog spec).
+  let moving = 0;
   const ctx: Ctx = {
     store,
     services,
@@ -152,14 +156,19 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
       const before = store.getState();
       store.dispatch(action);
       const after = store.getState();
-      if (after !== before && action.type !== 'sound/set') settle(after.change, after, options?.announce !== false);
+      if (after !== before && action.type !== 'sound/set' && action.type !== 'release/set') settle(after.change, after, options?.announce !== false);
     },
     settle,
+    gestureActive(active) {
+      moving = Math.max(0, moving + (active ? 1 : -1));
+      if (!active && moving === 0) render(store.getState()); // the drag settled: the fog fills in
+    },
   };
 
   // ---- the regions ----
   let tour: TourControls | null = null;
   let certificate: CertificateControls | null = null;
+  const banner: BannerPart = mountBanner(main, ctx);
   const chains = createChainDrawer(services.frame, browserObserve());
   const parts: Part[] = [
     mountTitleCard(header, ctx, options.tour === undefined ? undefined : { onPlay: () => tour?.start('button') }),
@@ -167,17 +176,18 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
     mountCandle(sections.candle, ctx),
     mountSurvivors(sections.survivors, ctx),
     mountGrounds(sections.safehouse, sections.yard, ctx, { yardChanged: (field, svg, view) => chains.schedule(field, svg, view) }),
-    mountTools(sections.tools, ctx, { onCertificate: (opener) => certificate?.open(opener) }),
+    banner,
+    mountTools(sections.tools, ctx, { onCertificate: (opener) => certificate?.open(opener), banner: () => banner.node }),
   ];
 
   // ---- keeping the page in step with the state ----
   function render(state: AppState): void {
-    const view = derive(state);
+    const view = derive(state, { settled: moving === 0 });
     for (const part of parts) part.update(view, state);
   }
   render(store.getState());
   const stop = store.subscribe(render);
-  const mountedCertificate = mountCertificate({ ctx, page, header, main, release: options.release ?? null });
+  const mountedCertificate = mountCertificate({ ctx, page, header, main });
   certificate = mountedCertificate;
   // The tour needs the page to exist (it adds a bar and a prompt to it); #play shows its prompt as soon as it is mounted.
   if (options.tour !== undefined) tour = mountTour({ ctx, script: options.tour, page, main, header, certificate: mountedCertificate });

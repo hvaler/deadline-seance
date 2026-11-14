@@ -1,5 +1,6 @@
 import type { Ctx, Part } from '../context';
-import { el } from '../dom';
+import { el, setText } from '../dom';
+import { createImportGroup } from './csv-group';
 
 /**
  * The tools: what works (back to the sample board, the death certificate) and, clearly marked, the places where later features will go. Each slot
@@ -7,7 +8,7 @@ import { el } from '../dom';
  */
 
 export interface SlotSpec {
-  readonly name: 'chronicle' | 'csv' | 'mcp';
+  readonly name: 'chronicle' | 'mcp';
   readonly label: string;
   /** Plain text instead of a disabled button. */
   readonly plain?: boolean;
@@ -15,13 +16,14 @@ export interface SlotSpec {
 
 export const TOOL_SLOTS: readonly SlotSpec[] = [
   { name: 'chronicle', label: 'Night chronicle and undo' },
-  { name: 'csv', label: 'CSV import and export' },
   { name: 'mcp', label: 'The rule as an MCP server for the Kiro agent', plain: true },
 ];
 
 /** What the tools need from the rest of the app: what to do when the death certificate button is pressed. */
 export interface ToolsHook {
   readonly onCertificate: (opener: HTMLElement) => void;
+  /** The banner of your tickets, to bring into view after an import. */
+  readonly banner: () => HTMLElement | null;
 }
 
 export function mountTools(section: HTMLElement, ctx: Ctx, hook: ToolsHook): Part {
@@ -59,6 +61,13 @@ export function mountTools(section: HTMLElement, ctx: Ctx, hook: ToolsHook): Par
     }),
   );
 
-  section.append(el('div', { class: 'tools-row' }, [reset, certificate]), slots);
-  return { update() {} };
+  const csv = createImportGroup(ctx, { banner: hook.banner });
+  section.append(el('div', { class: 'tools-row' }, [reset, certificate]), csv.node, slots);
+  return {
+    update(view, state) {
+      setText(reset, state.source.kind === 'built-in' ? 'Reset the sample board' : 'Reset your tickets');
+      csv.part.update(view, state);
+    },
+    destroy: () => csv.part.destroy?.(),
+  };
 }

@@ -1,0 +1,4 @@
+sep=;
+Issue key;Summary;Story Points;Cost of Delay;Must Have;Depends On;Times Postponed
+HB-1;"Pay; now";5;12;yes;;0
+HB-2;Receipts;3;7;no;HB-1;2

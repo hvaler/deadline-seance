@@ -295,3 +295,7 @@ After the engine and the screen work:
 - **The strip's current item is always marked**, also when the freeze is impossible (the slider always has a value); the word "now" keeps its room in every item so the strip does not change height.
 - **Heights** (block `min-height`, measured over 11 candle steps × 7 reserves at 14 widths from 320 to 1280 px): 6.5 rem from 1100 px, 7.75 rem to 820 px, 8.25 rem to 480 px, 12.5 rem below. The candle region's top is one value at each of the 14 widths.
 - **The percentage is floored** and can read 0 % with nights that hold (the sample board at 5 %: 6 nights): the sentence and the strip's spoken text always give the count.
+
+## 10. Plan B was built by the jira-csv spec
+
+Boards of more than 30 tickets (only an imported board can be one) do not work out the fog while the candle is being dragged: `derive(state, { settled })` keeps the last curve of the board (`View.fog.stale`), the sign shows `data-stale` and the word "updating", and `ctx.gestureActive` makes the app render again when the drag settles. The sample board (19 tickets) is unchanged. See `.kiro/specs/jira-csv/design.md` section 9.

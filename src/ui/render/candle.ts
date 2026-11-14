@@ -44,6 +44,7 @@ export function mountCandle(section: HTMLElement, ctx: Ctx): Part {
     toAction: (step) => ({ type: 'candle/set', step }),
     subjectOf: (start, end) => (start.candle === end.candle ? null : { kind: 'candle', from: start.candle, to: end.candle }),
     onSettle: (change, end) => ctx.settle(change, end),
+    onActive: (active) => ctx.gestureActive(active),
   });
   input.addEventListener('input', () => gesture.input(Number(input.value)));
   input.addEventListener('change', () => gesture.commit());

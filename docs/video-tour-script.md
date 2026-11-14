@@ -10,14 +10,14 @@ Generated from `src/ui/tour/sample-script.ts` by running it through the app's re
 
 | # | Seconds | Shows | The app | Subtitle | Characters | Per second |
 |---|---|---|---|---|---|---|
-| 1 | 0.0–5.5 | sign | Presses Reset: back to the plain night (Friday 18:00, no reserve, nobody away) | Mon 09:00, freeze Fri 18:00: 59 points, and 7 tickets stay outside. | 67 | 12.2 |
+| 1 | 0.0–5.5 | sign | Loads the sample board: back to the plain night (Friday 18:00, no reserve, nobody away) | Mon 09:00, freeze Fri 18:00: 59 points, and 7 tickets stay outside. | 67 | 12.2 |
 | 2 | 5.5–12.0 | candle | Moves the candle to Wed 18:00 | The candle burns down to Wed 18:00: 35 points, and saved cost of delay falls from 167 to 113. | 93 | 14.3 |
 | 3 | 12.0–17.0 | sign | Sends Ana away | Ana is away: 23 points left, and saved cost of delay falls to 79. | 65 | 13.0 |
 | 4 | 17.0–21.0 | yard | Rings HB-112 | HB-112, left out 3 releases, climbs from urgency 8 to 13. | 57 | 14.3 |
 | 5 | 21.0–26.0 | yard | Puts HB-112 down (Won't Do) | Put down: HB-114 can never ship, and the yard has 13 tickets left. | 66 | 13.2 |
 | 6 | 26.0–32.0 | safehouse | Exhumes HB-108, then rings HB-108 | Someone insists on HB-108: it comes in, and saved cost of delay falls to 63. | 76 | 12.7 |
 | 7 | 32.0–36.0 | certificate | Opens the death certificate (the note for the stakeholders) | One note for the stakeholders: what is out, and why. | 52 | 13.0 |
-| 8 | 36.0–40.5 | fog | Presses Reset: back to the plain night (Friday 18:00, no reserve, nobody away), then sets the reserve to 0 % | 0 % reserve: the cut holds on 0 of 1,000 nights. | 48 | 10.7 |
+| 8 | 36.0–40.5 | fog | Loads the sample board: back to the plain night (Friday 18:00, no reserve, nobody away), then sets the reserve to 0 % | 0 % reserve: the cut holds on 0 of 1,000 nights. | 48 | 10.7 |
 | 9 | 40.5–44.0 | fog | Sets the reserve to 10 % | 10 % reserve: it holds on 134 of 1,000 nights. | 46 | 13.1 |
 | 10 | 44.0–47.5 | fog | Sets the reserve to 15 % | 15 % reserve: it holds on 347 of 1,000 nights. | 46 | 13.1 |
 | 11 | 47.5–51.0 | fog | Sets the reserve to 20 % | 20 % reserve: it holds on 707 of 1,000 nights. | 46 | 13.1 |

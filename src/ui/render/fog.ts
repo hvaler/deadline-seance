@@ -1,6 +1,6 @@
 import type { View } from '../derive';
 import { el, setAttr, setText } from '../dom';
-import { FOG_NO_CUT, fogHeadline, fogImpossibleSentence, fogSentence, stripItemText } from '../text';
+import { FOG_NO_CUT, FOG_UPDATING, fogHeadline, fogImpossibleSentence, fogSentence, stripItemText } from '../text';
 
 /**
  * The fog of estimates on the sign: a strip under the reserve slider with the chance at every reserve step, and a block with the painted
@@ -68,6 +68,7 @@ export function createFog(): FogParts {
       setAttr(strip, 'hidden', fog === null);
       setAttr(block, 'hidden', fog === null);
       if (fog === null) return;
+      setAttr(block, 'data-stale', fog.stale ? 'true' : null);
 
       items.forEach((parts, index) => {
         const point = fog.points[index];
@@ -98,7 +99,7 @@ export function createFog(): FogParts {
         setText(figure, h.figure);
         setText(tail, h.tail);
         setAttr(figure, 'hidden', false);
-        setText(sentence, fogSentence(current));
+        setText(sentence, fog.stale ? FOG_UPDATING : fogSentence(current));
       } else {
         setText(lead, FOG_NO_CUT);
         setText(figure, '');

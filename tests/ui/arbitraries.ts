@@ -18,6 +18,8 @@ export const arbAction: fc.Arbitrary<Action> = fc.oneof(
   fc.constantFrom(...KEYS).map((key): Action => ({ type: 'tombstone/put-down', key })),
   fc.boolean().map((on): Action => ({ type: 'sound/set', on })),
   fc.constant<Action>({ type: 'board/reset' }),
+  fc.constant<Action>({ type: 'board/sample' }),
+  fc.oneof(fc.string({ maxLength: 80 }), fc.constantFrom('', '  ', 'Q4 freeze', 'x'.repeat(90))).map((name): Action => ({ type: 'release/set', name })),
 );
 
 /** Actions that are mostly meaningful (valid steps, percentages, names and keys), so sequences reach interesting states. */
@@ -29,6 +31,7 @@ export const arbMeaningfulAction: fc.Arbitrary<Action> = fc.oneof(
   { weight: 2, arbitrary: fc.constantFrom(...KEYS.slice(0, 19)).map((key): Action => ({ type: 'tombstone/resurrect', key })) },
   { weight: 2, arbitrary: fc.constantFrom(...KEYS.slice(0, 19)).map((key): Action => ({ type: 'tombstone/put-down', key })) },
   { weight: 1, arbitrary: fc.constant<Action>({ type: 'board/reset' }) },
+  { weight: 1, arbitrary: fc.constant<Action>({ type: 'board/sample' }) },
 );
 
 /** Runs actions from the initial state, returning every state reached (the first one is the initial state). */

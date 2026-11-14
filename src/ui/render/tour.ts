@@ -269,6 +269,7 @@ export function mountTour(options: TourOptions): TourControls {
     prompt = el('div', { class: 'tour-prompt', attrs: { role: 'group', 'aria-label': 'Play the night' }, data: { region: 'tour-prompt' } }, [
       el('p', { class: 'tour-prompt-text', text: 'Press Space to play the night' }),
       el('p', { class: 'tour-prompt-hint', text: 'Enter works too · Esc to look around first' }),
+      ...(ctx.store.getState().source.kind === 'file' ? [el('p', { class: 'tour-prompt-hint', text: 'The tour plays on the sample board. Your tickets come back when it ends.' })] : []),
       el('div', { class: 'tour-prompt-actions' }, [play, later]),
     ]);
     const skipLink = page.querySelector('.skip-link');

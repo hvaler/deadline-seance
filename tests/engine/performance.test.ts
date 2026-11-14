@@ -110,3 +110,35 @@ describe('performance (the fog, 80 tickets)', () => {
     for (const t of cached) expect(t).toBeLessThan(CEILING_MS);
   });
 });
+
+describe('performance (60 tickets: the most an import accepts)', () => {
+  // The three kinds of board of the jira-csv spec: normal, tie-heavy with dependencies, tie-heavy with none (the worst case for pruning).
+  const KINDS = [
+    { label: 'normal', options: { mustHaveRate: 0 } },
+    { label: 'tie-heavy with dependencies', options: { mustHaveRate: 0, ties: true } },
+    { label: 'tie-heavy, no dependencies', options: { mustHaveRate: 0, ties: true, maxDeps: 0 } },
+  ] as const;
+
+  for (const kind of KINDS) {
+    test(`${kind.label}: solve and a cached fog curve, median and worst (printed), each under 2 seconds`, () => {
+      const cases = fc.sample(arbSolveCase({ minTickets: 60, maxTickets: 60, ...kind.options }), { numRuns: 12, seed: 2026 });
+      const solves: number[] = [];
+      const curves: number[] = [];
+      for (const c of cases) {
+        const { board, freeze } = atCapacity(c.board, Math.max(1, Math.floor(c.board.tickets.reduce((s, t) => s + t.effort, 0) * 0.4)));
+        let t0 = now();
+        expect(solveWithCapacity(board, c.capacity, c.marginPct).ok).toBe(true);
+        solves.push(now() - t0);
+        const table = fogTable(board);
+        t0 = now();
+        expect(fogCurve(board, freeze, table).ok).toBe(true);
+        curves.push(now() - t0);
+      }
+      log(
+        `60 tickets, ${kind.label}: solve median ${median(solves).toFixed(1)} ms, worst ${Math.max(...solves).toFixed(1)} ms; ` +
+          `cached curve median ${median(curves).toFixed(1)} ms, worst ${Math.max(...curves).toFixed(1)} ms`,
+      );
+      for (const t of [...solves, ...curves]) expect(t).toBeLessThan(CEILING_MS);
+    });
+  }
+});

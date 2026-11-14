@@ -1,0 +1,62 @@
+# Implementation plan: jira-csv
+
+Run `npm run typecheck` and `npm test` before ticking any task; tick it only when both exit 0 (the suite starts at 59 files and 1200 tests). Run mutation checks one at a time, never in parallel on the same file, and revert each. Do not change the sample board or its seed. Do not loosen the CSP. Do not commit or push. A task marked **stop** ends with a question to the user instead of going on.
+
+- [x] 1. The rule first (Requirement 14.1)
+  - [x] 1.1 Append a dated section to `docs/rule.md` (Spanish, never rewriting history): the accepted headers, the closed-row and put-down-row rules, the dependency forms, the limits and why 80 (with the measurements), the apostrophe rule, the delimiter rule, the export, what is and is not imported (team, calendar, zone, weeks, threshold, seed 0)
+  - _Requirements: 14.1_
+- [x] 2. Reading and writing CSV (Requirement 1)
+  - [x] 2.1 `src/engine/csv.ts`: `parseCsv`, `serializeCsv`, the delimiter rule, the `sep=` line, the BOM, `CsvError` and its codes for this part; no banned word in code or strings
+  - [x] 2.2 `tests/engine/csv.test.ts`, first half: RFC 4180 examples, CRLF, LF, lone CR, quotes, doubled quotes, line breaks in quotes, delimiter detection and its tie, `sep=;`, an unterminated quote with its row, blank records kept, `parse(serialize(r)) = r` for both delimiters over generated records, and the fuzz (never throws on any string)
+  - _Requirements: 1.1–1.6_
+- [x] 3. Importing (Requirements 2, 3)
+  - [x] 3.1 `ACCEPTED_HEADERS` (data), `CSV_LIMITS`, `importCsv` by the steps of design section 4: header pass, classification, open rows, dependencies, limits, sort and cap, board; `Imported` with `skipped` and `warnings`
+  - [x] 3.2 Fixtures by hand: `tests/engine/fixtures/jira-cloud-export.csv` (BOM, real header names, repeated `Sprint`, `Labels` and `Inward issue link (Blocks)`, an outward link, a Done row, a Won't Do row, a link to the Done row, cells with commas, quotes and line breaks), `jira-semicolon.csv` (`sep=;`), `jira-errors.csv` (one mistake of every code)
+  - [x] 3.3 `csv.test.ts`, second half: the Jira fixture gives the exact board (named in the test); every error code with its row, its column letter and header, its order, and the cap of 100; limits (rows, columns, tickets, bytes); header errors stop the row pass; closed and put-down rows; every dependency form; cost rules; the apostrophe on import; a property that every error names an existing row and column; a property that shuffling the rows gives the same solution
+  - _Requirements: 2.1–2.5, 3.1–3.12, 5.3, 5.4_
+- [x] 4. Exporting and the round trip (Requirements 4, 5)
+  - [x] 4.1 `exportCsv`, the apostrophe pair, the writer's surrogate rule; `src/engine/index.ts` exports; `purity.test.ts` gets the new list on purpose
+  - [x] 4.2 `generators.ts`: `arbCsvBoard`, `arbCsvText`; `csv.test.ts`: the export columns and order, put-down rows with titles from `home`, `Fix Version/s` for kept, outside and impossible, **`P13 ...`** and **`P26 ...`** (comma and semicolon), the apostrophe round trip over arbitrary strings
+  - [x] 4.3 `traceability.test.ts`: P13 and P26 in `csv.test.ts`
+  - _Requirements: 4.1–4.7, 5.1, 5.2, 5.5_
+- [x] 5. Mutation checks (Requirement 5.6)
+  - [x] 5.1 One at a time, on a copy, reverted each time: delimiter always a comma; the reader drops a doubled quote; the row number ignores a line break inside quotes; an inward link read as outward; the apostrophe not stripped; a closed row not skipped; the cost-both check removed. Each must be caught by a named test; report which
+  - _Requirements: 5.6_
+- [x] 6. Measure, and confirm the limit (Requirement 11.1; Decision D1)
+  - [x] 6.1 `tests/engine/performance.test.ts`: solve and cached curve on 80-ticket boards made by `importCsv` (normal, tie-heavy, tie-heavy without dependencies), with loose bounds; print the numbers
+  - [x] 6.2 Repeat the size table of design section 9 (40 to 80 tickets). **Stop** and ask only if the numbers differ from the design by more than a factor of 2; otherwise keep 80 and report the worst case
+  - _Requirements: 3.10, 11.1, 11.5_
+- [x] 7. State, reducer and notes (Requirement 7)
+  - [x] 7.1 `model.ts`, `state.ts`: `builtIn`, `source`, `release`, `board/import`, `board/sample`, `release/set`, the new `Subject` and `Comparison`, `board/reset` keeps the loaded board; `initialStateFor(board, release)`; `ctx.act` leaves `release/set` unannounced; `soundEventFor` null for the new subjects
+  - [x] 7.2 `text.ts`: the notes, the banner sentences, `describeCsvError`, the release name from a file name; `night.ts`: `nightInputOf(state)`; `app.ts`: `initialStateFor(board, options.release)`
+  - [x] 7.3 Tests: `reducer.test.ts` and `arbitraries.ts` (new fields and actions; `board/sample` and `board/reset` on the built-in board give the same state; an import is not a diff; the very same state for no-ops; restore keeps the imported board), `text.test.ts` (notes and the provenance of the new sentences), `certificate-view.test.ts` and the golden test (release from the state)
+  - _Requirements: 7.1–7.8, 12.1, 12.4_
+- [x] 8. The tools (Requirements 6, 8, 10)
+  - [x] 8.1 `services.ts`: `Services.reader`; `harness.ts`: `RecordingReader`; `render/import.ts`: the group, the file input, the size check, the flow, the drop zone and the document's drag guard, the errors region with its focus, the downloads (sample and export) through `Services.files`; `render/tools.ts`: the group replaces the slot, the reset label
+  - [x] 8.2 `render/banner.ts`: the banner, the release field, "Back to the sample board", the focus and reveal after an import; `render/title-card.ts`: the product line
+  - [x] 8.3 CSS: the group, the drop zone, the errors region, the banner; tokens only, no pixel font under 16 px, no animation, 44 px targets, wrapping at 320 px
+  - [x] 8.4 `tests/ui/csv-tools.test.ts`, `csv-golden.test.ts` (`docs/examples/sample-board.csv` by file snapshot, generated with `-u`; the README table equals `ACCEPTED_HEADERS`), `slots.test.ts` (the CSV slot is gone; two slots remain), `a11y.test.ts`, `tokens.test.ts`, `contrast.test.ts`
+  - _Requirements: 6.1–6.7, 7.2–7.7, 8.1–8.6, 10.1–10.4, 14.3_
+- [x] 9. The tour on an imported board (Requirement 9)
+  - [x] 9.1 `sample-script.ts`: `board/sample` in the two scenes; `doc.ts`: its words; regenerate `docs/video-tour-script.md` with `npx vitest run tests/ui/tour-script.test.ts -u`; the prompt note while a file is loaded; the errors region and the certificate close when the tour starts
+  - [x] 9.2 Tests: the captions and totals are unchanged on the built-in board; a tour started on an imported board plays the sample and ends with the very same state object; the prompt note
+  - _Requirements: 9.1–9.4_
+- [x] 10. Plan B (Requirement 11)
+  - [x] 10.1 `gestures.ts` `onActive`, `context.ts` `gestureActive`, the candle and sign parts, `app.ts` counter and re-render on settle; `fog-cache.ts` `peekCurve` and the last curve per board; `derive(state, { settled })` and `View.fog.stale`; `FOG_ON_SETTLE_FROM = 30`; `render/fog.ts` the "updating" mark and `data-stale`
+  - [x] 10.2 `tests/ui/fog-settle.test.ts` as listed in design section 9; the existing fog tests unchanged
+  - _Requirements: 11.2–11.5_
+- [x] 11. Real browser (Requirement 13)
+  - [x] 11.1 Build; headless Chrome at 1280 × 720, 360 × 740 and 320 × 640: good file (chooser, and a drop if the protocol allows), a file with several errors, a generated 80-ticket file; screenshots (look at them); page `scrollWidth`; focus; the alert; the banner; "Back to the sample board"
+  - [x] 11.2 Download the sample and the export, compare with the engine's output, edit one cell of the sample, import it back and read the change; no policy violation
+  - [x] 11.3 Candle drag on the 80-ticket board with a frame trace, at normal speed and at 4 times slowdown, with plan B and with it switched off by a temporary build; report the numbers and the solve of the worst board you built
+  - [x] 11.4 The tour from an imported board; the imported board comes back
+  - [x] 11.5 Fix what the screenshots show and run again; delete the scripts, temporary files and `dist/`
+  - _Requirements: 13.1–13.5, 11.6_
+- [x] 12. Words outside the code (Requirement 14)
+  - [x] 12.1 README: "Your tickets" (header table, limits, how to try it, export contents, the apostrophe note, the encoding note), CSV leaves "out of scope"
+  - [x] 12.2 Addenda to the `board-ui` requirements and design: the CSV slot is filled by this spec; and to the `fog` design: plan B was built by this spec
+  - _Requirements: 14.2, 14.3_
+- [x] 13. Checkpoint
+  - [x] 13.1 `npm run typecheck`, `npm test`, `npm run build` all green; gzipped JS plus CSS under 60 kB (report the number and the test count)
+  - [x] 13.2 Report: the measured numbers (design section 9 repeated), the mutation checks and which test caught each, what each width showed and what changed, the error file's list, the 80-ticket file, the frame traces with and without plan B, the tour on an imported board, what could not be checked
+  - [x] 13.3 Stop. Do not commit or push

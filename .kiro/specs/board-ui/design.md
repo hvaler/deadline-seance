@@ -509,3 +509,7 @@ The fog slot was replaced by the fog block and the strip of the `fog` spec (`ren
 ## Addendum: the certificate
 
 `render/tools.ts` takes a hook (`onCertificate`) and shows the button next to "Reset the sample board" (`data-focus="certificate"`); `render/certificate.ts` builds the dialog only while it is open. `Services` gained `clipboard` and `files`. See `.kiro/specs/death-certificate`.
+
+## Addendum: your tickets
+
+`render/csv-group.ts` (the import and export controls) and `render/banner.ts` replace the CSV slot; `AppState` gained `builtIn`, `source` and `release`. See `.kiro/specs/jira-csv`.

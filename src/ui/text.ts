@@ -1,8 +1,8 @@
 import { FOG_MAX_PCT, FOG_MIN_PCT, MAX_FOG_SEED, SCALE } from '../engine/index';
-import type { CodParts, FogPoint, FogPointImpossible, FogPointOk, ImpossibleSolution, Reason, ValidationError } from '../engine/index';
+import type { CodParts, CsvError, FogPoint, FogPointImpossible, FogPointOk, ImpossibleSolution, Reason, ValidationError } from '../engine/index';
 import { CANDLE_STEPS } from './candle-steps';
 import type { Totals, TombstoneView, View } from './derive';
-import type { Change, Comparison, Subject } from './model';
+import type { AppState, Change, Comparison, Subject } from './model';
 
 /**
  * Every sentence the screen says. Each one is a pure function of facts: integers are put into the text exactly as the engine returned them,
@@ -260,7 +260,11 @@ function headlineOf(subject: Subject): string {
     case 'put-down':
       return `${subject.key} closed as Won't Do.`;
     case 'reset':
+      return subject.yours === true ? 'Back to your tickets.' : 'Back to the sample board.';
+    case 'sample':
       return 'Back to the sample board.';
+    case 'load':
+      return `Loaded your tickets from ${subject.name}.`;
   }
 }
 
@@ -305,6 +309,13 @@ function comparisonLines(subject: Subject, comparison: Comparison): string[] {
         `Saved cod ${comparison.before.savedCod} → ${comparison.after.savedCod}.`,
         'The board changed, so there is no ticket-by-ticket comparison.',
       ];
+    case 'new-board': {
+      // A different board was loaded: nothing to compare with, even where some keys are the same.
+      if (subject.kind !== 'load') return [];
+      const lines = [`The file has ${count(subject.count, 'open ticket')}.`];
+      if (subject.skipped > 0) lines.push(`Skipped ${count(subject.skipped, 'closed issue')}.`);
+      return lines;
+    }
   }
 }
 
@@ -397,4 +408,95 @@ export function describeValidationError(e: ValidationError): string {
       return `Invalid board: ${String(unreachable)}.`;
     }
   }
+}
+
+// ---- your tickets (the CSV import) -------------------------------------------------------------------------------------------
+
+/** What the sign shows in the place of the sentence while the chance is being worked out (plan B of the fog). */
+export const FOG_UPDATING = 'updating';
+
+/** "Row 7, column E (Story Points)", "Row 7", or "The file". */
+function placeOf(e: CsvError): string {
+  if (e.row === null) return 'The file';
+  if (e.column === null) return `Row ${e.row}`;
+  return `Row ${e.row}, column ${e.column.letter} (${e.column.header})`;
+}
+
+/** A cell's text, short enough for a sentence. */
+function quoted(value: string | undefined): string {
+  return `"${value ?? ''}"`;
+}
+
+/** One plain sentence for an error of the CSV import, made only of the error's own row, column, value, keys and limit. */
+export function describeCsvError(e: CsvError): string {
+  const place = placeOf(e);
+  const key = e.keys?.[0] ?? '';
+  switch (e.code) {
+    case 'empty-file':
+      return 'The file: it is empty.';
+    case 'no-tickets':
+      return 'The file: it has no tickets to import.';
+    case 'unterminated-quote':
+      return `Row ${e.row ?? 0}: a quote is opened and never closed.`;
+    case 'missing-column':
+      return `The file: the column ${e.value ?? ''} is missing.`;
+    case 'duplicate-column':
+      return `${place}: this column is also in column ${e.value ?? ''}; keep only one.`;
+    case 'missing-value':
+      return `${place}: this cell is empty.`;
+    case 'bad-key':
+      return `${place}: ${quoted(e.value)} cannot be a key (no spaces, commas or semicolons, at most ${e.limit ?? 0} characters).`;
+    case 'too-long':
+      return `${place}: the text is longer than ${e.limit ?? 0} characters.`;
+    case 'not-integer':
+      return `${place}: must be a whole number (got ${quoted(e.value)}).`;
+    case 'negative-number':
+      return `${place}: cannot be negative (got ${quoted(e.value)}).`;
+    case 'off-scale':
+      return `${place}: must be ${listOf(SCALE.map(String)).replace(' and ', ' or ')} (got ${quoted(e.value)}).`;
+    case 'cost-incomplete':
+      return `${place}: ${e.value ?? ''} is empty. Give Value, Urgency and Risk together, or only a Cost of Delay.`;
+    case 'cost-both':
+      return `${place}: this row has a Cost of Delay and also Value, Urgency or Risk. Give one or the other.`;
+    case 'cost-missing':
+      return `${place}: this row has no cost of delay. Fill Cost of Delay, or Value, Urgency and Risk.`;
+    case 'bad-flag':
+      return `${place}: must be yes or no (got ${quoted(e.value)}).`;
+    case 'duplicate-key':
+      return `${place}: ${key} is also used in row ${e.value ?? ''}.`;
+    case 'unknown-dependency':
+      return `${place}: ${key} is not in the file. Remove the link, or add that issue to the file.`;
+    case 'self-dependency':
+      return `${place}: ${key} depends on itself.`;
+    case 'dependency-cycle': {
+      const keys = e.keys ?? [];
+      return `${place}: these tickets depend on each other in a circle: ${[...keys, ...keys.slice(0, 1)].join(' → ')}.`;
+    }
+    case 'too-many-rows':
+      return `The file: it has ${e.value ?? ''} rows; the most is ${thousands(e.limit ?? 0)}.`;
+    case 'too-many-tickets':
+      return `The file: it has ${e.value ?? ''} open tickets; the most is ${e.limit ?? 0}. Filter the Jira export by fix version or sprint, then import it again.`;
+    case 'too-many-columns':
+      return `${place}: it has ${e.value ?? ''} columns; the most is ${e.limit ?? 0}.`;
+    case 'file-too-large':
+      return `The file: it is larger than ${thousands(e.limit ?? 0)} bytes.`;
+    case 'board-too-large':
+      return 'The file: the board is too large to solve exactly.';
+    case 'too-many-errors':
+      return `The file has ${e.total ?? 0} problems; the first ${e.limit ?? 0} are listed.`;
+  }
+}
+
+/** The banner above the page while your tickets are loaded: what came from the file and what is the sample's. Null on the built-in board. */
+export function bannerSentences(state: AppState): { readonly lead: string; readonly rest: string; readonly notes: readonly string[] } | null {
+  const source = state.source;
+  if (source.kind !== 'file') return null;
+  const notes: string[] = [];
+  if (source.skipped > 0) notes.push(`${count(source.skipped, 'closed issue')} skipped: a finished issue is not part of a freeze.`);
+  if (source.warnings.includes('replacement-characters')) notes.push('Some characters could not be read. Save the file as UTF-8 and import it again.');
+  return {
+    lead: `Your tickets from ${source.name}: ${count(state.home.tickets.length, 'ticket')}. Team and calendar are the sample's.`,
+    rest: `Release weeks and the zombie threshold are the sample's too (${count(state.home.nextReleaseWeeks, 'week')}, threshold ${state.home.zombieThreshold}); the fog uses seed ${state.home.fogSeed}.`,
+    notes,
+  };
 }

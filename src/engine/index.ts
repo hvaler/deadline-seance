@@ -38,3 +38,7 @@ export type { ExtractOptions, GuardFacts, GuardResult, Offending, OffendingReaso
 // The death certificate
 export { certificateNote, deathCertificate, escapeMarkdown, guardCertificate, plainText, renderCertificate, renderNote } from './certificate';
 export type { Block, Data, KeyRef, Note, RenderedCertificate, Text } from './certificate';
+
+// Jira CSV
+export { ACCEPTED_HEADERS, CSV_LIMITS, EXPORT_HEADERS, columnLetter, exportCsv, guardCell, importCsv, parseCsv, serializeCsv, toWellFormed, unguardCell } from './csv';
+export type { CsvColumn, CsvError, CsvErrorCode, CsvWarning, Delimiter, ExportInput, HeaderSpec, ImportBase, Imported, Meaning, ParsedCsv } from './csv';

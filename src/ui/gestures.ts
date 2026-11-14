@@ -22,6 +22,8 @@ export interface GestureOptions {
   /** Called once per settled gesture with the change from its start to its end, and the state it ended in. */
   readonly onSettle: (change: Change, end: AppState) => void;
   readonly settleMs?: number;
+  /** Called with true on the first input of a gesture and with false once it has settled (after onSettle). */
+  readonly onActive?: (active: boolean) => void;
 }
 
 export interface Gesture {
@@ -38,6 +40,7 @@ export interface Gesture {
 export function createGesture(options: GestureOptions): Gesture {
   const { store, frame, timers, toAction, subjectOf, onSettle } = options;
   const settleMs = options.settleMs ?? SETTLE_MS;
+  const { onActive } = options;
 
   let start: AppState | null = null;
   let pending: number | null = null;
@@ -53,6 +56,15 @@ export function createGesture(options: GestureOptions): Gesture {
   }
 
   function settle(): void {
+    const wasActive = start !== null;
+    try {
+      settleNow();
+    } finally {
+      if (wasActive) onActive?.(false);
+    }
+  }
+
+  function settleNow(): void {
     timerId = null;
     if (frameId !== null) {
       frame.cancel(frameId);
@@ -73,7 +85,10 @@ export function createGesture(options: GestureOptions): Gesture {
       return start !== null;
     },
     input(value) {
-      if (start === null) start = store.getState();
+      if (start === null) {
+        start = store.getState();
+        onActive?.(true);
+      }
       pending = value;
       if (frameId === null) frameId = frame.request(apply);
       if (timerId !== null) timers.clear(timerId);
@@ -84,12 +99,14 @@ export function createGesture(options: GestureOptions): Gesture {
       settle();
     },
     destroy() {
+      const wasActive = start !== null;
       if (timerId !== null) timers.clear(timerId);
       if (frameId !== null) frame.cancel(frameId);
       timerId = null;
       frameId = null;
       pending = null;
       start = null;
+      if (wasActive) onActive?.(false);
     },
   };
 }

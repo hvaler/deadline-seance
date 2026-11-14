@@ -2,7 +2,6 @@ import { describe, expect, test } from 'vitest';
 import { deathCertificate, guardCertificate, nightFacts } from '../../src/engine/index';
 import type { NightFacts } from '../../src/engine/index';
 import { nightInputOf } from '../../src/ui/night';
-import { SAMPLE_RELEASE } from '../../src/ui/sample-board';
 import type { AppState } from '../../src/ui/state';
 import { formulaText } from '../../src/ui/text';
 import { codParts } from '../../src/engine/index';
@@ -12,7 +11,7 @@ import { statesAfter } from './arbitraries';
 // a visible change. To regenerate them after a change on purpose: `npx vitest run tests/ui/certificate-golden.test.ts -u`.
 
 function factsOf(state: AppState): NightFacts {
-  const r = nightFacts(nightInputOf(state, SAMPLE_RELEASE));
+  const r = nightFacts(nightInputOf(state));
   if (!r.ok) throw new Error(JSON.stringify(r.error));
   return r.value;
 }

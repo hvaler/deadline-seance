@@ -31,8 +31,6 @@ export interface CertificateOptions {
   readonly page: HTMLElement;
   readonly header: HTMLElement;
   readonly main: HTMLElement;
-  /** What the release is called, or null. */
-  readonly release: string | null;
 }
 
 export const COPIED = 'Copied to the clipboard.';
@@ -50,7 +48,7 @@ interface View {
 }
 
 export function mountCertificate(options: CertificateOptions): CertificateControls {
-  const { ctx, page, header, main, release } = options;
+  const { ctx, page, header, main } = options;
   const { services } = ctx;
   const doc = ctx.root.ownerDocument;
 
@@ -111,7 +109,7 @@ export function mountCertificate(options: CertificateOptions): CertificateContro
 
   // ---- the note on the screen ----
   function build(v: View): void {
-    const facts = nightFacts(nightInputOf(ctx.store.getState(), release));
+    const facts = nightFacts(nightInputOf(ctx.store.getState()));
     if (!facts.ok) {
       markdown = '';
       setText(v.title, 'Death certificate');

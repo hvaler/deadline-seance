@@ -3,7 +3,7 @@ import type { Snapshot, Scene, SceneFacts, Script } from './types';
 import { count, listOf, thousands } from '../text';
 
 /**
- * The sample board's tour: "Play the night", 59 seconds. Every subtitle is one sentence with one key number, built from the engine's answers
+ * The sample board's tour (it always loads the sample first, so it plays the same on any loaded board): "Play the night", 59 seconds. Every subtitle is one sentence with one key number, built from the engine's answers
  * (`SceneFacts`) and nothing else; the screen carries the rest (the sign, the ring on a ticket, the fog strip). The keys named here are
  * constants of this script, used by the actions of the scenes too; `tests/ui/tour-script.test.ts` checks they are on the board.
  */
@@ -67,7 +67,7 @@ function fogLine(after: Snapshot, lead: string): string {
 
 const baseline: Scene = {
   id: 'baseline',
-  actions: [{ type: 'board/reset' }],
+  actions: [{ type: 'board/sample' }],
   caption: ({ after }) => {
     const s = solved(after);
     if (s === null) return noCut(after);
@@ -163,7 +163,7 @@ const certificate: Scene = {
 
 const fogZero: Scene = {
   id: 'fog-zero',
-  actions: [{ type: 'board/reset' }, { type: 'reserve/set', pct: 0 }],
+  actions: [{ type: 'board/sample' }, { type: 'reserve/set', pct: 0 }],
   caption: ({ after }) => fogLine(after, 'the cut'),
   durationMs: 4500,
   show: 'fog',
