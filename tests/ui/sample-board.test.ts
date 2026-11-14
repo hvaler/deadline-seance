@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { codParts, diffSolutions, exhume, putDown, solveFreeze, validateBoard } from '../../src/engine/index';
+import { codParts, diffSolutions, exhume, fogCurve, putDown, solveFreeze, validateBoard } from '../../src/engine/index';
 import type { Board, Diff, Solution, SolvedSolution, ValidBoard } from '../../src/engine/index';
 import { CANDLE_STEPS, LAST_CANDLE_STEP } from '../../src/ui/candle-steps';
 import { SAMPLE_NOW, PRODUCT_LINE, sampleBoard } from '../../src/ui/sample-board';
@@ -238,5 +238,48 @@ describe('survivors and reserve on the sample board', () => {
     expect(thirty).toMatchObject({ capacity: 59, effectiveCapacity: 41 });
     expect(keys(diff(full, thirty).sunk)).toEqual(['HB-115', 'HB-116', 'HB-118']);
     expect(diff(full, thirty).codDelta).toBe(-36);
+  });
+});
+
+describe('the fog of the sample board', () => {
+  // The real numbers of the engine for the sample board, seed 20261116, with the candle on Friday 18:00. Nobody picked them: the seed was fixed
+  // before they were computed. The prototype's 0 / 20 / 81 / 100 came from a fake board and are not a target. If the hash, the seed or the
+  // sample board change, this test changes on purpose, and so do the demo message in product.md and docs/rule.md.
+  const CURVE = [
+    { marginPct: 0, effectiveCapacity: 59, keptCount: 12, keptEffort: 59, holds: 0, pct: 0 },
+    { marginPct: 5, effectiveCapacity: 56, keptCount: 11, keptEffort: 56, holds: 6, pct: 0 }, // a few nights hold, and the floor says 0 %
+    { marginPct: 10, effectiveCapacity: 53, keptCount: 11, keptEffort: 51, holds: 134, pct: 13 },
+    { marginPct: 15, effectiveCapacity: 50, keptCount: 10, keptEffort: 49, holds: 347, pct: 34 },
+    { marginPct: 20, effectiveCapacity: 47, keptCount: 10, keptEffort: 46, holds: 707, pct: 70 },
+    { marginPct: 25, effectiveCapacity: 44, keptCount: 10, keptEffort: 43, holds: 959, pct: 95 },
+    { marginPct: 30, effectiveCapacity: 41, keptCount: 9, keptEffort: 41, holds: 996, pct: 99 },
+  ];
+
+  test('the chance at Friday 18:00 for every reserve step, with the raw count of nights', () => {
+    expect(sampleBoard().fogSeed).toBe(20261116);
+    const r = fogCurve(valid(sampleBoard()), { now: SAMPLE_NOW, freezeAt: CANDLE_STEPS[LAST_CANDLE_STEP]!.freezeAt });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const shown = r.value.map((p) =>
+      p.status === 'ok'
+        ? { marginPct: p.marginPct, effectiveCapacity: p.effectiveCapacity, keptCount: p.keptCount, keptEffort: p.keptEffort, holds: p.fog.holds, pct: p.fog.pct }
+        : { marginPct: p.marginPct, impossible: true },
+    );
+    expect(shown).toEqual(CURVE);
+    expect(r.value.every((p) => p.status === 'ok' && p.capacity === 59)).toBe(true);
+  });
+
+  test('the percentage is floored: at 5 % reserve 6 nights hold and it reads 0 %', () => {
+    const five = CURVE[1]!;
+    expect(five.holds).toBeGreaterThan(0);
+    expect(five.pct).toBe(0);
+    expect(Math.floor((100 * five.holds) / 1000)).toBe(five.pct);
+  });
+
+  test('the first three candle positions leave no cut to test at any reserve', () => {
+    for (const step of [0, 1, 2]) {
+      const r = fogCurve(valid(sampleBoard()), { now: SAMPLE_NOW, freezeAt: CANDLE_STEPS[step]!.freezeAt });
+      expect(r.ok && r.value.every((p) => p.status === 'impossible' && p.fog === null)).toBe(true);
+    }
   });
 });

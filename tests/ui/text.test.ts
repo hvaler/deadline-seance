@@ -14,6 +14,11 @@ import {
   describeValidationError,
   epitaphFor,
   formulaText,
+  fogHeadline,
+  fogImpossibleSentence,
+  fogSentence,
+  stripItemText,
+  thousands,
   listOf,
   noteSentence,
   reasonText,
@@ -327,6 +332,7 @@ describe('boards that fail validation', () => {
     'wont-do-key-in-tickets': { code: 'wont-do-key-in-tickets', subject: 'HB-7' },
     'invalid-absence': { code: 'invalid-absence', subject: 'Ana', value: '2026-02-30 full' },
     'board-too-large': { code: 'board-too-large', subject: 'board' },
+    'seed-out-of-range': { code: 'seed-out-of-range', subject: 'board', field: 'fogSeed', value: 4294967296 },
   };
 
   const expected: Record<ValidationErrorCode, string> = {
@@ -342,6 +348,7 @@ describe('boards that fail validation', () => {
     'wont-do-key-in-tickets': 'HB-7 is both a ticket and a put-down key.',
     'invalid-absence': 'Ana has an invalid day off: 2026-02-30 full.',
     'board-too-large': 'The board is too large to solve exactly.',
+    'seed-out-of-range': 'The fog seed must be a whole number from 0 to 4,294,967,295 (got 4294967296).',
   };
 
   test('every error code has its own sentence (the type makes a new code fail to compile here)', () => {
@@ -389,7 +396,9 @@ function numbersIn(value: unknown, into: Set<number> = new Set()): Set<number> {
 
 function integersInText(text: string): number[] {
   const withoutNames = text.replace(/[A-Za-z]+-\d+/g, ' ').replace(/\b\d{2}:\d{2}\b/g, ' ');
-  return (withoutNames.match(/\d+/g) ?? []).map(Number);
+  // "1,000" is the integer 1000: a comma between groups of three digits is formatting, not two numbers.
+  const joined = withoutNames.replace(/\d{1,3}(?:,\d{3})+/g, (group) => group.replace(/,/g, ''));
+  return (joined.match(/\d+/g) ?? []).map(Number);
 }
 
 function unexplained(text: string, ...sources: unknown[]): number[] {
@@ -463,5 +472,104 @@ describe('number provenance', () => {
     const note = changeNote(reducer(initial, { type: 'candle/set', step: 3 }).change);
     expect(note.headline).toBe(`Candle moved to ${CANDLE_STEPS[3]?.label}.`);
     expect(integersInText(note.headline)).toEqual([]);
+  });
+});
+
+describe('the fog in words', () => {
+  const at = (marginPct: number, step = 10) => {
+    const state = reducer(reducer(initialState(), { type: 'candle/set', step }), { type: 'reserve/set', pct: marginPct });
+    const view = derive(state);
+    const point = view.fog?.points[view.fog.currentIndex ?? -1];
+    if (point === undefined) throw new Error('no point');
+    return { view, point };
+  };
+  const ok = (marginPct: number) => {
+    const { point } = at(marginPct);
+    if (point.status !== 'ok') throw new Error('expected a solved point');
+    return point;
+  };
+
+  test('thousands puts the comma in', () => {
+    expect([0, 7, 999, 1000, 12345, 4294967295].map(thousands)).toEqual(['0', '7', '999', '1,000', '12,345', '4,294,967,295']);
+  });
+
+  test('the headline is "Holds in", the floored percentage and the nights', () => {
+    expect(fogHeadline(ok(0))).toEqual({ lead: 'Holds in', figure: '0 %', tail: 'of 1,000 nights' });
+    expect(fogHeadline(ok(20))).toEqual({ lead: 'Holds in', figure: '70 %', tail: 'of 1,000 nights' });
+  });
+
+  test('the sentence gives what the inside needs, what the team has, the range of estimates and the raw count of nights', () => {
+    expect(fogSentence(ok(0))).toBe('Inside needs 59 points on paper; the team has 59; estimates land between 80 % and 150 %. It held on 0 of 1,000 nights.');
+    expect(fogSentence(ok(15))).toBe('Inside needs 49 points on paper; the team has 59; estimates land between 80 % and 150 %. It held on 347 of 1,000 nights.');
+  });
+
+  test('a floored 0 % still tells how many nights held', () => {
+    const point = ok(5);
+    expect(point.fog.pct).toBe(0);
+    expect(point.fog.holds).toBe(6);
+    expect(fogHeadline(point).figure).toBe('0 %');
+    expect(fogSentence(point)).toBe('Inside needs 56 points on paper; the team has 59; estimates land between 80 % and 150 %. It held on 6 of 1,000 nights.');
+    expect(stripItemText(point, true)).toBe('5 % reserve (current): holds in 0 % of 1,000 nights (6 nights)');
+    expect(stripItemText(point, false)).toBe('5 % reserve: holds in 0 % of 1,000 nights (6 nights)');
+  });
+
+  test('one night is "1 night"', () => {
+    const point = { ...ok(5), fog: { nights: 1000, holds: 1, pct: 0 } };
+    expect(stripItemText(point, false)).toBe('5 % reserve: holds in 0 % of 1,000 nights (1 night)');
+  });
+
+  test('when there is no cut the sentence says why, with the engine numbers, and the strip item says impossible', () => {
+    const { point, view } = at(0, 2);
+    expect(point.status).toBe('impossible');
+    if (point.status !== 'impossible') return;
+    expect(fogImpossibleSentence(point)).toBe('No cut to test: the must-haves need 15 points; 12 are available after the 0 % reserve.');
+    expect(stripItemText(point, true)).toBe('0 % reserve (current): impossible freeze');
+    expect(view.solution.status).toBe('impossible');
+  });
+
+  test('every integer in the fog texts is a fact the engine returned (1,000 is read as the integer 1000)', () => {
+    fc.assert(
+      fc.property(fc.array(arbMeaningfulAction, { maxLength: 8 }), (actions) => {
+        for (const state of statesAfter(actions)) {
+          const view = derive(state);
+          for (const point of view.fog?.points ?? []) {
+            const facts = [point, 1000, 80, 150];
+            if (point.status === 'ok') {
+              expect(unexplained(fogHeadline(point).figure, point)).toEqual([]);
+              expect(unexplained(fogHeadline(point).tail, ...facts)).toEqual([]);
+              expect(unexplained(fogSentence(point), ...facts)).toEqual([]);
+            } else {
+              expect(unexplained(fogImpossibleSentence(point), point)).toEqual([]);
+            }
+            expect(unexplained(stripItemText(point, false), ...facts)).toEqual([]);
+          }
+        }
+      }),
+      { numRuns: 25 },
+    );
+  });
+
+  test('no text promises that more reserve helps: nothing says safe, better, best, recommend, always, raises, improves, more reserve ...', () => {
+    const forbidden =
+      /\b(safe|safer|safest|risky|good|bad|better|best|worse|worst|recommend\w*|guarantee\w*|always|never|raises?|improves?|increases?|boosts?|highest|lowest|ideal|optimal|sweet spot|(more|bigger|larger|higher) (reserve|margin|buffer))\b/i;
+    const seen: string[] = [];
+    for (let step = 0; step <= 10; step++) {
+      for (const pct of [0, 5, 10, 15, 20, 25, 30]) {
+        const { view, point } = at(pct, step);
+        const texts: string[] = [];
+        if (point.status === 'ok') {
+          const h = fogHeadline(point);
+          texts.push(`${h.lead} ${h.figure} ${h.tail}`, fogSentence(point));
+        } else {
+          texts.push(fogImpossibleSentence(point));
+        }
+        (view.fog?.points ?? []).forEach((p, i) => texts.push(stripItemText(p, i === view.fog?.currentIndex)));
+        for (const text of texts) {
+          expect(text, `${step}/${pct}: ${text}`).not.toMatch(forbidden);
+          seen.push(text);
+        }
+      }
+    }
+    expect(seen.length).toBeGreaterThan(500);
   });
 });

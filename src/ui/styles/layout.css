@@ -187,3 +187,16 @@ main {
   gap: 4px;
   justify-items: start;
 }
+
+/* The strip of the fog sits under the slider itself; on a narrow screen it takes the whole row, so seven numbers fit. */
+.fog-strip {
+  grid-column: 2;
+}
+
+@media (max-width: 639.98px) {
+  .fog-strip {
+    grid-column: 1 / -1;
+    padding-right: 4px;
+    padding-left: 4px;
+  }
+}

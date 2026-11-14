@@ -59,7 +59,7 @@ describe('generators produce valid data', () => {
       fc.property(arbCapacityCase, ({ window, people, instants }) => {
         expect(ZONES).toContain(window.timeZone);
         for (let i = 1; i < instants.length; i++) expect(instants[i]).toBeGreaterThanOrEqual(instants[i - 1] as number);
-        const board = { tickets: [], people, timeZone: window.timeZone, nextReleaseWeeks: 2, zombieThreshold: 3, wontDo: [] };
+        const board = { tickets: [], people, timeZone: window.timeZone, nextReleaseWeeks: 2, zombieThreshold: 3, wontDo: [], fogSeed: 0 };
         expect(validateBoard(board).ok).toBe(true);
       }),
       { numRuns: RUNS },

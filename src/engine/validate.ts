@@ -1,6 +1,6 @@
 import { findCycles } from './chain';
 import { compareKeys } from './keys';
-import { SCALE } from './types';
+import { MAX_FOG_SEED, SCALE } from './types';
 import type { Board, Key, Result, Ticket, ValidBoard, ValidationError } from './types';
 import { weightsFitSafeIntegers } from './weights';
 
@@ -79,6 +79,11 @@ export function validateBoard(board: Board): Result<ValidBoard, ValidationError[
     errors.push({ code: 'invalid-threshold', subject: 'board', field: 'zombieThreshold', value: String(board.zombieThreshold) });
   }
 
+  if (!Number.isSafeInteger(board.fogSeed)) {
+    errors.push({ code: 'not-integer', subject: 'board', field: 'fogSeed', value: String(board.fogSeed) });
+  } else if (board.fogSeed < 0 || board.fogSeed > MAX_FOG_SEED) {
+    errors.push({ code: 'seed-out-of-range', subject: 'board', field: 'fogSeed', value: board.fogSeed });
+  }
   // Duplicate keys among tickets, and among wontDo.
   const ticketKeys = new Set<Key>();
   const dupTickets = new Set<Key>();

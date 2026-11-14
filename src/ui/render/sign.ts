@@ -3,6 +3,7 @@ import { el, setAttr, setClass, setText } from '../dom';
 import { createGesture } from '../gestures';
 import type { Figure } from '../text';
 import { changeNote, verdictFigures, verdictSentences } from '../text';
+import { createFog } from './fog';
 
 /**
  * The taped plywood sign: the verdict, what the last change did, and the reserve slider. It has no live region of its own: what a screen
@@ -74,17 +75,17 @@ export function mountSign(section: HTMLElement, ctx: Ctx): Part {
     data: { focus: 'reserve' },
   });
   const output = el('output', { class: 'reserve-output num', attrs: { for: RESERVE_INPUT_ID } });
+  const fog = createFog();
   const reserve = el('div', { class: 'reserve' }, [
     el('label', { class: 'reserve-label', attrs: { for: RESERVE_INPUT_ID }, text: 'Reserve' }),
     input,
     output,
+    fog.strip,
     el('p', { class: 'reserve-hint', text: 'Keeps part of the capacity free, so the cut only fits what is left.' }),
   ]);
 
-  const fogSlot = el('p', { class: 'slot-text', data: { slot: 'fog' }, text: 'Chance the shelter holds: not built yet.' });
-
   const readout = el('div', { class: 'sign-readout' }, [verdict, note]);
-  const board = el('div', { class: 'sign-board' }, [readout, reserve, fogSlot]);
+  const board = el('div', { class: 'sign-board' }, [readout, reserve, fog.block]);
   section.append(board);
 
   const gesture = createGesture({
@@ -105,6 +106,7 @@ export function mountSign(section: HTMLElement, ctx: Ctx): Part {
       setClass(sentences, 'visually-hidden', !impossible);
       syncFigures(figures, verdictFigures(view));
       setClass(board, 'is-impossible', impossible);
+      fog.update(view);
 
       const shown = changeNote(state.change);
       setText(headline, shown.headline);

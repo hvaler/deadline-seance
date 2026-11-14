@@ -273,3 +273,43 @@ describe('the solution cache', () => {
     }
   });
 });
+
+describe('derive: the fog', () => {
+  test('has the seven reserve steps and marks the one of the state', () => {
+    const view = derive(initialState());
+    expect(view.fog?.points.map((p) => p.marginPct)).toEqual([0, 5, 10, 15, 20, 25, 30]);
+    expect(view.fog?.currentIndex).toBe(0);
+    for (const [pct, index] of [[5, 1], [15, 3], [30, 6]] as const) {
+      const v = derive(reducer(initialState(), { type: 'reserve/set', pct }));
+      expect(v.fog?.currentIndex).toBe(index);
+      expect(v.fog?.points[index]?.marginPct).toBe(pct);
+    }
+  });
+
+  test('the curve is the same one whatever the reserve (so the slider never recomputes it)', () => {
+    const start = initialState();
+    const a = derive(start).fog?.points;
+    const b = derive(reducer(start, { type: 'reserve/set', pct: 20 })).fog?.points;
+    expect(a).toBe(b);
+  });
+
+  test('the current point is the fog of the solution the view shows', () => {
+    const view = derive(reducer(initialState(), { type: 'reserve/set', pct: 15 }));
+    const point = view.fog?.points[view.fog.currentIndex ?? -1];
+    expect(point?.status).toBe('ok');
+    if (point?.status === 'ok' && view.solution.status === 'ok') {
+      expect(point.keptCount).toBe(view.solution.kept.length);
+      expect(point.keptEffort).toBe(view.solution.keptEffort);
+      expect(point.capacity).toBe(view.solution.capacity);
+      expect(point.effectiveCapacity).toBe(view.solution.effectiveCapacity);
+    }
+  });
+
+  test('an impossible freeze has impossible points and the same needed number as the solution', () => {
+    const view = derive(reducer(initialState(), { type: 'candle/set', step: 2 }));
+    expect(view.solution.status).toBe('impossible');
+    const point = view.fog?.points[0];
+    expect(point?.status).toBe('impossible');
+    if (point?.status === 'impossible' && view.solution.status === 'impossible') expect(point.needed).toBe(view.solution.needed);
+  });
+});

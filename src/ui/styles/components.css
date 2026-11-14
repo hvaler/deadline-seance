@@ -897,3 +897,126 @@
   stroke-dasharray: 2 7;
   opacity: 0.9;
 }
+
+/* ---- the fog of estimates ---- */
+
+/* The strip under the reserve slider: seven steps, each with its reserve, a bar, the chance and (on the current one) the word "now". */
+.fog-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin-top: 6px;
+  padding: 6px calc(var(--thumb) / 2);
+  border-radius: 4px;
+  background: var(--night);
+}
+
+.strip-item {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 2px;
+  min-width: 0;
+  padding: 4px 0 2px;
+  border-radius: 4px;
+  white-space: nowrap; /* a label never wraps: the strip keeps one height at every width */
+}
+
+.strip-item[aria-current='true'] {
+  box-shadow: inset 0 0 0 2px var(--amber);
+}
+
+.strip-reserve {
+  font-size: 0.75rem;
+  color: var(--stone);
+}
+
+.strip-bar {
+  position: relative;
+  width: 10px;
+  height: 32px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--ply-1);
+}
+
+/* The height of the bar is the chance (layout only): the engine's percentage turned into a scale. */
+.strip-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--amber);
+  transform: scaleY(calc(var(--pct, 0) / 100));
+  transform-origin: 50% 100%;
+  transition: transform 0.3s ease-out;
+}
+
+.strip-chance {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--bone);
+}
+
+.strip-now {
+  min-height: 1rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1rem;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+/* The block of the sign: the chance as a painted figure, and what is behind it. One colour for the figure, whatever its value. */
+.fog-block {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  /* Room for the tallest thing the block says at each width (measured in a real browser over every candle step and reserve), so the candle below never moves. */
+  min-height: 6.5rem;
+  padding: 10px 16px 12px;
+  border-radius: 4px;
+  background: var(--night);
+}
+
+.fog-headline {
+  font-family: var(--font-sign);
+  font-size: clamp(1.125rem, 2.4vw + 0.5rem, 1.5rem);
+  line-height: 1.2;
+  color: var(--bone);
+}
+
+.fog-figure {
+  display: inline-block;
+  font-size: clamp(2rem, 4vw + 0.8rem, 3rem);
+  line-height: 1.1;
+  color: var(--amber);
+}
+
+.fog-sentence {
+  font-size: 0.9375rem;
+  color: var(--bone);
+}
+
+@media (max-width: 1099.98px) {
+  .fog-block {
+    min-height: 7.75rem;
+  }
+}
+
+@media (max-width: 819.98px) {
+  .fog-block {
+    min-height: 8.25rem;
+  }
+}
+
+@media (max-width: 479.98px) {
+  .fog-block {
+    min-height: 12.5rem;
+  }
+}
+
+@media (max-width: 639.98px) {
+  /* Seven numbers across a phone: a little smaller, so neighbours do not touch. */
+  .strip-chance {
+    font-size: 0.75rem;
+  }
+}

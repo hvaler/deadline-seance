@@ -42,6 +42,8 @@ export interface Board {
   readonly zombieThreshold: number;
   /** Keys of tickets that were put down (closed as Won't Do). Their dependents can never be kept. */
   readonly wontDo: readonly Key[];
+  /** Seed of the fog of estimates: an integer from 0 to 4 294 967 295. The same board and seed give the same chance everywhere. */
+  readonly fogSeed: number;
 }
 
 declare const validBoardBrand: unique symbol;
@@ -141,6 +143,7 @@ export type ValidationErrorCode =
   | 'invalid-time-zone'
   | 'invalid-threshold'
   | 'wont-do-key-in-tickets'
+  | 'seed-out-of-range'
   | 'invalid-absence'
   | 'board-too-large';
 
@@ -167,3 +170,7 @@ export const SCALE = [1, 2, 3, 5, 8, 13, 20] as const;
 export const DEFAULT_TIME_ZONE = 'Europe/Madrid';
 export const DEFAULT_NEXT_RELEASE_WEEKS = 2;
 export const DEFAULT_ZOMBIE_THRESHOLD = 3;
+/** For callers that import a board from data with no seed (CSV, MCP). The engine itself never applies it. */
+export const DEFAULT_FOG_SEED = 0;
+/** The largest ogSeed: an unsigned 32-bit integer. */
+export const MAX_FOG_SEED = 4_294_967_295;

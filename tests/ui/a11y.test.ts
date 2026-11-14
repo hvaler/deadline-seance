@@ -72,7 +72,7 @@ describe.each(STATES)('the page, %s', (_name, drive) => {
 
   test('every section is a labelled region whose label is a real heading with text', () => {
     const { root } = page();
-    const sections = [...root.querySelectorAll('main section')];
+    const sections = [...root.querySelectorAll('main section.region')];
     expect(sections).toHaveLength(6);
     for (const section of sections) {
       const id = section.getAttribute('aria-labelledby') ?? '';
@@ -80,6 +80,20 @@ describe.each(STATES)('the page, %s', (_name, drive) => {
       expect(heading?.tagName, id).toBe('H2');
       expect((heading?.textContent ?? '').trim()).not.toBe('');
     }
+  });
+
+  test('the fog block is a labelled region of the sign (labelled by its own painted line, no new h2) and the strip is a named list with one current item', () => {
+    const { root } = page();
+    const fog = root.querySelector('section[data-region="fog"]')!;
+    expect(fog.closest('main section.region')?.getAttribute('data-region')).toBe('sign');
+    expect((root.querySelector(`[id="${fog.getAttribute('aria-labelledby')}"]`)?.textContent ?? '').trim()).not.toBe('');
+    expect(fog.querySelector('h1, h2, h3, h4')).toBeNull();
+    const list = root.querySelector('ol[data-region="fog-strip"]')!;
+    expect((list.getAttribute('aria-label') ?? '').trim()).not.toBe('');
+    expect(list.querySelectorAll('li')).toHaveLength(7);
+    expect(list.querySelectorAll('[aria-current="true"]')).toHaveLength(1);
+    expect(list.querySelector('[tabindex], a, button, input')).toBeNull();
+    expect(root.querySelector('[data-region="fog"] [aria-live]')).toBeNull();
   });
 
   test('every button and input has an accessible name', () => {

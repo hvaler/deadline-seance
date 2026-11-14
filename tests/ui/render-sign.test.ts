@@ -241,15 +241,15 @@ describe('the sign: the reserve', () => {
     const { root } = mountWith();
     const hint = root.querySelector('.reserve-hint')?.textContent ?? '';
     expect(hint).toBe('Keeps part of the capacity free, so the cut only fits what is left.');
-    expect(root.textContent).not.toMatch(/survive|holds? in|safer|guarantee/i);
+    expect(root.textContent).not.toMatch(/survive|safer|guarantee/i);
   });
 });
 
-describe('the sign: the empty slot for the fog of estimates', () => {
-  test('says plainly that the survival odds are not built yet', () => {
+describe('the sign: the fog of estimates', () => {
+  test('the fog slot is gone: a fog block and a strip stand in the sign (their tests are in render-fog.test.ts)', () => {
     const { root } = mountWith();
-    const slot = root.querySelector('[data-slot="fog"]');
-    expect(slot?.textContent).toBe('Chance the shelter holds: not built yet.');
-    expect(slot?.tagName).toBe('P');
+    expect(root.querySelector('[data-slot="fog"]')).toBeNull();
+    expect(region(root, 'sign').querySelector('[data-region="fog"]')).not.toBeNull();
+    expect(region(root, 'sign').querySelector('ol[data-region="fog-strip"]')).not.toBeNull();
   });
 });

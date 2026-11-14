@@ -14,6 +14,7 @@ export function makeBoard(tickets: Ticket[], over: Partial<Board> = {}): Board {
     nextReleaseWeeks: 2,
     zombieThreshold: 3,
     wontDo: [],
+    fogSeed: 12345,
     ...over,
   };
 }

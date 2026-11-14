@@ -24,6 +24,7 @@ function board(tickets: Ticket[], over: Partial<Board> = {}): Board {
     nextReleaseWeeks: 2,
     zombieThreshold: 3,
     wontDo: [],
+    fogSeed: 12345,
     ...over,
   };
 }
@@ -120,6 +121,24 @@ describe('validateBoard', () => {
     ]);
   });
 
+  test('fogSeed: an unsigned 32-bit integer; anything else is named with its value', () => {
+    expect(validateBoard(board([], { fogSeed: 0 })).ok).toBe(true);
+    expect(validateBoard(board([], { fogSeed: 4_294_967_295 })).ok).toBe(true);
+    expect(errorsOf(board([], { fogSeed: -1 }))).toEqual([{ code: 'seed-out-of-range', subject: 'board', field: 'fogSeed', value: -1 }]);
+    expect(errorsOf(board([], { fogSeed: 4_294_967_296 }))).toEqual([
+      { code: 'seed-out-of-range', subject: 'board', field: 'fogSeed', value: 4_294_967_296 },
+    ]);
+    expect(errorsOf(board([], { fogSeed: 1.5 }))).toEqual([{ code: 'not-integer', subject: 'board', field: 'fogSeed', value: '1.5' }]);
+    expect(codes(board([], { fogSeed: Number.NaN }))).toEqual(['not-integer']);
+    expect(codes(board([], { fogSeed: Number.POSITIVE_INFINITY }))).toEqual(['not-integer']);
+  });
+  test('a bad seed is reported with the other errors, sorted, whatever the order of the tickets', () => {
+    const tickets = [ticket('B', { effort: -1 }), ticket('A', { effort: 1.5 })];
+    const a = errorsOf(board(tickets, { fogSeed: -5 }));
+    const b = errorsOf(board([...tickets].reverse(), { fogSeed: -5 }));
+    expect(a).toEqual(b);
+    expect(a.map((e) => e.code)).toContain('seed-out-of-range');
+  });
   test('invalid-threshold', () => {
     expect(codes(board([], { zombieThreshold: 0 }))).toEqual(['invalid-threshold']);
     expect(codes(board([], { zombieThreshold: 1.5 }))).toEqual(['invalid-threshold']);

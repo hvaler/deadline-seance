@@ -378,3 +378,33 @@ La interfaz no cambia la regla. Estas son las decisiones que la rodean, para que
   ancho), para que la vela no se mueva bajo el dedo mientras se arrastra.
 - **Sin red.** Las fuentes se empaquetan (latín, solo los pesos usados) y la compilación lleva una política CSP sin ningún
   otro origen. Las rutas son relativas para que funcione en cualquier carpeta de un alojamiento estático.
+
+## 2026-11-14 — La niebla, en el motor y en la pantalla (spec `fog`)
+
+Este apartado precisa la sección «2. Niebla de las estimaciones» y P19–P21 (las secciones posteriores mandan sobre los borradores):
+
+- **Semilla.** `Board.fogSeed`, entero obligatorio de 0 a 4 294 967 295 (`seed-out-of-range` si no cabe, `not-integer` si no es entero). Es un dato
+  del tablero: dos tableros que solo se distinguen por la semilla son tableros distintos. El tablero de muestra usa `20261116` (la fecha de su `now`),
+  fijada antes de ver ningún resultado. `DEFAULT_FOG_SEED = 0` existe solo para quien importe un tablero sin semilla; el motor nunca lo aplica.
+- **El sorteo.** `fogFactor(semilla, clave, noche) = 80 + (h mod 71)`, con `h = MurmurHash3_x86_32` de los bytes little-endian de las palabras de 32 bits
+  `[unidad UTF-16 de la clave, …, noche]` y la semilla como semilla del hash. Las noches van de 0 a 999. Solo entra la clave, la noche y la semilla: ni
+  el esfuerzo, ni el resto de tickets, ni el conjunto salvado. Por eso los números aleatorios son comunes y P20 se cumple. Se comprueba con los
+  vectores publicados de MurmurHash3 y con una implementación independiente en las pruebas (BigInt, sin `Math.imul`). El factor es uniforme entre
+  80 y 150, así que su media es 115 %: un recorte que llena justo la capacidad casi nunca aguanta.
+- **La noche.** Cada ticket salvado toma `ceil(effort × f / 100)` (en enteros, `floor((effort × f + 99) / 100)`); la noche aguanta si la suma cabe en la
+  capacidad **completa** (sin margen). Resultado: `holds` noches y `pct = floor(100 × holds / 1000)`. El porcentaje se redondea hacia abajo, así que
+  puede ser 0 % con noches que aguantan: la pantalla siempre da también el número de noches.
+- **La curva.** `fogCurve` resuelve la congelación con cada margen (0, 5, … 30 %) y simula el conjunto salvado de cada uno con una sola tabla de sorteos.
+- **P20 y el margen.** No hay ninguna propiedad «más margen, más aguante», y hay una prueba que **encuentra** tableros donde más margen baja la
+  probabilidad (por ejemplo, 5 tickets, capacidad 7: 324 noches con 0 % y 76 con 5 %, porque a 0 % entra un ticket grande y a 5 % entran cuatro pequeños,
+  que se redondean hacia arriba). La pantalla no promete lo contrario.
+- **Números reales del tablero de muestra** (vela en el viernes a las 18:00, semilla 20261116), calculados por el motor, sin tocar el tablero:
+
+| Margen | 0 % | 5 % | 10 % | 15 % | 20 % | 25 % | 30 % |
+|---|---|---|---|---|---|---|---|
+| Salvados / puntos | 12 / 59 | 11 / 56 | 11 / 51 | 10 / 49 | 10 / 46 | 10 / 43 | 9 / 41 |
+| Noches que aguantan (de 1.000) | 0 | 6 | 134 | 347 | 707 | 959 | 996 |
+| Probabilidad mostrada | 0 % | 0 % | 13 % | 34 % | 70 % | 95 % | 99 % |
+
+  Con otras 20 semillas (1 a 20) cada paso se mueve poco: 10 % entre 9 y 12 %, 15 % entre 29 y 33 %, 20 % entre 67 y 72 %, 25 % entre 94 y 96 %,
+  30 % entre 99 y 100 %; 0 % y 5 % dan 0 % siempre. Los números 0 / 20 / 81 / 100 del prototipo salían de su tablero falso y no se usan.

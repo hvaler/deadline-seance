@@ -7,7 +7,7 @@ afterEach(() => {
 });
 
 /** The empty slots of features that are out of scope for this version, and the text each one must show. */
-const SLOTS = ['tour', 'fog', 'certificate', 'chronicle', 'csv', 'mcp'] as const;
+const SLOTS = ['tour', 'certificate', 'chronicle', 'csv', 'mcp'] as const;
 
 const slot = (root: ParentNode, name: string): HTMLElement[] => [...root.querySelectorAll<HTMLElement>(`[data-slot="${name}"]`)];
 
@@ -47,17 +47,15 @@ describe('empty slots', () => {
     }
   });
 
-  test('the slots are where the brief puts them: the tour in the title card, the fog in the sign, the rest in the tools', () => {
+  test('the slots are where the brief puts them: the tour in the title card, the rest in the tools', () => {
     const { root } = mountWith();
     expect(slot(root, 'tour')[0]?.closest('header')).not.toBeNull();
-    expect(slot(root, 'fog')[0]?.closest('[data-region="sign"]')).not.toBeNull();
     for (const name of ['certificate', 'chronicle', 'csv', 'mcp']) expect(slot(root, name)[0]?.closest('[data-region="tools"]'), name).not.toBeNull();
   });
 
   test('the labels name the feature', () => {
     const { root } = mountWith();
     expect(slot(root, 'tour')[0]?.textContent).toBe('Play the night · 60 s');
-    expect(slot(root, 'fog')[0]?.textContent).toBe('Chance the shelter holds: not built yet.');
     expect(slot(root, 'certificate')[0]?.textContent).toBe('Death certificate');
     expect(slot(root, 'chronicle')[0]?.textContent).toBe('Night chronicle and undo');
     expect(slot(root, 'csv')[0]?.textContent).toBe('CSV import and export');

@@ -455,3 +455,7 @@ changes silently.
 Fog of estimates and survival probability; LLM epitaphs and the number guard; death certificate; night chronicle and undo; CSV import
 and export; guided tour; MCP server. Also out of scope: editing tickets, creating tickets, saving state between visits, and any
 network call of any kind.
+
+## Addendum: the fog slot is filled
+
+Requirement 16 left a fog slot on the sign. The `fog` spec (`.kiro/specs/fog`) fills it: the slot `[data-slot="fog"]` is gone, and the sign carries a fog block (`[data-region="fog"]`) and a strip under the reserve slider. The other five slots are unchanged.

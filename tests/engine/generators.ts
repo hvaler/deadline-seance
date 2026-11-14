@@ -6,6 +6,8 @@ import type { Absence, Board, Cost, Key, Part, Person, Ticket } from '../../src/
 /** Scale values (1, 2, 3, 5, 8, 13, 20). */
 export const arbScale: fc.Arbitrary<number> = fc.constantFrom(...SCALE);
 
+/** A fog seed: any unsigned 32-bit integer, with the edges over-represented. */
+export const arbFogSeed: fc.Arbitrary<number> = fc.oneof(fc.integer({ min: 0, max: 4_294_967_295 }), fc.constantFrom(0, 1, 4_294_967_295));
 /** Margins the engine accepts: 0, 5, ..., 30. */
 export const arbMargin: fc.Arbitrary<number> = fc.constantFrom(0, 5, 10, 15, 20, 25, 30);
 
@@ -107,9 +109,10 @@ export function arbBoard(options: BoardOptions): fc.Arbitrary<Board> {
         arbPeople(),
         fc.integer({ min: 0, max: 6 }),
         fc.integer({ min: 1, max: 5 }),
+        arbFogSeed,
       );
     })
-    .map(([specs, wontCount, people, nextReleaseWeeks, zombieThreshold]): Board => {
+    .map(([specs, wontCount, people, nextReleaseWeeks, zombieThreshold, fogSeed]): Board => {
       const keys: Key[] = specs.map((s, i) => `${s.prefix}-${i}`);
       const wontKeys: Key[] = Array.from({ length: wontCount }, (_, j) => `W-${j}`);
       const tickets: Ticket[] = specs.map((s, i) => ({
@@ -129,6 +132,7 @@ export function arbBoard(options: BoardOptions): fc.Arbitrary<Board> {
         nextReleaseWeeks,
         zombieThreshold,
         wontDo: wontKeys,
+        fogSeed,
       };
     });
 }

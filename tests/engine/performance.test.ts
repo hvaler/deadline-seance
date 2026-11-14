@@ -1,8 +1,9 @@
 import * as fc from 'fast-check';
 import { describe, expect, test } from 'vitest';
 import { capacityBetween } from '../../src/engine/capacity';
+import { fogCurve, fogTable } from '../../src/engine/fog';
 import { solveWithCapacity } from '../../src/engine/solver';
-import { valid } from './fixtures';
+import { atCapacity, valid } from './fixtures';
 import { arbSolveCase } from './generators';
 import type { SolveCase } from './generators';
 
@@ -65,5 +66,47 @@ describe('performance (capacity)', () => {
     const elapsed = now() - t0;
     log(`capacity: 1000 calls in ${elapsed.toFixed(1)} ms`);
     expect(elapsed).toBeLessThan(CEILING_MS);
+  });
+});
+
+describe('performance (the fog, 80 tickets)', () => {
+  test('the first curve (table built) and a cached one (table kept) of 80-ticket boards stay far under the ceiling', () => {
+    const cases = fc.sample(arbSolveCase({ minTickets: 80, maxTickets: 80, mustHaveRate: 3 }), { numRuns: BOARDS, seed: 2026 });
+    const first: number[] = [];
+    const tableOnly: number[] = [];
+    const cached: number[] = [];
+    for (const c of cases) {
+      const { board, freeze } = atCapacity(c.board, c.capacity);
+      let t0 = now();
+      const table = fogTable(board);
+      tableOnly.push(now() - t0);
+      t0 = now();
+      const curve = fogCurve(board, freeze, table);
+      cached.push(now() - t0);
+      expect(curve.ok).toBe(true);
+      t0 = now();
+      fogCurve(board, freeze);
+      first.push(now() - t0);
+    }
+    log(
+      `fog, 80 tickets: table ${median(tableOnly).toFixed(2)} ms (max ${Math.max(...tableOnly).toFixed(2)}), ` +
+        `curve with a kept table ${median(cached).toFixed(2)} ms (max ${Math.max(...cached).toFixed(2)}), ` +
+        `first curve ${median(first).toFixed(2)} ms (max ${Math.max(...first).toFixed(2)})`,
+    );
+    for (const t of [...tableOnly, ...cached, ...first]) expect(t).toBeLessThan(CEILING_MS);
+  });
+
+  test('the same for the tie-heavy boards, where the solver works hardest', () => {
+    const cases = fc.sample(arbSolveCase({ minTickets: 80, maxTickets: 80, mustHaveRate: 0, ties: true }), { numRuns: BOARDS, seed: 2026 });
+    const cached: number[] = [];
+    for (const c of cases) {
+      const { board, freeze } = atCapacity(c.board, c.capacity);
+      const table = fogTable(board);
+      const t0 = now();
+      expect(fogCurve(board, freeze, table).ok).toBe(true);
+      cached.push(now() - t0);
+    }
+    log(`fog, 80 tie-heavy tickets: curve with a kept table ${median(cached).toFixed(2)} ms (max ${Math.max(...cached).toFixed(2)})`);
+    for (const t of cached) expect(t).toBeLessThan(CEILING_MS);
   });
 });

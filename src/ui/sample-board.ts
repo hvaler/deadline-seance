@@ -70,5 +70,7 @@ export function sampleBoard(): Board {
     nextReleaseWeeks: 2,
     zombieThreshold: 3,
     wontDo: [],
+    // Fixed before any chance was looked at (the date of `now`) and never changed to make a number look better.
+    fogSeed: 20261116,
   };
 }

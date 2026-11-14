@@ -43,6 +43,25 @@ describe('initial state', () => {
   });
 });
 
+describe('the fog seed', () => {
+  test('every action keeps the seed of the board, so the chance of a board is the same wherever it is copied to', () => {
+    const start = initialState();
+    expect(start.board.fogSeed).toBe(20261116);
+    fc.assert(
+      fc.property(fc.array(arbAction, { maxLength: 15 }), (actions) => {
+        let state = start;
+        for (const action of actions) {
+          state = reducer(state, action);
+          expect(state.board.fogSeed).toBe(20261116);
+        }
+      }),
+      { numRuns: 100 },
+    );
+    expect(run(start, { type: 'tombstone/put-down', key: 'HB-112' }).board.fogSeed).toBe(20261116);
+    expect(run(start, { type: 'tombstone/exhume', key: 'HB-108' }).board.fogSeed).toBe(20261116);
+  });
+});
+
 describe('candle/set', () => {
   test('moving the candle gives a diff with numbers: Fri 18:00 to Fri 13:00 sinks HB-115', () => {
     const next = reducer(initialState(), { type: 'candle/set', step: 9 });

@@ -3,7 +3,7 @@
 
 // Data model and constants
 export type * from './types';
-export { SCALE, DEFAULT_TIME_ZONE, DEFAULT_NEXT_RELEASE_WEEKS, DEFAULT_ZOMBIE_THRESHOLD, ok, err } from './types';
+export { SCALE, DEFAULT_TIME_ZONE, DEFAULT_NEXT_RELEASE_WEEKS, DEFAULT_ZOMBIE_THRESHOLD, DEFAULT_FOG_SEED, MAX_FOG_SEED, ok, err } from './types';
 
 // Keys
 export { compareKeys, sortedKeys, compareKeyLists } from './keys';
@@ -24,3 +24,7 @@ export { solveFreeze, solveWithCapacity } from './solver';
 // What changes when the rule re-solves
 export { diffSolutions, exhume, putDown, resurrect } from './diff';
 export type { ExhumeApplied, ExhumeOutcome, ExhumeRejected, PutDownApplied } from './diff';
+
+// The fog of estimates
+export { FOG_NIGHTS, FOG_MIN_PCT, FOG_MAX_PCT, FOG_RESERVE_STEPS, fogCurve, fogFactor, fogFromTable, fogTable, simulateFog } from './fog';
+export type { FogPoint, FogPointImpossible, FogPointOk, FogResult, FogTable } from './fog';

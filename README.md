@@ -28,9 +28,10 @@ The app opens on a built-in sample board, "Hollow Bank app 3.2 · release eve": 
 - Move the **candle** (eleven freeze times, Monday 09:00 to Friday 18:00) and the **reserve**: the cut, the totals and a plain sentence of what rose, what sank and what it cost follow at once.
 - Send a **survivor** away for a half day and see capacity shrink.
 - **Exhume** a tombstone, or **resurrect** or **put down (Won't Do)** a zombie. An exhume that cannot fit is refused and says by how much.
+- Read the **fog of estimates** on the sign: in how many of 1,000 simulated nights the kept work still fits the team when every estimate lands between 80 % and 150 % of what was written, for each reserve from 0 to 30 %. On some boards a bigger reserve even lowers the chance, so the strip only shows the numbers.
 - Every number on the screen comes from the engine in `src/engine`. The epitaph on a stone only says why the ticket is buried; its cost of waiting, releases left out and hunger are in the stone's details.
 
-Out of scope for now: CSV import and export, the guided tour, the death certificate, the chronicle with undo, the fog simulation and the MCP server. Their places on the page are inert, labelled slots.
+Out of scope for now: CSV import and export, the guided tour, the death certificate, the chronicle with undo and the MCP server. Their places on the page are inert, labelled slots.
 
 ## Layout
 

@@ -1,5 +1,5 @@
-import { SCALE } from '../engine/index';
-import type { CodParts, ImpossibleSolution, Reason, ValidationError } from '../engine/index';
+import { FOG_MAX_PCT, FOG_MIN_PCT, MAX_FOG_SEED, SCALE } from '../engine/index';
+import type { CodParts, FogPoint, FogPointImpossible, FogPointOk, ImpossibleSolution, Reason, ValidationError } from '../engine/index';
 import { CANDLE_STEPS } from './candle-steps';
 import type { Totals, TombstoneView, View } from './derive';
 import type { Change, Comparison, Subject } from './model';
@@ -21,6 +21,11 @@ export function count(n: number, one: string, many: string = `${one}s`): string 
 export function listOf(items: readonly string[]): string {
   if (items.length <= 1) return items.join('');
   return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
+}
+
+/** An integer with a comma between thousands: 1000 → "1,000". Formatting only. */
+export function thousands(n: number): string {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 // ---- cost of delay -----------------------------------------------------------------------------------------------------
@@ -189,6 +194,45 @@ export function verdictFigures(view: View): Figure[] {
   ];
 }
 
+// ---- the fog of estimates ----------------------------------------------------------------------------------------------
+
+export interface FogHeadline {
+  readonly lead: string;
+  /** The painted figure: the floored percentage, as the engine returned it. */
+  readonly figure: string;
+  readonly tail: string;
+}
+
+/** "Holds in" + "20 %" + "of 1,000 nights": the figure is `pct`, the nights are `FOG_NIGHTS`. */
+export function fogHeadline(point: FogPointOk): FogHeadline {
+  return { lead: 'Holds in', figure: `${point.fog.pct} %`, tail: `of ${thousands(point.fog.nights)} nights` };
+}
+
+/**
+ * The numbers behind the figure. The percentage is floored, so it can read 0 % while some nights hold: the sentence always ends with the raw
+ * count. "The team has" is the full capacity (the chance is measured against it, not against what is left after the reserve).
+ */
+export function fogSentence(point: FogPointOk): string {
+  return (
+    `Inside needs ${count(point.keptEffort, 'point')} on paper; the team has ${point.capacity}; ` +
+    `estimates land between ${FOG_MIN_PCT} % and ${FOG_MAX_PCT} %. It held on ${thousands(point.fog.holds)} of ${thousands(point.fog.nights)} nights.`
+  );
+}
+
+/** The headline when there is no cut to test. */
+export const FOG_NO_CUT = 'No cut to test';
+
+export function fogImpossibleSentence(point: FogPointImpossible): string {
+  return `${FOG_NO_CUT}: the must-haves need ${count(point.needed, 'point')}; ${point.effectiveCapacity} are available after the ${point.marginPct} % reserve.`;
+}
+
+/** What a screen reader reads for one item of the strip: "5 % reserve (current): holds in 0 % of 1,000 nights (6 nights)". */
+export function stripItemText(point: FogPoint, isCurrent: boolean): string {
+  const lead = `${point.marginPct} % reserve${isCurrent ? ' (current)' : ''}`;
+  if (point.status === 'impossible') return `${lead}: impossible freeze`;
+  const { pct, nights, holds } = point.fog;
+  return `${lead}: holds in ${pct} % of ${thousands(nights)} nights (${thousands(holds)} ${holds === 1 ? 'night' : 'nights'})`;
+}
 // ---- the change note ---------------------------------------------------------------------------------------------------
 
 export interface ChangeNote {
@@ -342,6 +386,8 @@ export function describeValidationError(e: ValidationError): string {
       return `The zombie threshold must be a whole number of 1 or more (got ${valueOf(e)}).`;
     case 'wont-do-key-in-tickets':
       return `${subject} is both a ticket and a put-down key.`;
+    case 'seed-out-of-range':
+      return `The fog seed must be a whole number from 0 to ${thousands(MAX_FOG_SEED)} (got ${valueOf(e)}).`;
     case 'invalid-absence':
       return `${subject} has an invalid day off: ${valueOf(e)}.`;
     case 'board-too-large':

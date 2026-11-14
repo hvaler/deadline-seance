@@ -17,7 +17,7 @@ describe('purity of src/engine', () => {
   test('the scan sees the engine sources', () => {
     const names = files.map((f) => f.name).sort();
     expect(names).toEqual(
-      expect.arrayContaining(['capacity.ts', 'chain.ts', 'cod.ts', 'diff.ts', 'index.ts', 'keys.ts', 'oracle.ts', 'solver.ts', 'types.ts', 'validate.ts', 'weights.ts']),
+      expect.arrayContaining(['capacity.ts', 'chain.ts', 'cod.ts', 'diff.ts', 'fog.ts', 'hash.ts', 'index.ts', 'keys.ts', 'oracle.ts', 'solver.ts', 'types.ts', 'validate.ts', 'weights.ts']),
     );
   });
 
@@ -72,9 +72,15 @@ describe('public API', () => {
   test('index.ts exports exactly the documented functions and constants, and not the oracle', () => {
     expect(Object.keys(engine).sort()).toEqual(
       [
+        'DEFAULT_FOG_SEED',
         'DEFAULT_NEXT_RELEASE_WEEKS',
         'DEFAULT_TIME_ZONE',
         'DEFAULT_ZOMBIE_THRESHOLD',
+        'FOG_MAX_PCT',
+        'FOG_MIN_PCT',
+        'FOG_NIGHTS',
+        'FOG_RESERVE_STEPS',
+        'MAX_FOG_SEED',
         'SCALE',
         'burialCost',
         'capacityBetween',
@@ -87,9 +93,14 @@ describe('public API', () => {
         'effectiveUrgency',
         'err',
         'exhume',
+        'fogCurve',
+        'fogFactor',
+        'fogFromTable',
+        'fogTable',
         'ok',
         'putDown',
         'resurrect',
+        'simulateFog',
         'solveFreeze',
         'solveWithCapacity',
         'sortedKeys',

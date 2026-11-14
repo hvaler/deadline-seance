@@ -497,3 +497,7 @@ cannot run in jsdom; they are the manual checklist in the last task, and the fin
 - **A sign that does not move.** The verdict and the change note share `.sign-readout`, whose `min-height` is the tallest thing they say together (15.5 rem, 21 rem under 820 px, 29 rem under 480 px; measured in a real browser). The candle below stays put while it is dragged.
 - **Build.** `base: './'`, `assetsInlineLimit: 0`, and a build-only plugin writes the policy of `build/csp.ts` into `index.html`. `tests/ui/build.test.ts` builds into a temporary folder and checks the result (policy, relative paths, no inline code, no `data:`, fonts and licences, size budget). It needs `@types/node` (dev only; the engine's tsconfig does not load it).
 - **Pages.** `.github/workflows/pages.yml`: build job read-only, deploy job alone has `pages: write` and `id-token: write`; every action pinned to a commit. `tests/ui/workflow.test.ts` checks that.
+
+## Addendum: the fog on the sign
+
+The fog slot was replaced by the fog block and the strip of the `fog` spec (`render/fog.ts`, placed by `render/sign.ts`). The block does not use the class `fog`, which belongs to the drifting-fog canvas of the atmosphere; a test guards that. The sign keeps one height: the fog block has a `min-height` per width next to the `.sign-readout` one.

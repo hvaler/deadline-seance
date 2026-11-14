@@ -28,6 +28,7 @@ const breakIt: Record<ValidationErrorCode, (board: Board) => Board> = {
   'invalid-time-zone': (b) => ({ ...b, timeZone: 'Mars/Olympus' }),
   'invalid-threshold': (b) => ({ ...b, zombieThreshold: 0 }),
   'wont-do-key-in-tickets': (b) => ({ ...b, wontDo: ['HB-101'] }),
+  'seed-out-of-range': (b) => ({ ...b, fogSeed: 4_294_967_296 }),
   'invalid-absence': (b) => ({ ...b, people: b.people.map((p) => (p.name === 'Ana' ? { ...p, daysOff: [{ date: '2026-02-30', part: 'full' as const }] } : p)) }),
   'board-too-large': (b) => ({ ...b, tickets: b.tickets.map((t) => ({ ...t, effort: 1_000_000_000 })) }),
 };

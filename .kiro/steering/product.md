@@ -92,5 +92,18 @@ Priority: 1, 2, 4 and 5 score most. If time runs short, cut 8 first, then 6, the
 ## Demo message
 
 On the sample board, the optimal cut on paper is fragile: with the candle on Friday 18:00 the rule fills 59 of 59 points
-and the shelter holds in 0 % of 1,000 nights. With a 15 % reserve it holds 20 %, with 20 % it holds 81 %, with 30 % it
-holds 100 %. You have to cut more than the arithmetic says.
+and the shelter holds in 0 of 1,000 nights (0 %). The real curve, computed by the engine (seed 20261116, estimates
+between 80 % and 150 %, measured against the full capacity of 59 points):
+
+| Reserve | 0 % | 5 % | 10 % | 15 % | 20 % | 25 % | 30 % |
+|---|---|---|---|---|---|---|---|
+| Kept tickets / points | 12 / 59 | 11 / 56 | 11 / 51 | 10 / 49 | 10 / 46 | 10 / 43 | 9 / 41 |
+| Nights that hold (of 1,000) | 0 | 6 | 134 | 347 | 707 | 959 | 996 |
+| Chance shown | 0 % | 0 % | 13 % | 34 % | 70 % | 95 % | 99 % |
+
+The percentage is floored, so 5 % reads 0 % although 6 nights hold: the screen always gives the count too. You have to cut
+more than the arithmetic says: filling the capacity exactly never holds, and it takes a reserve of about 20 % before the
+shelter holds on most nights. These numbers belong to this board and this seed (other seeds move each step by a few points:
+for 20 seeds, 10 % gave 9 to 12 %, 15 % gave 29 to 33 %, 20 % gave 67 to 72 %). On other boards a bigger reserve can even
+lower the chance; the strip shows the numbers and the app never says that more reserve is safer. The prototype's
+0 / 20 / 81 / 100 came from its fake board and are not used.

@@ -1,6 +1,7 @@
 import { capacityBetween, codParts, compareKeys, effectiveCapacity, effectiveUrgency } from '../engine/index';
-import type { CodParts, FreezeInput, Key, Reason, Solution, Ticket } from '../engine/index';
+import type { CodParts, FogPoint, FreezeInput, Key, Reason, Solution, Ticket } from '../engine/index';
 import { CANDLE_STEPS } from './candle-steps';
+import { curveFor } from './fog-cache';
 import { freezeFor, presentPeople } from './model';
 import type { AppState } from './model';
 import { SAMPLE_NOW } from './sample-board';
@@ -58,6 +59,13 @@ export interface MustHaveView {
   readonly effort: number;
 }
 
+export interface FogView {
+  /** The chance at each reserve step (0, 5, ... 30), from the engine. */
+  readonly points: readonly FogPoint[];
+  /** The index of the point whose reserve is the state's reserve. Chosen here, so the renderer compares nothing. */
+  readonly currentIndex: number | null;
+}
+
 export interface View {
   readonly freeze: FreezeInput;
   readonly candle: {
@@ -84,6 +92,8 @@ export interface View {
   readonly mustHaves: readonly MustHaveView[];
   /** Keys closed as Won't Do. */
   readonly putDown: readonly Key[];
+  /** The fog of estimates; null only if the engine returned an error. */
+  readonly fog: FogView | null;
 }
 
 function unwrap<T>(result: { readonly ok: true; readonly value: T } | { readonly ok: false; readonly error: { readonly code: string } }): T {
@@ -106,6 +116,13 @@ function cardOf(ticket: Ticket): CardView {
     cost,
     hungry: !cost.imported && cost.effectiveUrgency !== cost.urgency,
   };
+}
+
+function fogViewFor(state: AppState): FogView | null {
+  const points = curveFor(state);
+  if (points === null) return null;
+  const index = points.findIndex((p) => p.marginPct === state.marginPct);
+  return { points, currentIndex: index < 0 ? null : index };
 }
 
 export function derive(state: AppState): View {
@@ -173,5 +190,6 @@ export function derive(state: AppState): View {
       .map((t) => ({ key: t.key, title: t.title, effort: t.effort }))
       .sort((a, b) => compareKeys(a.key, b.key)),
     putDown: [...state.board.wontDo].sort(compareKeys),
+    fog: fogViewFor(state),
   };
 }
