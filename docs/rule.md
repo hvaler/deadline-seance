@@ -1,3 +1,5 @@
+Design log in Spanish, kept as the dated history of how the rule was decided. The English overview is docs/architecture.md.
+
 # Deadline Séance — la regla de decisión (borrador)
 
 ## 2026-11-12 — Borrador 1, para corregir

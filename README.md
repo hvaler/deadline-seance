@@ -36,6 +36,8 @@ flowchart LR
   jira -. "same CSV format" .-> csv
 ```
 
+For a short technical overview (modules, the rule, the fog, key decisions, tests), see [docs/architecture.md](docs/architecture.md).
+
 
 ## Run it
 
@@ -109,7 +111,7 @@ To record it: open the page, change the address to end in `#play` (the page show
 The rule is also a tool for an AI agent. `node mcp/start.mjs` serves three read-only tools over MCP (`solve_freeze`, `what_if`, `death_certificate`) that call the same engine as the page: no network, no files, no clock. This repository's `.kiro/settings/mcp.json` already registers it for Kiro. How to connect other clients, and one call and answer per tool (generated from a test, so the numbers cannot drift), are in [docs/mcp.md](docs/mcp.md).
 ## Layout
 
-`src/engine` is the rule (pure, deterministic, no DOM); `src/ui` draws it and never decides anything; `mcp` serves it to agents (it imports only the engine); `tests` mirrors them. The design history is in `docs/rule.md`.
+`src/engine` is the rule (pure, deterministic, no DOM); `src/ui` draws it and never decides anything; `mcp` serves it to agents (it imports only the engine); `tests` mirrors them. The English overview is [docs/architecture.md](docs/architecture.md); the design history (in Spanish) is in `docs/rule.md`.
 
 ## Fonts
 
