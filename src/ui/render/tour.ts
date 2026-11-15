@@ -35,6 +35,8 @@ export interface TourOptions {
   readonly matchMedia?: MatchMedia | undefined;
   /** The death certificate view, for the scene that shows it. The tour closes it whenever the scene is over. */
   readonly certificate?: CertificateControls | undefined;
+  /** Called after the bar or the prompt appeared or went, so whatever is fixed to the viewport can look again. */
+  readonly onLayout?: (() => void) | undefined;
 }
 
 export const PLAY_HASH = '#play';
@@ -48,7 +50,7 @@ interface Bar {
 }
 
 export function mountTour(options: TourOptions): TourControls {
-  const { ctx, script, page, main, header, certificate } = options;
+  const { ctx, script, page, main, header, certificate, onLayout } = options;
   const { services } = ctx;
   const doc = ctx.root.ownerDocument;
   const motion = motionPreference(options.matchMedia ?? (typeof window.matchMedia === 'function' ? window.matchMedia.bind(window) : undefined));
@@ -229,7 +231,8 @@ export function mountTour(options: TourOptions): TourControls {
         }
         playingControls(phase === 'paused');
         break;
-      }      case 'ended':
+      }
+      case 'ended':
         active = false;
         certificate?.close({ focus: false });
         setInert(false);
@@ -250,6 +253,7 @@ export function mountTour(options: TourOptions): TourControls {
         break;
       }
     }
+    onLayout?.();
   }
 
   // ---- starting ----
@@ -274,11 +278,14 @@ export function mountTour(options: TourOptions): TourControls {
     ]);
     const skipLink = page.querySelector('.skip-link');
     page.insertBefore(prompt, skipLink === null ? page.firstChild : skipLink.nextSibling);
+    onLayout?.();
   }
 
   function hidePrompt(): void {
-    prompt?.remove();
+    if (prompt === null) return;
+    prompt.remove();
     prompt = null;
+    onLayout?.();
   }
 
   /** The key that starts the tour is a user gesture: if sound is on, make sure the audio context is awake inside it. */

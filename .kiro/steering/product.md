@@ -73,7 +73,7 @@ Priority: 1, 2, 4 and 5 score most. If time runs short, cut 8 first, then 6, the
 4. Death certificate: a Markdown note for stakeholders on what is left out and why (freeze, capacity and margin, what
    is kept, survival probability, per buried ticket the reason, `cod` with its formula and cost of waiting, zombies,
    finished-off tickets). It passes the same number guard as epitaphs.
-5. Guided tour: "Play the night", 60 automatic seconds with subtitles. It is also the script of the demo video.
+5. Guided tour: "Play the night", about a minute (59 s measured) on its own, with subtitles. It is also the script of the demo video.
 6. Night chronicle: a log of every decision with its effect ("Ana leaves → HB-109 out (−15)") and step-by-step undo.
 7. Jira CSV import: try it with your own data, no credentials. Export a CSV for Jira import too.
 8. The rule as an MCP server: a `deadline-seance` tool the Kiro agent can query (`solve_freeze`, `what_if`), using the

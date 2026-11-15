@@ -10,8 +10,7 @@
 - Audio: Web Audio API only (synthesized synth bass and effects). No audio files, no third-party music. One short
   convolution reverb is allowed, with an impulse response generated in code, shared by the eerie per-action sounds.
   Each action has its own distinct sound: resurrect, put down, bury, cascade and undo (five sounds). The undo sound is a soft rewind, the resurrect turned around; it plays only when Sound is on, once per undo, and never during the tour's restore.
-- Optional LLM: called only for epitaphs and change explanations, behind a deterministic number guard with a fixed
-  template fallback. The app must be fully usable with no API key and no network.
+- LLM: this build ships without one. Epitaphs, change explanations and the certificate come from fixed templates over engine facts, and the app makes no network request: `build/csp.ts` sets `connect-src 'none'`. Adding an LLM (only for epitaphs and change explanations, behind the number guard with the template as fallback) would need a CSP change as well as the client code. The app must stay fully usable with no API key and no network.
 - MCP server (feature 8): a small Node entry point that imports the same engine package as the web app. No duplicated
   rule logic.
 

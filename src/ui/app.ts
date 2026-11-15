@@ -234,7 +234,8 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
   const mountedCertificate = mountCertificate({ ctx, page, header, main });
   certificate = mountedCertificate;
   // The tour needs the page to exist (it adds a bar and a prompt to it); #play shows its prompt as soon as it is mounted.
-  if (options.tour !== undefined) tour = mountTour({ ctx, script: options.tour, page, main, header, certificate: mountedCertificate });
+  if (options.tour !== undefined) tour = mountTour({ ctx, script: options.tour, page, main, header, certificate: mountedCertificate, onLayout: () => recGuard?.check() });
+  recGuard?.check(); // once now that the page, the title card and a prompt from #play are in place
   const mountedTour = tour;
   // Ctrl+Z / Cmd+Z undoes, unless the user is typing (the browser's own undo), the tour is running or the certificate dialog is open.
   const doc = root.ownerDocument;

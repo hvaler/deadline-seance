@@ -56,9 +56,9 @@ a capacity, a cost or a probability.
 
 - Board view with tombstones and dependency chains, candle (freeze time) and team controls, margin control.
 - Messages for impossible freeze and invalid boards, taken verbatim from engine output.
-- Epitaphs: optional LLM call, passed through `engine/guard`, with template fallback.
+- Epitaphs: fixed templates from engine facts. This build has no LLM call (see tech.md).
 - Chronicle panel with undo, certificate view and export, CSV import and export.
-- Guided tour ("Play the night", 60 s with subtitles).
+- Guided tour ("Play the night", 59 s with subtitles).
 - Web Audio synth (created after a user gesture) and visual effects (glow, VHS, fog) with reduced-motion support.
 - The UI passes `now` into the engine; it is the only place that reads the clock.
 

@@ -2,6 +2,7 @@ import { checkNumbers, guardFacts } from './guard';
 import type { GuardResult, Span } from './guard';
 import { describeDecision } from './chronicle';
 import type { Decisions, NightFacts, OutsideFact, OutsideReason, PushedOut, SolvedNight } from './facts';
+import { thousands } from './messages';
 import type { Key } from './types';
 
 /**
@@ -69,10 +70,6 @@ export function escapeMarkdown(text: string): string {
 // ---- small helpers ---------------------------------------------------------------------------------------------------------
 
 const count = (n: number, one: string, many: string = `${one}s`): string => `${n} ${n === 1 ? one : many}`;
-
-function thousands(n: number): string {
-  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-}
 
 const k = (key: Key): KeyRef => ({ key });
 const d = (text: string): Data => ({ data: text });
