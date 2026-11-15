@@ -1,4 +1,10 @@
+<p align="center"><img src="public/favicon.svg" width="96" alt="Deadline Séance logo: a tombstone with a candle"></p>
+
 # Deadline Séance
+
+![Deadline Séance: the red glowing title "Night of the Living Backlog" over the verdict sign for the sample board. Freeze Fri 18:00, 59 points available, 59 points inside, 7 tickets outside.](docs/assets/cover.png)
+
+[![Kiro IDE](https://img.shields.io/badge/Kiro_IDE-built_with-8A2BE2)](https://kiro.dev) [![TypeScript 7.0.2](https://img.shields.io/badge/TypeScript-7.0.2-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![Vite 8.3.8](https://img.shields.io/badge/Vite-8.3.8-646CFF?logo=vite&logoColor=white)](https://vite.dev) [![Vitest 5.1.0](https://img.shields.io/badge/Vitest-5.1.0-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev) [![fast-check 4.10.2](https://img.shields.io/badge/fast--check-4.10.2-B5179E)](https://fast-check.dev) [![Model Context Protocol SDK 2.4.0](https://img.shields.io/badge/MCP_SDK-2.4.0-000000)](https://modelcontextprotocol.io) [![Web Audio API](https://img.shields.io/badge/Web_Audio-API-E34F26)](https://developer.mozilla.org/docs/Web/API/Web_Audio_API) [![GitHub Pages](https://img.shields.io/badge/GitHub-Pages-222222?logo=githubpages&logoColor=white)](https://hvaler.github.io/deadline-seance/) [![MIT licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
 
 Freeze-eve scope cutting. A deterministic solver (0/1 knapsack with dependencies and must-haves, value = cost of
 delay) decides which tickets to bury before the deadline; property-based tests prove its rules. This build has no LLM:
@@ -125,6 +131,18 @@ The app makes no network request: its fonts are bundled from the [Fontsource](ht
 | IBM Plex Mono | numbers | SIL Open Font License 1.1 |
 
 The licence texts ship with the build in `licenses/` (source: `public/licenses/`).
+
+## Built with
+
+- [Kiro IDE](https://kiro.dev): the specs, steering files and agent hooks that drove the build, and the client that runs the MCP server.
+- [TypeScript](https://www.typescriptlang.org) 7.0.2, strict mode: the engine, the page and the MCP server.
+- [Vite](https://vite.dev) 8.3.8: the dev server and the static build, with the Content Security Policy written into `index.html`.
+- [Vitest](https://vitest.dev) 5.1.0: the test runner for the whole suite.
+- [fast-check](https://fast-check.dev) 4.10.2: the property-based tests for the rule properties P1 to P27.
+- [Model Context Protocol](https://modelcontextprotocol.io): the protocol the `deadline-seance` tools speak, through the official SDK 2.4.0.
+- [Web Audio API](https://developer.mozilla.org/docs/Web/API/Web_Audio_API): the synthesized sounds, with no audio files.
+- [GitHub Pages](https://pages.github.com): hosts the [live app](https://hvaler.github.io/deadline-seance/) from the static build.
+- [MIT licence](LICENSE): the licence of the code.
 
 ## License
 
