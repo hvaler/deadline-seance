@@ -71,7 +71,7 @@ px vitest run tests/ui/certificate-golden.test.ts -u.
 
 ## Play the night
 
-The button **Play the night · 60 s** runs a 59-second tour of the real app: it presses the app's own controls (the candle, a person away, a zombie put down, an exhume, the reserve) with one subtitle per scene, and every number in a subtitle is what the engine returns at that moment. **Pause**, **Skip scene** and **Stop** (or `Esc`) are on the screen all the time; when it ends, your own state is put back exactly. The page is inert while it plays, and the tour never turns sound on.
+The button **Play the night · 59 s** runs a 59-second tour of the real app: it presses the app's own controls (the candle, a person away, a zombie put down, an exhume, the reserve) with one subtitle per scene, and every number in a subtitle is what the engine returns at that moment. **Pause**, **Skip scene** and **Stop** (or `Esc`) are on the screen all the time; when it ends, your own state is put back exactly. The page is inert while it plays, and the tour never turns sound on.
 
 To record it: open the page, change the address to end in `#play` (the page shows "Press Space to play the night" and waits), and press **Space** when the recording runs. For the app's sounds, press **Sound on** first. The script of the video, with the real numbers of every scene, is [docs/video-tour-script.md](docs/video-tour-script.md); it is generated from the tour's data and a test fails if it drifts.
 ## MCP server

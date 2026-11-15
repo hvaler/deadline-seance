@@ -50,7 +50,7 @@ describe('MCP: docs/mcp.md', () => {
   test('every tool and the config appear, and the golden numbers are in the page', () => {
     for (const name of Object.keys(blocks)) expect(docs).toContain(`<!-- generated:${name}:start -->`);
     expect(docs).toContain('Kept 12 tickets, 59 points, cost of delay 167.');
-    expect(docs).toContain('The night holds on 0 of 1000 simulated nights');
+    expect(docs).toContain('The night holds on 0 of 1,000 simulated nights');
   });
 
   test('it says the server is read-only, offline and clock-free, and which documentation the design read', () => {

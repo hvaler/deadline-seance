@@ -23,7 +23,7 @@ const noteOf = (root: ParentNode) => {
 describe('the sign: verdict', () => {
   test('says what is inside and what is left outside, from the engine totals', () => {
     const { root } = mountWith();
-    expect(verdictOf(root)).toEqual(['Inside the safehouse: 12 tickets, 59 of 59 points, saved cod 167. Left outside: 7 tickets, cod 101.']);
+    expect(verdictOf(root)).toEqual(['Inside the safehouse: 12 tickets, 59 of 59 points, saved cost of delay 167. Left outside: 7 tickets, cost of delay 101.']);
     expect(verdictOf(root)).toEqual(verdictSentences(derive(initialState())));
   });
 
@@ -31,7 +31,7 @@ describe('the sign: verdict', () => {
     const { root, app } = mountWith();
     app.store.dispatch({ type: 'reserve/set', pct: 15 });
     expect(verdictOf(root)).toEqual([
-      'Inside the safehouse: 10 tickets, 49 of 50 points, saved cod 147. Left outside: 9 tickets, cod 121.',
+      'Inside the safehouse: 10 tickets, 49 of 50 points, saved cost of delay 147. Left outside: 9 tickets, cost of delay 121.',
       'Capacity 59, 15 % reserve.',
     ]);
   });
@@ -66,7 +66,7 @@ describe('the sign: change note', () => {
     app.store.dispatch({ type: 'candle/set', step: 9 });
     expect(noteOf(root)).toEqual({
       headline: 'Candle moved to Fri 13:00.',
-      lines: ['Sinks: HB-115 (13).', 'Loss: 13.', 'Saved cod 167 → 154.'],
+      lines: ['Sinks: HB-115 (13).', 'Loss: 13.', 'Saved cost of delay 167 → 154.'],
       alert: 'false',
       kind: 'done',
     });

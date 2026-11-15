@@ -14,7 +14,16 @@ describe('MCP: solve_freeze on the sample board', () => {
     expect(structured.kept).toHaveLength(12);
   });
 
-  test('every field equals what the engine says when called directly', () => {
+  test('the text writes numbers as the app does: 1,000 with a comma and 95 % with a space (the structured value keeps plain integers)', () => {
+    const { text, structured } = answer(solveFreezeTool(SAMPLE_REQUEST));
+    expect(text).toContain('The night holds on 0 of 1,000 simulated nights (0 %).');
+    expect(text).toContain('with a 0 % reserve');
+    expect(text).not.toMatch(/\b1000\b|\d%/);
+    expect(structured.fog).toEqual({ nights: 1000, holds: 0, pct: 0 });
+    const withReserve = answer(solveFreezeTool({ ...SAMPLE_REQUEST, marginPct: 20 }));
+    expect(withReserve.text).toContain('with a 20 % reserve');
+    expect(withReserve.text).toMatch(/holds on 7\d\d of 1,000 simulated nights \(70 %\)/);
+  });  test('every field equals what the engine says when called directly', () => {
     const { structured } = answer(solveFreezeTool(SAMPLE_REQUEST));
     const direct = solveFreeze(SAMPLE, GOLDEN);
     if (!direct.ok || direct.value.status !== 'ok') throw new Error('the golden night must be solved');

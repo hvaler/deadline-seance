@@ -67,7 +67,7 @@ Every tool takes a `board`: `{"source":"sample"}` (the app's sample board), `{"s
 
 ### `solve_freeze`
 
-The cut list: what is kept (points, cost of delay), every ticket outside with its reason (no room, depends on an outside ticket, depends on a put-down ticket), zombies, and the chance, out of 1000 simulated nights, that the kept work fits.
+The cut list: what is kept (points, cost of delay), every ticket outside with its reason (no room, depends on an outside ticket, depends on a put-down ticket), zombies, and the chance, out of 1,000 simulated nights, that the kept work fits.
 
 <!-- generated:solve_freeze:start -->
 Call `solve_freeze` with:
@@ -84,9 +84,9 @@ Answer (the text block; `structuredContent` carries the same values as JSON):
 
 ```text
 Freeze Fri 2026-11-20 18:00 (Europe/Madrid), asked on Mon 2026-11-16 09:00.
-Capacity 59 points, 59 with a 0% reserve.
+Capacity 59 points, 59 with a 0 % reserve.
 Kept 12 tickets, 59 points, cost of delay 167.
-The night holds on 0 of 1000 simulated nights (0%).
+The night holds on 0 of 1,000 simulated nights (0 %).
 Kept:
 - HB-101 "Fix stale balance after a transfer" (5 points, cost of delay 18)
 - HB-102 "Strong-auth callback (PSD2)" (8 points, cost of delay 29)
@@ -136,8 +136,8 @@ Answer (the text block; `structuredContent` carries the same values as JSON):
 
 ```text
 What if: Ana away on 2026-11-20 (full).
-Before: capacity 59 (59 with a 0% reserve), kept 12 tickets, 59 points, cost of delay 167. The night holds on 0 of 1000 nights (0%).
-After: capacity 55 (55 with a 0% reserve), kept 11 tickets, 51 points, cost of delay 154. The night holds on 11 of 1000 nights (1%).
+Before: capacity 59 (59 with a 0 % reserve), kept 12 tickets, 59 points, cost of delay 167. The night holds on 0 of 1,000 nights (0 %).
+After: capacity 55 (55 with a 0 % reserve), kept 11 tickets, 51 points, cost of delay 154. The night holds on 11 of 1,000 nights (1 %).
 Comes in: nothing.
 Goes out: HB-115 "Phone wallet pass" (8 points, cost of delay 13).
 Cost of delay kept changes by -13.
@@ -165,8 +165,8 @@ Answer (the text block; `structuredContent` carries the same values as JSON):
 
 ```text
 What if: exhume HB-117.
-Before: capacity 59 (59 with a 0% reserve), kept 12 tickets, 59 points, cost of delay 167. The night holds on 0 of 1000 nights (0%).
-After: capacity 59 (59 with a 0% reserve), kept 10 tickets, 59 points, cost of delay 140. The night holds on 1 of 1000 nights (0%).
+Before: capacity 59 (59 with a 0 % reserve), kept 12 tickets, 59 points, cost of delay 167. The night holds on 0 of 1,000 nights (0 %).
+After: capacity 59 (59 with a 0 % reserve), kept 10 tickets, 59 points, cost of delay 140. The night holds on 1 of 1,000 nights (0 %).
 Comes in: HB-117 "Onboarding rewrite" (21 points, cost of delay 16).
 Goes out: HB-113 "Accessibility audit fixes" (5 points, cost of delay 14); HB-115 "Phone wallet pass" (8 points, cost of delay 13); HB-118 "Referral programme" (8 points, cost of delay 16).
 Cost of delay kept changes by -27.

@@ -226,14 +226,14 @@ function fillGrave(grave: Grave, tomb: TombstoneView, index: number, weeks: numb
 
 export function mountGrounds(safehouse: HTMLElement, yard: HTMLElement, ctx: Ctx, hooks: GroundHooks = {}): Part {
   // Safehouse
-  const keptSummary = el('p', { class: 'ground-summary num', data: { region: 'safehouse-summary' } });
+  const keptSummary = el('p', { class: 'ground-summary num', attrs: { title: 'cod is short for cost of delay: the saved cost of delay of everything inside' }, data: { region: 'safehouse-summary' } });
   const keptEmpty = el('p', { class: 'ground-empty', data: { region: 'safehouse-empty' } });
   const planks = el('ul', { class: 'shelf', attrs: { role: 'list' }, data: { list: 'safehouse' } });
   const mustHaves = el('ul', { class: 'musthave-list', attrs: { role: 'list' }, data: { list: 'must-haves' } });
   safehouse.append(keptSummary, keptEmpty, mustHaves, planks);
 
   // Yard
-  const buriedSummary = el('p', { class: 'ground-summary num', data: { region: 'yard-summary' } });
+  const buriedSummary = el('p', { class: 'ground-summary num', attrs: { title: 'cod is short for cost of delay: the cost of delay of everything left outside' }, data: { region: 'yard-summary' } });
   const buriedEmpty = el('p', { class: 'ground-empty', data: { region: 'yard-empty' } });
   const svg = svgEl('svg', { class: 'chains', attrs: { 'aria-hidden': 'true', focusable: 'false' }, data: { region: 'chains' } });
   const graves = el('ul', { class: 'graves', attrs: { role: 'list' }, data: { list: 'yard' } });

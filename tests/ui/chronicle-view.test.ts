@@ -49,7 +49,7 @@ describe('the panel', () => {
     expect(section.previousElementSibling).toBe(region(root, 'survivors'));
     expect(section.nextElementSibling?.classList.contains('grounds')).toBe(true);
     expect(section.textContent).toContain(CHRONICLE_HELP);
-    expect(CHRONICLE_HELP).toContain('The number in brackets is the change in saved cod.');
+    expect(CHRONICLE_HELP).toContain('The number in brackets is the change in saved cost of delay.');
     expect(section.textContent).toContain(CHRONICLE_EMPTY);
     expect(undoButton(root).disabled).toBe(true);
     expect(undoButton(root).getAttribute('aria-describedby')).toContain('chronicle-empty');
@@ -124,7 +124,7 @@ describe('the panel', () => {
     dragCandle(h, [1]);
     dragCandle(h, [10]);
     expect(texts(h.root)).toEqual([
-      'Freeze moved to Fri 18:00 \u2192 possible again: 12 in, saved cod 167',
+      'Freeze moved to Fri 18:00 \u2192 possible again: 12 in, saved cost of delay 167',
       'Freeze moved to Mon 13:00 \u2192 impossible: needs 15 points, 6 available',
     ]);
   });

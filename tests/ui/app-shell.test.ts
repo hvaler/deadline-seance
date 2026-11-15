@@ -90,7 +90,7 @@ describe('the page shell', () => {
     mount();
     const tour = root.querySelector<HTMLButtonElement>('[data-slot="tour"]');
     expect(tour?.disabled).toBe(true);
-    expect(tour?.textContent).toBe('Play the night · 60 s');
+    expect(tour?.textContent).toBe('Play the night');
     const noteId = tour?.getAttribute('aria-describedby') ?? '';
     expect(root.querySelector(`#${noteId}`)?.textContent).toBe('The guided tour is not built yet.');
   });

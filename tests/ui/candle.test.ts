@@ -142,7 +142,7 @@ describe('the candle: moving it', () => {
     expect(text).toBe(announcementText(expected.change, derive(app.store.getState())));
     expect(text.startsWith('Candle moved to Wed 18:00.')).toBe(true);
     // The text names the start-to-end diff: Friday 18:00 against Wednesday 18:00, not the last step alone.
-    expect(text).toContain('Sinks: HB-105 (11), HB-113 (14), HB-115 (13), HB-118 (16); together 54. Loss: 54. Saved cod 167 → 113.');
+    expect(text).toContain('Sinks: HB-105 (11), HB-113 (14), HB-115 (13), HB-118 (16); together 54. Loss: 54. Saved cost of delay 167 → 113.');
     expect(text).not.toContain('Candle moved to Thu');
   });
 

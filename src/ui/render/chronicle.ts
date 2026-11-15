@@ -9,7 +9,7 @@ import type { Entry } from '../model';
  *
  * The list has a fixed height and scrolls inside itself, so a new line moves nothing else on the page.
  */
-export const CHRONICLE_HELP = 'Every decision of tonight, newest first. The number in brackets is the change in saved cod.';
+export const CHRONICLE_HELP = 'Every decision of tonight, newest first. The number in brackets is the change in saved cost of delay.';
 export const CHRONICLE_EMPTY = 'No decisions yet. Move the candle, send someone away or exhume a ticket, and each decision is written here.';
 interface Row {
   readonly item: HTMLLIElement;

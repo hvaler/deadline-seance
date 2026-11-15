@@ -43,7 +43,9 @@ export const SMALL_TIMES = { now: '2026-11-16T09:00:00+01:00', freezeAt: '2026-1
 
 /** Every integer in a text, as numbers. */
 export function integersIn(text: string): number[] {
-  return (text.match(/\d+/g) ?? []).map(Number);
+  // The text writes the counts of nights as the app does: 1,000 is the integer 1000 (a comma between groups of three digits is formatting).
+  const joined = text.replace(/\d{1,3}(?:,\d{3})+/g, (group) => group.replace(/,/g, ''));
+  return (joined.match(/\d+/g) ?? []).map(Number);
 }
 
 /** A message must not carry a stack, a source location or a path of this machine. */

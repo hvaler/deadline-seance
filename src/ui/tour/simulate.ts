@@ -53,7 +53,4 @@ export function simulateTour(script: Script, initial: AppState): readonly Simula
   return result;
 }
 
-/** The sum of the scenes' durations, in milliseconds. */
-export function totalMs(script: Script): number {
-  return script.reduce((sum, scene) => sum + scene.durationMs, 0);
-}
+export { totalMs } from './duration';

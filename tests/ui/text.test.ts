@@ -134,13 +134,13 @@ describe('reasons and epitaphs', () => {
 });describe('the verdict', () => {
   test('a solved cut: what is inside, what is left outside', () => {
     expect(verdictSentences(derive(initial))).toEqual([
-      'Inside the safehouse: 12 tickets, 59 of 59 points, saved cod 167. Left outside: 7 tickets, cod 101.',
+      'Inside the safehouse: 12 tickets, 59 of 59 points, saved cost of delay 167. Left outside: 7 tickets, cost of delay 101.',
     ]);
   });
 
   test('with a reserve it says how the capacity was cut', () => {
     expect(verdictSentences(derive(run(initial, { type: 'reserve/set', pct: 15 })))).toEqual([
-      'Inside the safehouse: 10 tickets, 49 of 50 points, saved cod 147. Left outside: 9 tickets, cod 121.',
+      'Inside the safehouse: 10 tickets, 49 of 50 points, saved cost of delay 147. Left outside: 9 tickets, cost of delay 121.',
       'Capacity 59, 15 % reserve.',
     ]);
   });
@@ -153,7 +153,7 @@ describe('reasons and epitaphs', () => {
         return r.value;
       })(),
     );
-    expect(verdictSentences(derive(lone))[0]).toBe('Inside the safehouse: 1 ticket, 5 of 59 points, saved cod 18. Left outside: 0 tickets, cod 0.');
+    expect(verdictSentences(derive(lone))[0]).toBe('Inside the safehouse: 1 ticket, 5 of 59 points, saved cost of delay 18. Left outside: 0 tickets, cost of delay 0.');
   });
 
   test('an impossible freeze: the numbers and what to do', () => {
@@ -195,7 +195,7 @@ describe('the change note', () => {
     expect(note).toEqual({
       kind: 'done',
       headline: 'Candle moved to Fri 13:00.',
-      lines: ['Sinks: HB-115 (13).', 'Loss: 13.', 'Saved cod 167 → 154.'],
+      lines: ['Sinks: HB-115 (13).', 'Loss: 13.', 'Saved cost of delay 167 → 154.'],
       alert: false,
     });
   });
@@ -207,28 +207,28 @@ describe('the change note', () => {
       'Rises: HB-104 (11), HB-106 (16), HB-107 (11); together 38.',
       'Sinks: HB-105 (11), HB-113 (14); together 25.',
       'Gain: 13.',
-      'Saved cod 100 → 113.',
+      'Saved cost of delay 100 → 113.',
     ]);
   });
 
   test('reserve, and survivors going and coming back', () => {
     expect(changeNote(reducer(initial, { type: 'reserve/set', pct: 15 }).change)).toMatchObject({
       headline: 'Reserve set to 15 %.',
-      lines: ['Sinks: HB-115 (13), HB-116 (7); together 20.', 'Loss: 20.', 'Saved cod 167 → 147.'],
+      lines: ['Sinks: HB-115 (13), HB-116 (7); together 20.', 'Loss: 20.', 'Saved cost of delay 167 → 147.'],
     });
     const away = reducer(initial, { type: 'survivor/toggle', name: 'Ana' });
     expect(changeNote(away.change)).toMatchObject({
       headline: 'Ana sent away.',
-      lines: ['Sinks: HB-113 (14), HB-115 (13), HB-118 (16); together 43.', 'Loss: 43.', 'Saved cod 167 → 124.'],
+      lines: ['Sinks: HB-113 (14), HB-115 (13), HB-118 (16); together 43.', 'Loss: 43.', 'Saved cost of delay 167 → 124.'],
     });
     expect(changeNote(reducer(away, { type: 'survivor/toggle', name: 'Ana' }).change)).toMatchObject({
       headline: 'Ana is back.',
-      lines: ['Rises: HB-113 (14), HB-115 (13), HB-118 (16); together 43.', 'Gain: 43.', 'Saved cod 124 → 167.'],
+      lines: ['Rises: HB-113 (14), HB-115 (13), HB-118 (16); together 43.', 'Gain: 43.', 'Saved cost of delay 124 → 167.'],
     });
   });
 
   test('exhume and resurrect say what comes back and what is buried in exchange', () => {
-    const lines = ['Rises: HB-110 (13).', 'Sinks: HB-113 (14), HB-115 (13); together 27.', 'Loss: 14.', 'Saved cod 167 → 153.'];
+    const lines = ['Rises: HB-110 (13).', 'Sinks: HB-113 (14), HB-115 (13); together 27.', 'Loss: 14.', 'Saved cost of delay 167 → 153.'];
     expect(changeNote(reducer(initial, { type: 'tombstone/exhume', key: 'HB-110' }).change)).toMatchObject({ headline: 'HB-110 exhumed.', lines });
     expect(changeNote(reducer(initial, { type: 'tombstone/resurrect', key: 'HB-110' }).change)).toMatchObject({ headline: 'HB-110 resurrected.', lines });
   });
@@ -289,7 +289,7 @@ describe('the change note', () => {
     expect(changeNote(reducer(initial, { type: 'board/reset' }).change)).toEqual({
       kind: 'done',
       headline: 'Back to the sample board.',
-      lines: ['Nothing rises and nothing sinks.', 'No change in saved cod.', 'Saved cod 167 → 167.'],
+      lines: ['Nothing rises and nothing sinks.', 'No change in saved cost of delay.', 'Saved cost of delay 167 → 167.'],
       alert: false,
     });
     const messy = run(initial, { type: 'tombstone/exhume', key: 'HB-110' });
@@ -297,14 +297,14 @@ describe('the change note', () => {
       'Rises: HB-113 (14), HB-115 (13); together 27.',
       'Sinks: HB-110 (13).',
       'Gain: 14.',
-      'Saved cod 153 → 167.',
+      'Saved cost of delay 153 → 167.',
     ]);
   });
 
   test('a reset that brings a closed ticket back compares only the totals', () => {
     const closed = run(initial, { type: 'candle/set', step: 4 }, { type: 'tombstone/put-down', key: 'HB-113' });
     expect(changeNote(reducer(closed, { type: 'board/reset' }).change).lines).toEqual([
-      'Saved cod 79 → 167.',
+      'Saved cost of delay 79 → 167.',
       'The board changed, so there is no ticket-by-ticket comparison.',
     ]);
   });
@@ -312,10 +312,10 @@ describe('the change note', () => {
   test('the announcement is the change, then the verdict, in one text', () => {
     const state = reducer(initial, { type: 'candle/set', step: 9 });
     expect(announcementText(state.change, derive(state))).toBe(
-      'Candle moved to Fri 13:00. Sinks: HB-115 (13). Loss: 13. Saved cod 167 → 154. ' +
-        'Inside the safehouse: 11 tickets, 51 of 53 points, saved cod 154. Left outside: 8 tickets, cod 114.',
+      'Candle moved to Fri 13:00. Sinks: HB-115 (13). Loss: 13. Saved cost of delay 167 → 154. ' +
+        'Inside the safehouse: 11 tickets, 51 of 53 points, saved cost of delay 154. Left outside: 8 tickets, cost of delay 114.',
     );
-    expect(noteSentence(changeNote(state.change))).toBe('Candle moved to Fri 13:00. Sinks: HB-115 (13). Loss: 13. Saved cod 167 → 154.');
+    expect(noteSentence(changeNote(state.change))).toBe('Candle moved to Fri 13:00. Sinks: HB-115 (13). Loss: 13. Saved cost of delay 167 → 154.');
   });
 });
 
@@ -382,7 +382,7 @@ describe('number provenance', () => {
     expect(unexplained('Loss: 44.', { codDelta: -43 })).toEqual([44]);
     expect(unexplained('Loss: 43.', { codDelta: -43 })).toEqual([]);
     expect(unexplained('Rises: HB-112 (13). Candle moved to Wed 18:00.', { cod: 13 })).toEqual([]);
-    expect(unexplained('Saved cod 100 → 113.', { a: 100 })).toEqual([113]);
+    expect(unexplained('Saved cost of delay 100 → 113.', { a: 100 })).toEqual([113]);
   });
 
   test('on the initial state every integer in every sentence is a fact', () => {

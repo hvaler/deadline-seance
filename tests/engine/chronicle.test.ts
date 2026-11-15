@@ -82,8 +82,8 @@ describe('the sentence of a decision', () => {
     ['Reset \u2192 HB-113 in (0)', facts({ kind: 'reset' }, diff(['HB-113'], [], 0))],
     ['Freeze moved to Mon 13:00 \u2192 impossible: needs 15 points, 6 available', facts({ kind: 'candle', weekday: 'Mon', time: '13:00' }, { kind: 'impossible', stillImpossible: false, needed: 15, available: 6 })],
     ['Freeze moved to Mon 09:00 \u2192 still impossible: needs 1 point, 0 available', facts({ kind: 'candle', weekday: 'Mon', time: '09:00' }, { kind: 'impossible', stillImpossible: true, needed: 1, available: 0 })],
-    ['Freeze moved to Fri 18:00 \u2192 possible again: 12 in, saved cod 167', facts({ kind: 'candle', weekday: 'Fri', time: '18:00' }, { kind: 'possible-again', kept: 12, savedCod: 167 })],
-    ['Reset \u2192 saved cod 89 \u2192 167', facts({ kind: 'reset' }, { kind: 'totals', before: 89, after: 167 })],
+    ['Freeze moved to Fri 18:00 \u2192 possible again: 12 in, saved cost of delay 167', facts({ kind: 'candle', weekday: 'Fri', time: '18:00' }, { kind: 'possible-again', kept: 12, savedCod: 167 })],
+    ['Reset \u2192 saved cost of delay 89 \u2192 167', facts({ kind: 'reset' }, { kind: 'totals', before: 89, after: 167 })],
     ['Loaded q4.csv: 14 open tickets', facts({ kind: 'load', file: 'q4.csv', tickets: 14, skipped: 2 }, { kind: 'new-board' })],
     ['Loaded one.csv: 1 open ticket', facts({ kind: 'load', file: 'one.csv', tickets: 1, skipped: 0 }, { kind: 'new-board' })],
     ['Back to the sample board: 19 tickets', facts({ kind: 'sample', tickets: 19 }, { kind: 'new-board' })],
@@ -117,7 +117,7 @@ describe('the undo announcement', () => {
     expect(undoLine(f, 1, { kind: 'impossible', stillImpossible: false, needed: 15, available: 6 })).toBe('Undone: Reset. The freeze is now impossible: needs 15 points, 6 available.');
     expect(undoLine(f, 1, { kind: 'possible-again', kept: 12, savedCod: 167 })).toBe('Undone: Reset. The freeze is possible again.');
     expect(undoLine(f, 1, { kind: 'new-board' })).toBe('Undone: Reset. Your earlier night is back.');
-    expect(undoLine(f, 1, { kind: 'totals', before: 1, after: 2 })).toBe('Undone: Reset. Saved cod 1 \u2192 2.');
+    expect(undoLine(f, 1, { kind: 'totals', before: 1, after: 2 })).toBe('Undone: Reset. Saved cost of delay 1 \u2192 2.');
     expect(plainText(describeUndo(f, 1, { kind: 'new-board' }))).toBe('Undone: Reset. Your earlier night is back.');
   });
 });

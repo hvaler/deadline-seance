@@ -50,7 +50,7 @@ describe('survivors', () => {
     expect(texts(region(root, 'change').querySelectorAll('li'))).toEqual([
       'Sinks: HB-113 (14), HB-115 (13), HB-118 (16); together 43.',
       'Loss: 43.',
-      'Saved cod 167 → 124.',
+      'Saved cost of delay 167 → 124.',
     ]);
   });
 

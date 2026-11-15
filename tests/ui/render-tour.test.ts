@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { sampleBoard } from '../../src/ui/sample-board';
+import { tourButtonLabel } from '../../src/ui/tour/duration';
 import { sampleScript } from '../../src/ui/tour/sample-script';
 import { simulateTour, totalMs } from '../../src/ui/tour/simulate';
 import { byFocus, mountWith, region } from './harness';
@@ -40,7 +41,8 @@ describe('the button', () => {
   test('with a tour it is a real button that plays it; the slot and its note are gone', () => {
     const h = tourApp();
     expect(header(h.root).tagName).toBe('BUTTON');
-    expect(header(h.root).textContent).toBe('Play the night · 60 s');
+    expect(header(h.root).textContent).toBe(tourButtonLabel(sampleScript));
+    expect(header(h.root).textContent).toBe('Play the night · 59 s'); // what the script measures: 59,000 ms
     expect(header(h.root).disabled).toBe(false);
     expect(h.root.querySelector('[data-slot="tour"]')).toBeNull();
     expect(h.root.querySelector('#slot-note-tour')).toBeNull();

@@ -201,7 +201,7 @@ describe('which actions write an entry', () => {
       'Reserve 20 % \u2192 HB-113, HB-115 out (\u221227)',
       'Reserve 0 % \u2192 HB-113, HB-115 in (+27)',
       'Freeze moved to Mon 13:00 \u2192 impossible: needs 15 points, 6 available',
-      'Freeze moved to Fri 18:00 \u2192 possible again: 12 in, saved cod 167',
+      'Freeze moved to Fri 18:00 \u2192 possible again: 12 in, saved cost of delay 167',
       'Freeze moved to Wed 18:00 \u2192 HB-105, HB-113, HB-115, HB-118 out (\u221254)',
       'Ana leaves \u2192 HB-105 in; HB-104, HB-106, HB-107, HB-116 out (\u221234)',
       'Put down HB-112 \u2192 no change',

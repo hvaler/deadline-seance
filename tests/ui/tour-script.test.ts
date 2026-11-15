@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { initialState } from '../../src/ui/state';
 import { INSISTED, ZOMBIE, sampleScript } from '../../src/ui/tour/sample-script';
 import { renderTourScript } from '../../src/ui/tour/doc';
+import { secondsText, tourButtonLabel, tourLabelFor } from '../../src/ui/tour/duration';
 import { simulateTour, totalMs } from '../../src/ui/tour/simulate';
 import { unexplained } from './provenance';
 
@@ -32,6 +33,13 @@ describe('the script of the sample board', () => {
 });
 
 describe('time', () => {
+  test('the button label is made from the measured duration: one source, so it cannot drift', () => {
+    expect(tourButtonLabel(sampleScript)).toBe(`Play the night \u00b7 ${totalMs(sampleScript) / 1000} s`);
+    expect(tourButtonLabel(sampleScript)).toBe('Play the night \u00b7 59 s');
+    expect(secondsText(59_500)).toBe('59.5');
+    expect(tourLabelFor(60_000)).toBe('Play the night \u00b7 60 s');
+    expect(renderTourScript(simulateTour(sampleScript, initialState()))).toContain(`The header button "${tourButtonLabel(sampleScript)}" starts it too.`);
+  });
   test('the tour takes at most 60 seconds', () => {
     expect(totalMs(sampleScript)).toBeLessThanOrEqual(60_000);
     expect(seconds(totalMs(sampleScript))).toBe(59);

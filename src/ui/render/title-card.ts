@@ -13,6 +13,8 @@ export const TITLE = 'Night of the Living Backlog';
 /** What the title card needs when the app has a tour: what to do when its button is pressed. */
 export interface TourHook {
   readonly onPlay: () => void;
+  /** The button's text, made from the tour's own measured duration (	our/duration.ts). */
+  readonly label: string;
 }
 
 export function mountTitleCard(header: HTMLElement, ctx: Ctx, tour?: TourHook): Part {
@@ -36,13 +38,13 @@ export function mountTitleCard(header: HTMLElement, ctx: Ctx, tour?: TourHook): 
           class: 'button slot',
           attrs: { type: 'button', disabled: true, 'aria-describedby': 'slot-note-tour' },
           data: { slot: 'tour' },
-          text: 'Play the night · 60 s',
+          text: 'Play the night',
         })
       : el('button', {
           class: 'button button-primary',
           attrs: { type: 'button' },
           data: { action: 'tour', focus: 'tour' },
-          text: 'Play the night · 60 s',
+          text: tour.label,
           on: { click: () => tour.onPlay() },
         });
 

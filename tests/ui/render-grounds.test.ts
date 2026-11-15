@@ -160,7 +160,7 @@ describe('actions', () => {
     expect(shownKeys(root, 'yard')).not.toContain('HB-108');
     expect(texts(plank(root, 'HB-108').querySelectorAll('.tag-must-have'))).toEqual(['must-have']);
     expect(region(root, 'safehouse-summary').textContent).toBe('12 tickets · 59 of 59 points · saved cod 164');
-    expect(texts(region(root, 'change').querySelectorAll('li'))).toEqual(['Rises: HB-108 (10).', 'Sinks: HB-115 (13).', 'Loss: 3.', 'Saved cod 167 → 164.']);
+    expect(texts(region(root, 'change').querySelectorAll('li'))).toEqual(['Rises: HB-108 (10).', 'Sinks: HB-115 (13).', 'Loss: 3.', 'Saved cost of delay 167 → 164.']);
     expect(app.store.getState().board.tickets.find((t) => t.key === 'HB-108')?.mustHave).toBe(true);
   });
 

@@ -122,9 +122,9 @@ export function describeEffect(subject: DecisionSubject, effect: DecisionEffect)
     case 'impossible':
       return [`${effect.stillImpossible ? 'still impossible' : 'impossible'}: needs ${count(effect.needed, 'point')}, ${effect.available} available`];
     case 'possible-again':
-      return [`possible again: ${effect.kept} in, saved cod ${effect.savedCod}`];
+      return [`possible again: ${effect.kept} in, saved cost of delay ${effect.savedCod}`];
     case 'totals':
-      return [`saved cod ${effect.before} \u2192 ${effect.after}`];
+      return [`saved cost of delay ${effect.before} \u2192 ${effect.after}`];
     case 'diff': {
       const parts = effectParts(subject, effect);
       if (parts.length === 0 && effect.codDelta === 0) return ['no change'];
@@ -159,7 +159,7 @@ export function describeUndoEffect(effect: DecisionEffect): Text {
     case 'possible-again':
       return ['The freeze is possible again.'];
     case 'totals':
-      return [`Saved cod ${effect.before} \u2192 ${effect.after}.`];
+      return [`Saved cost of delay ${effect.before} \u2192 ${effect.after}.`];
     case 'diff': {
       const parts: Text[] = [];
       const raised = effect.raised.map((e) => e.key);

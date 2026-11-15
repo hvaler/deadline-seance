@@ -32,7 +32,7 @@ describe('the verdict figures', () => {
     expect([...figures.querySelectorAll('.figure')].map((n) => (n as HTMLElement).dataset.tone)).toEqual(['time', 'available', 'inside', 'outside']);
     const sentences = root.querySelector('.verdict-sentences')!;
     expect(sentences.classList.contains('visually-hidden')).toBe(true);
-    expect(sentences.textContent).toBe('Inside the safehouse: 12 tickets, 59 of 59 points, saved cod 167. Left outside: 7 tickets, cod 101.');
+    expect(sentences.textContent).toBe('Inside the safehouse: 12 tickets, 59 of 59 points, saved cost of delay 167. Left outside: 7 tickets, cost of delay 101.');
     expect(figures.closest('[data-region="verdict"]')).toBe(region(root, 'verdict'));
   });
 

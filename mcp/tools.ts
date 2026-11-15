@@ -18,7 +18,7 @@ export const TOOLS = {
   solve_freeze: {
     title: 'Solve a freeze',
     description:
-      'Which tickets stay and which go for a freeze: points, cost of delay, the reason for each ticket outside, zombies, and the chance (of 1000 simulated nights) that the kept work fits. ' +
+      'Which tickets stay and which go for a freeze: points, cost of delay, the reason for each ticket outside, zombies, and the chance (of 1,000 simulated nights) that the kept work fits. ' +
       'Example: {"board":{"source":"sample"}} answers for Friday 18:00 with 12 tickets kept. A freeze that cannot be met is a result with status "impossible", not an error.',
     inputSchema: SolveFreezeInput,
     outputSchema: SolveFreezeOutput,

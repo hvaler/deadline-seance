@@ -4,6 +4,7 @@ import { createAnnouncer } from './announcer';
 import { startAtmosphere } from './atmosphere/index';
 import type { Atmosphere, AtmosphereDeps } from './atmosphere/index';
 import { createDecor } from './atmosphere/decor';
+import { browserRecMove, createRecGuard } from './atmosphere/rec-guard';
 import type { Ctx, Part } from './context';
 import { derive } from './derive';
 import { el } from './dom';
@@ -35,6 +36,7 @@ import type { Action, AppState, Change } from './state';
 import { createStore } from './store';
 import type { Store } from './store';
 import { NOTHING_TO_UNDO, announcementText } from './text';
+import { tourButtonLabel } from './tour/duration';
 import type { Script } from './tour/types';
 
 /**
@@ -139,6 +141,12 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
   root.replaceChildren(page);
   const decor = createDecor(backLayer, frontLayer);
   const atmosphere: Atmosphere | null = options.atmosphere === undefined ? null : startAtmosphere(decor, options.atmosphere);
+  // The REC corner steps aside while the title card or the tour's bar would be under it (it is fixed to the viewport, the title scrolls).
+  const recNode = frontLayer.querySelector<HTMLElement>('.rec');
+  const recGuard =
+    recNode === null
+      ? null
+      : createRecGuard(recNode, () => [...header.querySelectorAll('.product-line, .title, .tagline, .title-actions'), ...page.querySelectorAll('.tour-bar, .tour-prompt')], { frame: services.frame, onMove: browserRecMove() });
 
   // ---- saying what happened ----
   function settle(change: Change, state: AppState, announce = true): void {
@@ -206,7 +214,7 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
   const banner: BannerPart = mountBanner(main, ctx);
   const chains = createChainDrawer(services.frame, browserObserve());
   const parts: Part[] = [
-    mountTitleCard(header, ctx, options.tour === undefined ? undefined : { onPlay: () => tour?.start('button') }),
+    mountTitleCard(header, ctx, options.tour === undefined ? undefined : { onPlay: () => tour?.start('button'), label: tourButtonLabel(options.tour) }),
     mountSign(sections.sign, ctx),
     mountCandle(sections.candle, ctx),
     mountSurvivors(sections.survivors, ctx),
@@ -252,6 +260,7 @@ export function mountApp(root: HTMLElement, board: Board, options: MountOptions 
       for (const part of parts) part.destroy?.();
       chains.destroy();
       atmosphere?.destroy();
+      recGuard?.destroy();
       announcer.clear();
       root.replaceChildren();
     },

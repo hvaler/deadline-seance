@@ -55,7 +55,7 @@ describe('empty slots', () => {
 
   test('the labels name the feature', () => {
     const { root } = mountWith();
-    expect(slot(root, 'tour')[0]?.textContent).toBe('Play the night · 60 s');
+    expect(slot(root, 'tour')[0]?.textContent).toBe('Play the night');
     expect(slot(root, 'mcp')[0]?.textContent).toBe('The rule as an MCP server for the Kiro agent');
   });
 
@@ -106,7 +106,7 @@ describe('the title card', () => {
     expect([...header.children].map((c) => c.className.split(' ')[0])).toEqual(['product-line', 'title', 'tagline', 'title-actions', 'slot-note']);
     expect(header.querySelector('h1')?.textContent).toBe('Night of the Living Backlog');
     const buttons = [...header.querySelectorAll('.title-actions button')].map((b) => b.textContent);
-    expect(buttons).toEqual(['Play the night · 60 s', 'Sound off']);
+    expect(buttons).toEqual(['Play the night', 'Sound off']);
   });
 });
 

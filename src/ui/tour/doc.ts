@@ -1,6 +1,7 @@
 import { CANDLE_STEPS } from '../candle-steps';
 import type { Action } from '../state';
 import { thousands } from '../text';
+import { tourLabelFor } from './duration';
 import type { SimulatedScene } from './simulate';
 
 /**
@@ -109,7 +110,7 @@ export function renderTourScript(sim: readonly SimulatedScene[]): string {
   lines.push('- Record at 1920 × 1080 in a browser window with the page filling it. The page is a 1,120 px column; the subtitle bar is the same width.');
   lines.push('- The tour restores the page to what it was when it ends, and every scene starts from the app\'s own state, so it can be recorded again and again.');
   lines.push('- To start it without a cursor: open the page, change the address to end in `#play` (no reload), then press **Space** (or Enter) when the recording runs.');
-  lines.push('  `Esc` removes the prompt without starting. The header button "Play the night · 60 s" starts it too.');
+  lines.push('  `Esc` removes the prompt without starting. The header button "' + tourLabelFor(total) + '" starts it too.');
   lines.push('- To have the app\'s sounds in the recording: press **Sound on** first, with a click, and then change the address to `#play` without reloading the page.');
   lines.push('  The tour never turns sound on by itself and plays no music.');
   lines.push('- While it runs, **Pause**, **Skip scene** and **Stop** (or `Esc`) are on the screen at all times. At the end, **Play again** and **Close** appear.');

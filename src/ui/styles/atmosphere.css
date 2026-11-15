@@ -69,3 +69,8 @@
 .rec-time {
   color: var(--bone);
 }
+
+/* The corner steps aside (opacity only) while the title card or the tour's bar would be under it: see atmosphere/rec-guard.ts. */
+.rec-away {
+  opacity: 0;
+}

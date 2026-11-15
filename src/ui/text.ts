@@ -149,8 +149,8 @@ export function verdictSentences(view: View): string[] {
   const t = view.totals;
   if (t === null) return [];
   const sentences = [
-    `Inside the safehouse: ${count(t.keptCount, 'ticket')}, ${t.keptEffort} of ${solution.effectiveCapacity} points, saved cod ${t.savedCod}. ` +
-      `Left outside: ${count(t.buriedCount, 'ticket')}, cod ${t.buriedCod}.`,
+    `Inside the safehouse: ${count(t.keptCount, 'ticket')}, ${t.keptEffort} of ${solution.effectiveCapacity} points, saved cost of delay ${t.savedCod}. ` +
+      `Left outside: ${count(t.buriedCount, 'ticket')}, cost of delay ${t.buriedCod}.`,
   ];
   if (solution.marginPct > 0) sentences.push(`Capacity ${solution.capacity}, ${solution.marginPct} % reserve.`);
   return sentences;
@@ -285,8 +285,8 @@ function comparisonLines(subject: Subject, comparison: Comparison): string[] {
       if (diff.sunk.length > 0) lines.push(entriesText('Sinks', diff.sunk, diff.sunkCod));
       if (diff.codDelta > 0) lines.push(`Gain: ${diff.codDelta}.`);
       else if (diff.codDelta < 0) lines.push(`Loss: ${Math.abs(diff.codDelta)}.`);
-      else lines.push('No change in saved cod.');
-      lines.push(`Saved cod ${before.savedCod} → ${after.savedCod}.`);
+      else lines.push('No change in saved cost of delay.');
+      lines.push(`Saved cost of delay ${before.savedCod} → ${after.savedCod}.`);
       return lines;
     }
     case 'not-comparable': {
@@ -296,7 +296,7 @@ function comparisonLines(subject: Subject, comparison: Comparison): string[] {
     }
     case 'no-diff':
       return [
-        `Saved cod ${comparison.before.savedCod} → ${comparison.after.savedCod}.`,
+        `Saved cost of delay ${comparison.before.savedCod} → ${comparison.after.savedCod}.`,
         'The board changed, so there is no ticket-by-ticket comparison.',
       ];
     case 'new-board': {

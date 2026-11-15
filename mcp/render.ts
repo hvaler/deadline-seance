@@ -1,8 +1,9 @@
-import { listOf } from '../src/engine/index';
+import { listOf, thousands } from '../src/engine/index';
 import type { SideValue, SolveFreezeOutputValue, TicketRowValue, WhatIfOutputValue } from './schemas';
 
-// Text from structured values. This file places values in sentences; it computes nothing. The engine's integers appear as they are (no thousands
-// separator), so a test can find each one in the structured value.
+// Text from structured values. This file places values in sentences; it computes nothing. The engine's integers appear as they are, except that the
+// counts of simulated nights are written as the app writes them ("1,000", via the engine's thousands) and a percent has a space before it (95 %),
+// so the server and the page read the same. A test reads 1,000 as 1000 and finds each integer in the structured value.
 
 type Reason = SolveFreezeOutputValue['outside'][number]['reason'];
 
@@ -31,13 +32,13 @@ export function renderSolve(out: SolveFreezeOutputValue): string {
   lines.push(`Freeze ${out.freeze.weekday} ${out.freeze.date} ${out.freeze.time} (${out.zone}), asked on ${out.asOf.weekday} ${out.asOf.date} ${out.asOf.time}.`);
   if (out.away.length > 0) lines.push(`Away for the night: ${listOf(out.away)}.`);
   if (out.status === 'impossible') {
-    lines.push(`The freeze is impossible: the must-haves need ${out.needed ?? 0} points and the capacity is ${out.capacity} (${out.effectiveCapacity} with a ${out.marginPct}% reserve).`);
+    lines.push(`The freeze is impossible: the must-haves need ${out.needed ?? 0} points and the capacity is ${out.capacity} (${out.effectiveCapacity} with a ${out.marginPct} % reserve).`);
     for (const b of out.blockedMustHaves) lines.push(`${b.key} is a must-have that depends on ${b.putDownKey}, which was put down.`);
     return lines.join('\n');
   }
-  lines.push(`Capacity ${out.capacity} points, ${out.effectiveCapacity} with a ${out.marginPct}% reserve.`);
+  lines.push(`Capacity ${out.capacity} points, ${out.effectiveCapacity} with a ${out.marginPct} % reserve.`);
   if (out.totals !== null) lines.push(`Kept ${out.totals.tickets} tickets, ${out.totals.points} points, cost of delay ${out.totals.cod}.`);
-  if (out.fog !== null) lines.push(`The night holds on ${out.fog.holds} of ${out.fog.nights} simulated nights (${out.fog.pct}%).`);
+  if (out.fog !== null) lines.push(`The night holds on ${thousands(out.fog.holds)} of ${thousands(out.fog.nights)} simulated nights (${out.fog.pct} %).`);
   lines.push('Kept:');
   for (const t of out.kept) lines.push(`- ${row(t)}`);
   if (out.outsideTotals !== null) {
@@ -54,8 +55,8 @@ function sideText(label: string, s: SideValue): string {
   if (s.status === 'impossible') {
     return `${label}: impossible. The must-haves need ${s.needed ?? 0} points and the capacity is ${s.capacity}.`;
   }
-  const fog = s.fog === null ? '' : ` The night holds on ${s.fog.holds} of ${s.fog.nights} nights (${s.fog.pct}%).`;
-  return `${label}: capacity ${s.capacity} (${s.effectiveCapacity} with a ${s.marginPct}% reserve), kept ${s.tickets ?? 0} tickets, ${s.points ?? 0} points, cost of delay ${s.cod ?? 0}.${fog}`;
+  const fog = s.fog === null ? '' : ` The night holds on ${thousands(s.fog.holds)} of ${thousands(s.fog.nights)} nights (${s.fog.pct} %).`;
+  return `${label}: capacity ${s.capacity} (${s.effectiveCapacity} with a ${s.marginPct} % reserve), kept ${s.tickets ?? 0} tickets, ${s.points ?? 0} points, cost of delay ${s.cod ?? 0}.${fog}`;
 }
 
 export function renderWhatIf(out: WhatIfOutputValue): string {
