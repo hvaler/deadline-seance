@@ -99,7 +99,7 @@ describe('importing a good file (Requirement 7)', () => {
     expect(state).toMatchObject({ candle: 10, marginPct: 0, away: [], sound: true, release: 'q4 freeze', source: { kind: 'file', name: 'q4_freeze.csv', skipped: 0, warnings: [] } });
     expect(state.home.tickets.map((t) => t.key)).toEqual(['Z-1', 'Z-2', 'Z-3']);
     expect(state.home.wontDo).toEqual([]);
-    expect([state.home.fogSeed, state.home.nextReleaseWeeks, state.home.zombieThreshold]).toEqual([0, 2, 3]);
+    expect([state.home.fogSeed, state.home.nextReleaseWeeks, state.home.zombieThreshold]).toEqual([sampleBoard().fogSeed, 2, 3]);
     expect(state.home.people).toEqual(sampleBoard().people);
     expect([...shownKeys(h.root, 'safehouse'), ...shownKeys(h.root, 'yard')].sort()).toEqual(['Z-1', 'Z-2', 'Z-3']);
   });
@@ -110,7 +110,7 @@ describe('importing a good file (Requirement 7)', () => {
     const b = banner(h.root);
     expect(b.hasAttribute('hidden')).toBe(false);
     expect(b.querySelector('.source-lead')?.textContent).toBe("Your tickets from q4_freeze.csv: 3 tickets. Team and calendar are the sample's.");
-    expect(b.querySelector('.source-rest')?.textContent).toBe("Release weeks and the zombie threshold are the sample's too (2 weeks, threshold 3); the fog uses seed 0.");
+    expect(b.querySelector('.source-rest')?.textContent).toBe("Release weeks and the zombie threshold are the sample's too (2 weeks, threshold 3); the fog uses seed 20261116.");
     expect(b.querySelector<HTMLInputElement>('#source-release')?.value).toBe('q4 freeze');
     expect(b.querySelector('label')?.textContent).toBe('Release name');
     expect(byFocus(b, 'back-to-sample').textContent).toBe('Back to the sample board');

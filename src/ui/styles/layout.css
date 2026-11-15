@@ -176,16 +176,8 @@ main {
   margin-bottom: 16px;
 }
 
-.slots {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
-  gap: 12px 16px;
-}
-
-.slot-item {
-  display: grid;
-  gap: 4px;
-  justify-items: start;
+.mcp-note {
+  margin-top: 16px;
 }
 
 /* The strip of the fog sits under the slider, in the slider's column, and is centred on the slider's seven positions (see components.css).

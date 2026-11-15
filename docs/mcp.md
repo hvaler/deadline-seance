@@ -57,7 +57,7 @@ To look at the tools without a client, use the MCP Inspector: `npx @modelcontext
 
 ## The three tools
 
-Every tool takes a `board`: `{"source":"sample"}` (the app's sample board), `{"source":"csv","text":"..."}` (Jira CSV text, read by the same importer as the web app, with the same limits and error sentences) or `{"source":"json","board":{...}}` (tickets and people; the zone, release weeks, zombie threshold, put-down keys and fog seed take the engine's defaults). Then:
+Every tool takes a `board`: `{"source":"sample"}` (the app's sample board), `{"source":"csv","text":"..."}` (Jira CSV text, read by the same importer as the web app, with the same limits and error sentences) or `{"source":"json","board":{...}}` (tickets and people; the zone, release weeks, zombie threshold, put-down keys and fog seed take the engine's defaults, and the default fog seed is the sample board's, 20261116). Then:
 
 | Input | Meaning |
 |---|---|

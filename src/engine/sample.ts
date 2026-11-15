@@ -1,3 +1,4 @@
+import { DEFAULT_FOG_SEED } from './types';
 import type { Board, Cost, Ticket } from './types';
 
 /**
@@ -75,6 +76,6 @@ export function sampleBoard(): Board {
     zombieThreshold: 3,
     wontDo: [],
     // Fixed before any chance was looked at (the date of `now`) and never changed to make a number look better.
-    fogSeed: 20261116,
+    fogSeed: DEFAULT_FOG_SEED,
   };
 }

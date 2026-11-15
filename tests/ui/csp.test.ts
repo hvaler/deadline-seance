@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { CSP_DIRECTIVES, CSP_POLICY } from '../../build/csp';
+import { MCP_DOCS_URL } from '../../src/ui/render/tools';
 
 // The app makes no network request at all: its fonts are bundled and its policy allows only its own origin (Requirements 13.2, 15.3, 15.4).
 
@@ -88,8 +89,11 @@ describe('no external URL anywhere in what ships', () => {
     }
   });
 
-  test('UI sources have no host (the SVG namespace is the only URL) and no link to another origin', () => {
-    for (const f of uiSources) expect(hostsIn(code(f.text)), f.name).toEqual([]);
+  test('UI sources have no host (the SVG namespace is the only URL) except one link to the MCP docs, which is navigation, not a request', () => {
+    for (const f of uiSources) {
+      const hosts = f.name.endsWith('render/tools.ts') ? [MCP_DOCS_URL] : [];
+      expect(hostsIn(code(f.text)), f.name).toEqual(hosts);
+    }
   });
 
   test('fonts.css imports exactly the six font files the app uses, latin subset only', () => {

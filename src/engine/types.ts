@@ -170,7 +170,12 @@ export const SCALE = [1, 2, 3, 5, 8, 13, 20] as const;
 export const DEFAULT_TIME_ZONE = 'Europe/Madrid';
 export const DEFAULT_NEXT_RELEASE_WEEKS = 2;
 export const DEFAULT_ZOMBIE_THRESHOLD = 3;
-/** For callers that import a board from data with no seed (CSV, MCP). The engine itself never applies it. */
-export const DEFAULT_FOG_SEED = 0;
+/**
+ * The seed of every board that does not bring its own: the sample board, a Jira CSV and an MCP board with no seed. One value, so every board
+ * rolls the same nights and a sample exported and imported back shows the same fog. Fixed before any chance was looked at (the date of the
+ * sample's 
+ow) and never changed to make a number look better. The engine itself never applies it.
+ */
+export const DEFAULT_FOG_SEED = 20261116;
 /** The largest ogSeed: an unsigned 32-bit integer. */
 export const MAX_FOG_SEED = 4_294_967_295;

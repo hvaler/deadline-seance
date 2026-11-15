@@ -206,9 +206,8 @@ describe('layout', () => {
     expect(layout).toContain('@media (min-width: 1100px)');
   });
 
-  test('tombstones and slots wrap to the screen: the minimum column width is capped by 100 %', () => {
+  test('tombstones wrap to the screen: the minimum column width is capped by 100 %', () => {
     expect(layout).toContain('minmax(min(100%, 220px), 1fr)');
-    expect(layout).toContain('minmax(min(100%, 240px), 1fr)');
   });
 
   test('the content is one centred column with a maximum width', () => {

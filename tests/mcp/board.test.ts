@@ -14,6 +14,7 @@ describe('MCP: naming the board', () => {
     const fromSample = answer(solveFreezeTool(SAMPLE_REQUEST));
     expect(fromCsv.structured.kept).toEqual(fromSample.structured.kept);
     expect(fromCsv.structured.outside).toEqual(fromSample.structured.outside);
+    expect(fromCsv.structured.fog).toEqual(fromSample.structured.fog); // the same seed, so the same nights
     expect(fromCsv.structured.totals).toEqual({ tickets: 12, points: 59, cod: 167 });
   });
 

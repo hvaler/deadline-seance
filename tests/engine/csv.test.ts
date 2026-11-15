@@ -16,6 +16,8 @@ import type { CsvError, ImportBase } from '../../src/engine/csv';
 import { solveWithCapacity } from '../../src/engine/solver';
 import type { Board, Ticket, ValidBoard } from '../../src/engine/types';
 import { compareKeys } from '../../src/engine/keys';
+import { DEFAULT_FOG_SEED } from '../../src/engine/types';
+import { SAMPLE_FREEZE_AT, SAMPLE_NOW, fogCurve, sampleBoard } from '../../src/engine/index';
 import { makeBoard, ticket, valid } from './fixtures';
 import { arbCost, arbCsvBoard, arbCsvTitle, canonicalBoard } from './generators';
 
@@ -228,7 +230,7 @@ describe('a real Jira Cloud export', () => {
     expect(r.value.ticketCount).toBe(8);
     expect(r.value.skipped).toEqual({ count: 1, byResolution: [{ resolution: 'Done', count: 1 }] });
     expect(r.value.warnings).toEqual([]);
-    expect([b.timeZone, b.nextReleaseWeeks, b.zombieThreshold, b.fogSeed, b.people]).toEqual([BASE.timeZone, 2, 3, 0, BASE.people]);
+    expect([b.timeZone, b.nextReleaseWeeks, b.zombieThreshold, b.fogSeed, b.people]).toEqual([BASE.timeZone, 2, 3, DEFAULT_FOG_SEED, BASE.people]);
   });
 
   test('the Done issue is skipped and a link to it is dropped; the Won\'t Do issue blocks its dependent', () => {
@@ -437,7 +439,7 @@ const closedExpected = (closed: readonly Ticket[]): Ticket[] => closed.map((t) =
 
 /** What a board must look like after a round trip: titles as a file holds them, the seed the import gives, the team as given. */
 function expected(b: Board): unknown {
-  return canonicalBoard({ ...b, fogSeed: 0, tickets: b.tickets.map((t) => ({ ...t, title: toWellFormed(t.title) })) });
+  return canonicalBoard({ ...b, fogSeed: DEFAULT_FOG_SEED, tickets: b.tickets.map((t) => ({ ...t, title: toWellFormed(t.title) })) });
 }
 
 describe('the export (Requirement 4)', () => {
@@ -555,5 +557,22 @@ describe('the round trip', () => {
       }),
       { numRuns: 80 },
     );
+  });
+});
+
+describe('the sample round trip keeps the fog', () => {
+  test('export the sample, import it back: same seed, same board, same fog curve at every reserve', () => {
+    const sample = valid(sampleBoard());
+    const text = exportOf(sample, new Set(), sample);
+    const r = importCsv(text, { people: sample.people, timeZone: sample.timeZone, nextReleaseWeeks: sample.nextReleaseWeeks, zombieThreshold: sample.zombieThreshold });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(sample.fogSeed).toBe(DEFAULT_FOG_SEED);
+    expect(r.value.board.fogSeed).toBe(sample.fogSeed);
+    const when = { now: SAMPLE_NOW, freezeAt: SAMPLE_FREEZE_AT };
+    const before = fogCurve(sample, when);
+    const after = fogCurve(r.value.board, when);
+    expect(before.ok && after.ok).toBe(true);
+    expect(after).toEqual(before);
   });
 });

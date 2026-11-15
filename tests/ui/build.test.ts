@@ -5,6 +5,7 @@ import { gzipSync } from 'node:zlib';
 import { build } from 'vite';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { CSP_POLICY } from '../../build/csp';
+import { MCP_DOCS_URL } from '../../src/ui/render/tools';
 
 // The real production build, into a temporary folder: what ships is what these tests read. (The dev server is not checked here: the policy
 // is written in the build only.)
@@ -69,7 +70,8 @@ describe('dist assets', () => {
       const text = read(`assets/${name}`);
       expect(text, name).not.toMatch(/url\(\s*["']?data:/);
       expect(text, name).not.toMatch(/["'`]data:/);
-      const hosts = [...text.matchAll(/https?:\/\/[^\s"'`)]+/g)].map((m) => m[0]).filter((u) => u !== 'http://www.w3.org/2000/svg');
+      // The one allowed URL besides the SVG namespace is the link to the MCP docs in the tools: navigation, not a request.
+      const hosts = [...text.matchAll(/https?:\/\/[^\s"'`)]+/g)].map((m) => m[0]).filter((u) => u !== 'http://www.w3.org/2000/svg' && u !== MCP_DOCS_URL);
       expect(hosts, name).toEqual([]);
     }
     expect(read('index.html')).not.toMatch(/https?:\/\//);

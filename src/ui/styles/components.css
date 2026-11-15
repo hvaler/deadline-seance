@@ -93,12 +93,19 @@
 }
 
 .slot-note,
-.slot-text,
-.slot-label {
+.slot-text {
   font-size: 0.875rem;
   color: var(--stone);
 }
 
+.mcp-note {
+  font-size: 0.875rem;
+  color: var(--stone);
+}
+.mcp-note a {
+  color: var(--bone);
+  text-decoration: underline;
+}
 .slot-text {
   padding-top: 6px;
   border-top: 2px dashed var(--stone);

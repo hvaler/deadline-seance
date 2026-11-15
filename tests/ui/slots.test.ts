@@ -7,7 +7,7 @@ afterEach(() => {
 });
 
 /** The empty slots of features that are out of scope for this version, and the text each one must show. */
-const SLOTS = ['tour', 'mcp'] as const; // the chronicle slot was filled by the night-chronicle spec: it is a working panel now
+const SLOTS = ['tour'] as const; // the chronicle slot was filled by the night-chronicle spec and the MCP slot by a plain line (see 'the tools'): both are real now
 
 const slot = (root: ParentNode, name: string): HTMLElement[] => [...root.querySelectorAll<HTMLElement>(`[data-slot="${name}"]`)];
 
@@ -47,16 +47,14 @@ describe('empty slots', () => {
     }
   });
 
-  test('the slots are where the brief puts them: the tour in the title card, the rest in the tools', () => {
+  test('the tour slot is in the title card', () => {
     const { root } = mountWith();
     expect(slot(root, 'tour')[0]?.closest('header')).not.toBeNull();
-    for (const name of ['mcp']) expect(slot(root, name)[0]?.closest('[data-region="tools"]'), name).not.toBeNull();
   });
 
   test('the labels name the feature', () => {
     const { root } = mountWith();
     expect(slot(root, 'tour')[0]?.textContent).toBe('Play the night');
-    expect(slot(root, 'mcp')[0]?.textContent).toBe('The rule as an MCP server for the Kiro agent');
   });
 
   test('pressing a slot does nothing: no change of state, no announcement, no sound', () => {
@@ -121,6 +119,18 @@ describe('the tools', () => {
     expect(button.closest('[data-region="tools"]')).not.toBeNull();
     expect(button.previousElementSibling).toBe(byFocus(root, 'reset'));
     expect(root.textContent).not.toContain('Death certificate Not built yet');
+  });
+
+  test('the MCP server is one plain true line with a normal link to its docs, and no "not built yet"', () => {
+    const { root } = mountWith();
+    const note = root.querySelector<HTMLElement>('[data-region="tools"] [data-note="mcp"]');
+    expect(note?.textContent).toBe('The same rule runs as an MCP server for the Kiro agent: see docs/mcp.md');
+    const link = note?.querySelector('a');
+    expect(link?.getAttribute('href')).toBe('https://github.com/hvaler/deadline-seance/blob/main/docs/mcp.md');
+    expect(link?.textContent).toBe('docs/mcp.md');
+    expect(link?.hasAttribute('target')).toBe(false);
+    expect(root.querySelector('[data-slot="mcp"]')).toBeNull();
+    expect(root.querySelector('[data-region="tools"]')?.textContent).not.toMatch(/not built yet/i);
   });
 
   test('"Reset the sample board" works and is not a slot', () => {

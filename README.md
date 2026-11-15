@@ -33,13 +33,13 @@ The app opens on a built-in sample board, "Hollow Bank app 3.2 · release eve": 
 - Every number on the screen comes from the engine in `src/engine`. The epitaph on a stone only says why the ticket is buried; its cost of waiting, releases left out and hunger are in the stone's details.
 
 - Read the **night chronicle** under the survivors: one line per decision, newest first (`Ana leaves → HB-105 in; HB-104, HB-106, HB-107, HB-116 out (−34)`; the number in brackets is the change in saved cod). **Undo** takes back the last one, **Undo to here** goes back to before any line, and `Ctrl+Z` / `Cmd+Z` undoes when you are not typing in a text field (a soft rewind sound plays if Sound is on). There is no redo: the line you undid says exactly what to press again. The log keeps the last 50 decisions; loading a CSV or going back to the sample starts a new log, and undoing that load brings the old one back. The tour never writes into it, and the death certificate ends with a "Decisions tonight" section.
-Out of scope for now: the MCP server on the page (the server itself exists: see MCP server below). Its place on the page is an inert, labelled slot.
+The MCP server is not part of the page: the tools section has one line with a link to [docs/mcp.md](docs/mcp.md) (see MCP server below).
 
 ## Your tickets (Jira CSV)
 
 **Import Jira CSV** (in the tools) lets you try the app with your own tickets. **Download sample CSV** gives you the sample board as a file: change a number, import it back and watch the cut change. The file is read on your computer and goes nowhere: the page makes no request. **Export CSV for Jira** writes the board as it is now (what you exhumed, what you put down, the cut) as a CSV for Jira's importer.
 
-What comes from the file is the tickets. The team, the calendar, the time zone, the release weeks (2), the zombie threshold (3) and the fog seed (0) are the sample's, and a banner says so. The banner also names the release (from the file name; you can edit it: it names the death certificate and the export), and **Back to the sample board** takes you back. The guided tour always plays on the sample board and puts your tickets back when it ends.
+What comes from the file is the tickets. The team, the calendar, the time zone, the release weeks (2), the zombie threshold (3) and the fog seed (20261116, so the numbers do not move when you import the sample back) are the sample's, and a banner says so. The banner also names the release (from the file name; you can edit it: it names the death certificate and the export), and **Back to the sample board** takes you back. The guided tour always plays on the sample board and puts your tickets back when it ends.
 
 **What the file needs.** One row per issue, the header in row 1, comma or semicolon. Headers are matched without regard to case, and `Custom field (X)` counts as `X`:
 
