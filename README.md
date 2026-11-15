@@ -8,6 +8,35 @@ Built with [Kiro](https://kiro.dev) for Kiroween 2026.
 
 Try the [live app](https://hvaler.github.io/deadline-seance/), watch the [demo video](https://youtu.be/Vn5QPBWRCSQ) or see the companion [Kiro Crew app](https://github.com/hvaler/deadline-seance-crew).
 
+## Kiro Crew companion
+
+The Crew app reuses this engine unchanged and reads live Jira; this repo does not depend on it and works alone and offline.
+
+```mermaid
+flowchart LR
+
+  subgraph main["deadline-seance (Kiro IDE)"]
+    web["Web app<br/>no network, no LLM"]
+    csv["Import Jira CSV"]
+    engine["Rule engine → MCP server<br/>solve_freeze · what_if · death_certificate"]
+    web --> engine
+    csv --> web
+  end
+
+  subgraph crew["deadline-seance-crew (Kiro Crew)"]
+    jira["jira-board<br/>read-only, 127.0.0.1"]
+    vendored["Vendored engine<br/>commit 72ad1ac, SHA-256 pinned"]
+    agent["undertaker agent · skill · paused cron"]
+    jira -- "CSV" --> agent
+    agent --> vendored
+  end
+
+  JiraCloud[("Jira Cloud")] --> jira
+  engine -. "same bundle, copied" .-> vendored
+  jira -. "same CSV format" .-> csv
+```
+
+
 ## Run it
 
 Node 22.22+ or 24.15+.
