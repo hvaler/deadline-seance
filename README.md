@@ -1,10 +1,12 @@
 # Deadline Séance
 
 Freeze-eve scope cutting. A deterministic solver (0/1 knapsack with dependencies and must-haves, value = cost of
-delay) decides which tickets to bury before the deadline; property-based tests prove its rules. The LLM never
-computes a number: it only writes the epitaphs.
+delay) decides which tickets to bury before the deadline; property-based tests prove its rules. This build has no LLM:
+epitaphs, change explanations and the death certificate are fixed templates over the engine's facts, and the page makes no network request.
 
-Built with [Kiro](https://kiro.dev) for Kiroween 2026. Work in progress.
+Built with [Kiro](https://kiro.dev) for Kiroween 2026.
+
+Try the [live app](https://hvaler.github.io/deadline-seance/), watch the [demo video](https://youtu.be/Vn5QPBWRCSQ) or see the companion [Kiro Crew app](https://github.com/hvaler/deadline-seance-crew).
 
 ## Run it
 

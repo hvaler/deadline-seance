@@ -6,7 +6,7 @@ import { whatIfTool } from './what-if';
 
 /** What the model reads when it lists the server. No SDK type here: `server.ts` is the only file that knows the SDK. */
 export const INSTRUCTIONS =
-  'Deadline Seance decides which tickets to cut the night before a freeze. Three read-only tools ask the same rule as the web app: ' +
+  'Deadline Séance decides which tickets to cut the night before a freeze. Three read-only tools ask the same rule as the web app: ' +
   'solve_freeze (the cut list with the reason for every ticket outside), what_if (one change: exhume, put down, someone away or back, move the freeze, change the reserve) ' +
   'and death_certificate (the note for stakeholders). Every time is an input: give an ISO 8601 time with a zone, or epoch milliseconds. ' +
   'With board {"source":"sample"} now and freezeAt are optional (Monday 2026-11-16 09:00 and Friday 2026-11-20 18:00, Europe/Madrid). ' +
