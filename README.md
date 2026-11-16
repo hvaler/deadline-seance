@@ -12,7 +12,7 @@ epitaphs, change explanations and the death certificate are fixed templates over
 
 Built with [Kiro](https://kiro.dev) for Kiroween 2026.
 
-Try the [live app](https://hvaler.github.io/deadline-seance/), watch the [demo video](https://youtu.be/Vn5QPBWRCSQ) or see the companion [Kiro Crew app](https://github.com/hvaler/deadline-seance-crew).
+Try the [live app](https://hvaler.github.io/deadline-seance/), watch the [demo video](https://youtu.be/SV9ZxPKZj-E) or see the companion [Kiro Crew app](https://github.com/hvaler/deadline-seance-crew).
 
 ## Kiro Crew companion
 
